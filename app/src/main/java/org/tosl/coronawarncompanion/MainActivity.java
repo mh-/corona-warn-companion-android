@@ -5,12 +5,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.BarChart;
-import com.github.mikephil.charting.charts.Chart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
@@ -27,7 +30,6 @@ import org.tosl.coronawarncompanion.dkdownload.DKDownload;
 import org.tosl.coronawarncompanion.gmsreadout.ContactDbOnDisk;
 import org.tosl.coronawarncompanion.gmsreadout.RpiList;
 import org.tosl.coronawarncompanion.matcher.Matcher;
-//import org.tosl.coronawarncompanion.matcher.Matcher;
 
 import java.io.IOException;
 import java.net.URL;
@@ -42,6 +44,11 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 
 import static org.tosl.coronawarncompanion.dkdownload.Unzip.getUnzippedBytesFromZipFileBytes;
+import static org.tosl.coronawarncompanion.tools.Utils.getDateFromDaysSinceEpoch;
+import static org.tosl.coronawarncompanion.tools.Utils.getDaysSinceEpochFromENIN;
+import static org.tosl.coronawarncompanion.tools.Utils.getENINFromDate;
+import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromDaysSinceEpoch;
+import static org.tosl.coronawarncompanion.tools.Utils.standardRollingPeriod;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -55,21 +62,18 @@ public class MainActivity extends AppCompatActivity {
     private DKDownload diagnosisKeysDownload;
     private final LinkedList<URL> diagnosisKeysUrls = new LinkedList<>();
 
-    private final LinkedList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList = new LinkedList<>();
+    private LinkedList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList = new LinkedList<>();
 
-    private static final int standardRollingPeriod = 144;
-    private long getMillisFromDaysSinceEpoch(int daysSinceEpoch) { return (long) daysSinceEpoch * 24*60*60*1000L; }
-    private Date getDateFromDaysSinceEpoch(int daysSinceEpoch) { return new Date(getMillisFromDaysSinceEpoch(daysSinceEpoch)); }
-    private int getENINFromDate(Date date) { return (int)(date.getTime()/(10*60*1000)); }
-    private Date getDateFromENIN(int ENIN) { return new Date((long) ENIN * 10*60*1000L); }
-    private int getDaysSinceEpochFromENIN(int ENIN) { return ENIN/standardRollingPeriod; }
+    private LinkedList<Matcher.MatchEntry> matches = new LinkedList<>();
 
     private final int gridColor = Color.parseColor("#E0E0E0");
 
     private BarChart chart1;
     private BarChart chart2;
+    private BarChart chart3;
     private TextView textView1;
     private TextView textView2;
+    private TextView textView3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,15 +84,18 @@ public class MainActivity extends AppCompatActivity {
 
         textView1 = findViewById(R.id.textView1);
         textView2 = findViewById(R.id.textView2);
+        textView3 = findViewById(R.id.textView3);
         chart1 = findViewById(R.id.chart1);
         chart2 = findViewById(R.id.chart2);
+        chart3 = findViewById(R.id.chart3);
         chart1.setOnChartGestureListener(new Chart1GestureListener());
         chart2.setOnChartGestureListener(new Chart2GestureListener());
+        chart3.setOnChartGestureListener(new Chart3GestureListener());
 
         ContactDbOnDisk contactDbOnDisk = new ContactDbOnDisk(this);
         rpiList = contactDbOnDisk.getRpisFromContactDB();
 
-        SortedSet<Integer> rpiListDaysSinceEpoch = rpiList.getDaysSinceEpoch();
+        SortedSet<Integer> rpiListDaysSinceEpoch = rpiList.getAvailableDaysSinceEpoch();
         List<BarEntry> dataPoints1 = new ArrayList<>();
 
         int count = 0;
@@ -107,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
         maxDate = new Date(getMillisFromDaysSinceEpoch(rpiListDaysSinceEpoch.last()));
         String maxDateStr = dateFormat.format(maxDate);
 
-        textView1.setText("RPIs: "+count+" entries ("+minDateStr+"-"+maxDateStr+")");
+        textView1.setText("RPIs: " + count + " entries (" + minDateStr + "-" + maxDateStr + ")");
 
         BarDataSet dataSet1 = new BarDataSet(dataPoints1, "RPIs"); // add entries to dataSet1
         dataSet1.setAxisDependency(YAxis.AxisDependency.LEFT);
@@ -120,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
         ValueFormatter xAxisFormatter1 = new ValueFormatter() {
             @Override
             public String getAxisLabel(float value, AxisBase axis) {
-                return dateFormat.format(getDateFromDaysSinceEpoch((int)value));
+                return dateFormat.format(getDateFromDaysSinceEpoch((int) value));
             }
         };
         XAxis xAxis = chart1.getXAxis();
@@ -185,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void processUrlList() {
         for (URL url : diagnosisKeysUrls) {
-            Log.d(TAG, "Going to download: "+url);
+            Log.d(TAG, "Going to download: " + url);
             diagnosisKeysDownload.dkFileRequest(url, new processUrlListCallbackCommand());
         }
     }
@@ -193,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
     public class processUrlListCallbackCommand implements DKDownload.CallbackCommand {
         public void execute(Object data) {
             DKDownload.FileResponse fileResponse = (DKDownload.FileResponse) data;
-            Log.d(TAG, "Download complete: "+fileResponse.url);
+            Log.d(TAG, "Download complete: " + fileResponse.url);
 
             // unzip the data
             byte[] exportDotBinBytes = {};
@@ -207,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
             diagnosisKeysList.addAll(diagnosisKeysImport.getDiagnosisKeys());
 
             diagnosisKeysUrls.remove(fileResponse.url);
-            Log.d(TAG, "Downloads left: "+diagnosisKeysUrls.size());
+            Log.d(TAG, "Downloads left: " + diagnosisKeysUrls.size());
             if (diagnosisKeysUrls.size() == 0) {  // all files have been downloaded
                 processDownloadedDiagnosisKeys();
             }
@@ -218,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Count the downloaded Diagnosis Keys
 
-        Log.d(TAG, "Number of keys that have been downloaded: "+diagnosisKeysList.size());
+        Log.d(TAG, "Number of keys that have been downloaded: " + diagnosisKeysList.size());
 
         TreeMap<Integer, Integer> diagnosisKeyCountMap = new TreeMap<>();  // Key: ENIN (==date), Value: count
         int minENIN = getENINFromDate(minDate);
@@ -240,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        textView2.setText("DKs: "+count+" entries");
+        textView2.setText("DKs: " + count + " entries");
 
         List<BarEntry> dataPoints2 = new ArrayList<>();
 
@@ -265,7 +272,7 @@ public class MainActivity extends AppCompatActivity {
         ValueFormatter xAxisFormatter2 = new ValueFormatter() {
             @Override
             public String getAxisLabel(float value, AxisBase axis) {
-                return dateFormat.format(getDateFromDaysSinceEpoch((int)value));
+                return dateFormat.format(getDateFromDaysSinceEpoch((int) value));
             }
         };
         XAxis xAxis = chart2.getXAxis();
@@ -288,17 +295,58 @@ public class MainActivity extends AppCompatActivity {
         chart2.setScaleYEnabled(false);
         chart2.invalidate(); // refresh
 
-        doMatching();
+        startMatching();
     }
 
-    private void doMatching() {
-        Matcher matcher = new Matcher(rpiList, diagnosisKeysList);
-        matcher.findMatches();
+    public Handler uiThreadHandler;
 
+    private void startMatching() {
+        uiThreadHandler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(@SuppressWarnings("NullableProblems") Message inputMessage) {
+                Log.d(TAG, "Message received.");
+                int numberOfMatches = matches.size();
+                if (numberOfMatches == 0) {
+                    textView3.setText("No matches found.");
+                } else {
+                    textView3.setText("Matches found: " + numberOfMatches);
+                }
+                nextStepTODO();
+            }
+        };
+
+        HandlerThread ht = new HandlerThread("BackgroundMatcher");
+        ht.start();
+        Handler backgroundThreadHandler = new Handler(ht.getLooper());
+        backgroundThreadHandler.post(new BackgroundMatching(this));
+    }
+
+    private class BackgroundMatching implements Runnable {
+        private final MainActivity mainActivity;
+
+        BackgroundMatching(MainActivity theMainActivity) {
+            mainActivity = theMainActivity;
+        }
+
+        @Override
+        public void run() {
+            // Moves the current Thread into the background
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+
+            Matcher matcher = new Matcher(rpiList, diagnosisKeysList);
+            mainActivity.matches = matcher.findMatches();
+            Log.d(TAG, "Finished matching, sending the message...");
+            Message completeMessage = mainActivity.uiThreadHandler.obtainMessage();
+            completeMessage.sendToTarget();
+        }
+    }
+
+    private void nextStepTODO() {
         //TODO
     }
 
-    private void syncCharts(BarChart mainChart, BarChart[] otherCharts) {
+
+    private void syncCharts (BarChart mainChart, BarChart[]otherCharts){
         Matrix mainMatrix;
         float[] mainVals = new float[9];
         Matrix otherMatrix;
@@ -318,42 +366,62 @@ public class MainActivity extends AppCompatActivity {
     }
 
     class Chart1GestureListener implements OnChartGestureListener {
-        public void onChartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {}
-        public void onChartGestureEnd(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {}
-        public void onChartLongPressed(MotionEvent me) {}
-        public void onChartDoubleTapped(MotionEvent me) {}
-        public void onChartSingleTapped(MotionEvent me) {}
+        public void onChartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) { }
+        public void onChartGestureEnd(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) { }
+        public void onChartLongPressed(MotionEvent me) { }
+        public void onChartDoubleTapped(MotionEvent me) { }
+        public void onChartSingleTapped(MotionEvent me) { }
         public void onChartFling(MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) {
-            BarChart[] otherCharts = {chart2};
+            BarChart[] otherCharts = {chart2, chart3};
             syncCharts(chart1, otherCharts);
         }
         public void onChartScale(MotionEvent me, float scaleX, float scaleY) {
-            BarChart[] otherCharts = {chart2};
+            BarChart[] otherCharts = {chart2, chart3};
             syncCharts(chart1, otherCharts);
         }
         public void onChartTranslate(MotionEvent me, float dX, float dY) {
-            BarChart[] otherCharts = {chart2};
+            BarChart[] otherCharts = {chart2, chart3};
             syncCharts(chart1, otherCharts);
         }
     }
 
     class Chart2GestureListener implements OnChartGestureListener {
-        public void onChartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {}
-        public void onChartGestureEnd(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {}
-        public void onChartLongPressed(MotionEvent me) {}
-        public void onChartDoubleTapped(MotionEvent me) {}
-        public void onChartSingleTapped(MotionEvent me) {}
+        public void onChartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) { }
+        public void onChartGestureEnd(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) { }
+        public void onChartLongPressed(MotionEvent me) { }
+        public void onChartDoubleTapped(MotionEvent me) { }
+        public void onChartSingleTapped(MotionEvent me) { }
         public void onChartFling(MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) {
-            BarChart[] otherCharts = {chart1};
+            BarChart[] otherCharts = {chart1, chart3};
             syncCharts(chart2, otherCharts);
         }
         public void onChartScale(MotionEvent me, float scaleX, float scaleY) {
-            BarChart[] otherCharts = {chart1};
+            BarChart[] otherCharts = {chart1, chart3};
             syncCharts(chart2, otherCharts);
         }
         public void onChartTranslate(MotionEvent me, float dX, float dY) {
-            BarChart[] otherCharts = {chart1};
+            BarChart[] otherCharts = {chart1, chart3};
             syncCharts(chart2, otherCharts);
+        }
+    }
+
+    class Chart3GestureListener implements OnChartGestureListener {
+        public void onChartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) { }
+        public void onChartGestureEnd(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) { }
+        public void onChartLongPressed(MotionEvent me) { }
+        public void onChartDoubleTapped(MotionEvent me) { }
+        public void onChartSingleTapped(MotionEvent me) { }
+        public void onChartFling(MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) {
+            BarChart[] otherCharts = {chart1, chart2};
+            syncCharts(chart3, otherCharts);
+        }
+        public void onChartScale(MotionEvent me, float scaleX, float scaleY) {
+            BarChart[] otherCharts = {chart1, chart2};
+            syncCharts(chart3, otherCharts);
+        }
+        public void onChartTranslate(MotionEvent me, float dX, float dY) {
+            BarChart[] otherCharts = {chart1, chart2};
+            syncCharts(chart3, otherCharts);
         }
     }
 }

@@ -5,11 +5,16 @@ import java.util.*;
 public class RpiList {
     private static final String TAG = "RpiList";
 
-    private final TreeMap<Integer, LinkedList<RpiEntry>> map;
+    private final TreeMap<Integer, LinkedList<RpiEntry>> map;  // daysSinceEpoch, listOfRpiEntries
 
     public static class RpiEntry {
-        public final byte[] rpi = new byte[16];
-        public byte[] scanData = null;
+        public final byte[] rpi;        // RPI bytes
+        public final byte[] scanData;   // ProtoBuf-encoded list of all scans
+
+        public RpiEntry(byte[] rpiBytes, byte[] scanDataBytes) {
+            rpi = rpiBytes;
+            scanData = scanDataBytes;
+        }
     }
 
     public RpiList() {
@@ -33,8 +38,22 @@ public class RpiList {
         return map.get(daysSinceEpoch);
     }
 
-    public SortedSet<Integer> getDaysSinceEpoch() {
+    public byte[] getFirstScanDataForDaysSinceEpochAndRpi(Integer daysSinceEpoch, byte[] searchRpi) {
+        //TODO: use another data structure for search (not linked list) -> e.g. add a tree.
+        byte[] scanData = null;
+        LinkedList<RpiEntry> rpiEntries = map.get(daysSinceEpoch);
+        if (rpiEntries != null) {
+            for (RpiEntry rpiEntry : rpiEntries) {
+                if (Arrays.equals(rpiEntry.rpi, searchRpi)) {
+                    scanData = rpiEntry.scanData;
+                    break;
+                }
+            }
+        }
+        return scanData;
+    }
 
+    public SortedSet<Integer> getAvailableDaysSinceEpoch() {
         return (SortedSet<Integer>) map.keySet();
     }
 }

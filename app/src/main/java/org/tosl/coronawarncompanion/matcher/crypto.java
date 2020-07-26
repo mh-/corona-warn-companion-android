@@ -18,18 +18,18 @@ public class crypto {
     private static final int intervalLengthMinutes = 10;
     private static final int tekRollingPeriod = 144;
 
-    int en_interval_number(int timestamp_seconds) {
+    public static int en_interval_number(int timestamp_seconds) {
         return timestamp_seconds / (60 * intervalLengthMinutes);
     }
 
-    byte[] encodedEnIntervalNumber(int enin) {
+    public static byte[] encodedEnIntervalNumber(int enin) {
         final ByteBuffer bb = ByteBuffer.allocate(4);
         bb.order(ByteOrder.LITTLE_ENDIAN);
         bb.putInt(enin);
         return bb.array();
     }
 
-    byte[] deriveRpiKey(byte[] tek) {
+    public static byte[] deriveRpiKey(byte[] tek) {
         byte[] derivedKey = null;
         try {
             derivedKey = hkdfSha256(tek, null, "EN-RPIK".getBytes(StandardCharsets.UTF_8), 16);
@@ -39,7 +39,7 @@ public class crypto {
         return derivedKey;
     }
 
-    byte[] deriveAemKey(byte[] tek) {
+    public static byte[] deriveAemKey(byte[] tek) {
         byte[] derivedKey = null;
         try {
             derivedKey = hkdfSha256(tek, null, "EN-AEMK".getBytes(StandardCharsets.UTF_8), 16);
@@ -49,8 +49,8 @@ public class crypto {
         return derivedKey;
     }
 
-    byte[] encryptRpi(byte[] rpi_key, int interval_number) {
-        byte[] enin = encodedEnIntervalNumber(interval_number);
+    public static byte[] encryptRpi(byte[] rpiKey, int intervalNumber) {
+        byte[] enin = encodedEnIntervalNumber(intervalNumber);
         ByteArrayOutputStream padded_data = new ByteArrayOutputStream();
         try {
             padded_data.write("EN-RPI".getBytes(StandardCharsets.UTF_8));
@@ -62,7 +62,7 @@ public class crypto {
         byte[] ciphertext = null;
         try {
             AesEcbEncryptor encryptor = AesEcbEncryptor.create();
-            encryptor.init(rpi_key);
+            encryptor.init(rpiKey);
             ciphertext = encryptor.encrypt(padded_data.toByteArray());
         } catch (CryptoException e) {
             e.printStackTrace();
@@ -70,7 +70,7 @@ public class crypto {
         return ciphertext;
     }
 
-    LinkedList<byte[]> createListOfRpisForIntervalRange(byte[] rpi_key, int interval_number, int interval_count) {
+    public static LinkedList<byte[]> createListOfRpisForIntervalRange(byte[] rpiKey, int intervalNumber, int intervalCount) {
         LinkedList<byte[]> rpis = new LinkedList<>();
 
         ByteArrayOutputStream padded_data_template = new ByteArrayOutputStream();
@@ -78,8 +78,8 @@ public class crypto {
             padded_data_template.write("EN-RPI".getBytes(StandardCharsets.UTF_8));
             padded_data_template.write(new byte[] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
             AesEcbEncryptor encryptor = AesEcbEncryptor.create();
-            encryptor.init(rpi_key);
-            for (int interval=interval_number; interval <= interval_number + interval_count; interval++) {
+            encryptor.init(rpiKey);
+            for (int interval=intervalNumber; interval <= intervalNumber + intervalCount; interval++) {
                 ByteArrayOutputStream padded_data = new ByteArrayOutputStream();
                 padded_data.write(padded_data_template.toByteArray());
                 padded_data.write(encodedEnIntervalNumber(interval));
@@ -91,20 +91,20 @@ public class crypto {
         return rpis;
     }
 
-    byte[] decryptAem(byte[] aem_key, byte[] aem, byte[] rpi) {
+    public static byte[] decryptAem(byte[] aemKey, byte[] aem, byte[] rpi) {
         byte[] result = null;
         try {
-            result = aesCtr(aem_key, rpi, aem);
+            result = aesCtr(aemKey, rpi, aem);
         } catch (CryptoException e) {
             e.printStackTrace();
         }
         return result;
     }
 
-    byte[] encryptAem(byte[] aem_key, byte[] metadata, byte[] rpi) {
+    public static byte[] encryptAem(byte[] aemKey, byte[] metadata, byte[] rpi) {
         byte[] result = null;
         try {
-            result = aesCtr(aem_key, rpi, metadata);
+            result = aesCtr(aemKey, rpi, metadata);
         } catch (CryptoException e) {
             e.printStackTrace();
         }

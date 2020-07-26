@@ -84,13 +84,13 @@ public class ContactDbOnDisk {
             byte[] key = iterator.peekNext().getKey();
             byte[] value = iterator.peekNext().getValue();
 
-            RpiList.RpiEntry rpiEntry = new RpiList.RpiEntry();
             ByteBuffer keyBuf = ByteBuffer.wrap(key);
             int daysSinceEpoch = keyBuf.getShort();
             // Log.d(TAG, "Days since Epoch: "+ daysSinceEpoch + ", Date: " + date);
 
-            keyBuf.get(rpiEntry.rpi);
-            rpiEntry.scanData = value;
+            byte[] rpiBytes = new byte[16];
+            keyBuf.get(rpiBytes);
+            RpiList.RpiEntry rpiEntry = new RpiList.RpiEntry(rpiBytes, value);
 
             rpiList.addEntry(daysSinceEpoch, rpiEntry);
         }
