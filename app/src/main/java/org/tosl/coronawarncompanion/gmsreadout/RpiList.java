@@ -5,7 +5,12 @@ import java.util.*;
 public class RpiList {
     private static final String TAG = "RpiList";
 
-    private final TreeMap<Integer, LinkedList<RpiEntry>> map;  // daysSinceEpoch, listOfRpiEntries
+    private final TreeMap<Integer, DayEntry> map;  // daysSinceEpoch, DayEntry
+
+    public static class DayEntry {
+        public HashSet<byte[]> rpis = new HashSet<>();               // RPI bytes for fast search
+        public LinkedList<RpiEntry> rpiEntries = new LinkedList<>(); // RpiEntries for other purposes
+    }
 
     public static class RpiEntry {
         public final byte[] rpi;        // RPI bytes
@@ -22,31 +27,38 @@ public class RpiList {
     }
 
     public void addEntry(Integer daysSinceEpoch, RpiEntry entry) {
-        LinkedList<RpiEntry> rpiEntries;
+        DayEntry dayEntry;
         if (!map.containsKey(daysSinceEpoch)) {
-            rpiEntries = new LinkedList<>();
-            map.put(daysSinceEpoch, rpiEntries);
+            dayEntry = new DayEntry();
+            map.put(daysSinceEpoch, dayEntry);
             //Log.d(TAG, "Added date: " + date);
         }
-        rpiEntries = map.get(daysSinceEpoch);
-        if (rpiEntries != null) {
-            rpiEntries.add(entry);
+        dayEntry = map.get(daysSinceEpoch);
+        if (dayEntry != null) {
+            dayEntry.rpis.add(entry.rpi);
+            dayEntry.rpiEntries.add(entry);
         }
     }
 
     public LinkedList<RpiEntry> getRpiEntriesForDaysSinceEpoch(Integer daysSinceEpoch) {
-        return map.get(daysSinceEpoch);
+        DayEntry dayEntry = map.get(daysSinceEpoch);
+        if (dayEntry != null) {
+            return dayEntry.rpiEntries;
+        } else {
+            return null;
+        }
     }
 
     public byte[] getFirstScanDataForDaysSinceEpochAndRpi(Integer daysSinceEpoch, byte[] searchRpi) {
-        //TODO: use another data structure for search (not linked list) -> e.g. add a tree.
         byte[] scanData = null;
-        LinkedList<RpiEntry> rpiEntries = map.get(daysSinceEpoch);
-        if (rpiEntries != null) {
-            for (RpiEntry rpiEntry : rpiEntries) {
-                if (Arrays.equals(rpiEntry.rpi, searchRpi)) {
-                    scanData = rpiEntry.scanData;
-                    break;
+        DayEntry dayEntry = map.get(daysSinceEpoch);
+        if (dayEntry != null) {
+            if (dayEntry.rpis.contains(searchRpi)) {
+                for (RpiEntry rpiEntry : dayEntry.rpiEntries) {
+                    if (Arrays.equals(rpiEntry.rpi, searchRpi)) {
+                        scanData = rpiEntry.scanData;
+                        break;
+                    }
                 }
             }
         }
