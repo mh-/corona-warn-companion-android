@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.TextView;
@@ -305,13 +306,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void handleMessage(@SuppressWarnings("NullableProblems") Message inputMessage) {
                 Log.d(TAG, "Message received.");
-                int numberOfMatches = matches.size();
-                if (numberOfMatches == 0) {
-                    textView3.setText("No matches found.");
-                } else {
-                    textView3.setText("Matches found: " + numberOfMatches);
-                }
-                nextStepTODO();
+                presentMatchResults();
             }
         };
 
@@ -330,8 +325,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void run() {
-            // Moves the current Thread into the background
-            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
 
             Matcher matcher = new Matcher(rpiList, diagnosisKeysList);
             mainActivity.matches = matcher.findMatches();
@@ -341,7 +335,70 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void nextStepTODO() {
+    private void presentMatchResults() {
+        int numberOfMatches = matches.size();
+        if (numberOfMatches == 0) {
+            textView3.setText("No matches found.");
+        } else {
+            textView3.setText("Matches found: " + numberOfMatches);
+        }
+        Log.d(TAG, "Number of matches: "+numberOfMatches);
+
+        List<BarEntry> dataPoints3 = new ArrayList<>();
+        SortedSet<Integer> rpiListDaysSinceEpoch = rpiList.getAvailableDaysSinceEpoch();
+        int total = 0;
+        for (Integer daysSinceEpoch : rpiListDaysSinceEpoch) {
+            int count = 0;
+            for (Matcher.MatchEntry matchEntry : matches) {
+                if (getDaysSinceEpochFromENIN(matchEntry.diagnosisKey.getRollingStartIntervalNumber()) == daysSinceEpoch) {
+                    count++;
+                }
+            }
+            //Log.d(TAG, "Datapoint: " + daysSinceEpoch + ": " + count);
+            dataPoints3.add(new BarEntry(daysSinceEpoch, count));
+            total += count;
+        }
+        Log.d(TAG, "Number of matches displayed: "+total);
+
+        // set date label formatter
+        DateFormat dateFormat = new SimpleDateFormat("d.M.");
+
+        BarDataSet dataSet3 = new BarDataSet(dataPoints3, "Matches"); // add entries to dataSet3
+        dataSet3.setAxisDependency(YAxis.AxisDependency.LEFT);
+
+        BarData barData3 = new BarData(dataSet3);
+        chart3.setData(barData3);
+        //chart3.setFitBars(true); // make the x-axis fit exactly all bars
+
+        // the labels that should be drawn on the XAxis
+        ValueFormatter xAxisFormatter3 = new ValueFormatter() {
+            @Override
+            public String getAxisLabel(float value, AxisBase axis) {
+                return dateFormat.format(getDateFromDaysSinceEpoch((int) value));
+            }
+        };
+        XAxis xAxis = chart3.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setValueFormatter(xAxisFormatter3);
+        xAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
+        xAxis.setGranularityEnabled(true);
+        xAxis.setDrawGridLines(false);
+
+        YAxis yAxis = chart3.getAxisLeft();
+        yAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
+        yAxis.setGranularityEnabled(true);
+        yAxis.setAxisMinimum(0.0f);
+        yAxis.setGridColor(gridColor);
+
+        chart3.getAxisRight().setAxisMinimum(0.0f);
+        chart3.getAxisRight().setDrawLabels(false);
+        chart3.getLegend().setEnabled(false);
+        chart3.getDescription().setEnabled(false);
+        chart3.setScaleYEnabled(false);
+        chart3.invalidate(); // refresh
+
+
+
         //TODO
     }
 
