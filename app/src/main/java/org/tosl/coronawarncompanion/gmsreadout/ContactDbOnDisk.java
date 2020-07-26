@@ -79,21 +79,20 @@ public class ContactDbOnDisk {
         readOptions.verifyChecksums(true);
         readOptions.fillCache(true);
 
-        try (DBIterator iterator = levelDBStore.iterator(readOptions)) {
-            for(iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
-                byte[] key = iterator.peekNext().getKey();
-                byte[] value = iterator.peekNext().getValue();
+        DBIterator iterator = levelDBStore.iterator(readOptions);
+        for(iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+            byte[] key = iterator.peekNext().getKey();
+            byte[] value = iterator.peekNext().getValue();
 
-                RpiList.RpiEntry rpiEntry = new RpiList.RpiEntry();
-                ByteBuffer keyBuf = ByteBuffer.wrap(key);
-                int daysSinceEpoch = keyBuf.getShort();
-                // Log.d(TAG, "Days since Epoch: "+ daysSinceEpoch + ", Date: " + date);
+            RpiList.RpiEntry rpiEntry = new RpiList.RpiEntry();
+            ByteBuffer keyBuf = ByteBuffer.wrap(key);
+            int daysSinceEpoch = keyBuf.getShort();
+            // Log.d(TAG, "Days since Epoch: "+ daysSinceEpoch + ", Date: " + date);
 
-                keyBuf.get(rpiEntry.rpi);
-                rpiEntry.scanData = value;
+            keyBuf.get(rpiEntry.rpi);
+            rpiEntry.scanData = value;
 
-                rpiList.addEntry(daysSinceEpoch, rpiEntry);
-            }
+            rpiList.addEntry(daysSinceEpoch, rpiEntry);
         }
         return rpiList;
     }
