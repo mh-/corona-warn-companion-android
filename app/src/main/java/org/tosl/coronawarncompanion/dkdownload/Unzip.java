@@ -30,7 +30,7 @@ public class Unzip {
                     pos += bytesRead;
                 }
                 //Log.d(TAG, "Unzipped file. Length: "+pos);
-                result = Arrays.copyOf(tmpBuffer, pos);
+                result = Arrays.copyOf(tmpBuffer, pos+1);
                 //noinspection UnusedAssignment
                 tmpBuffer = null;
                 break;

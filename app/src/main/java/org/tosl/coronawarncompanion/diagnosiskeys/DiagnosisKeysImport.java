@@ -24,7 +24,7 @@ public class DiagnosisKeysImport {
         }
         if (Arrays.equals(Arrays.copyOf(exportDotBin, 16), headerBytes)) {
             try {
-                dkImport = DiagnosisKeysProtos.TemporaryExposureKeyExport.parseFrom(Arrays.copyOfRange(exportDotBin, 16, exportDotBin.length+1));
+                dkImport = DiagnosisKeysProtos.TemporaryExposureKeyExport.parseFrom(Arrays.copyOfRange(exportDotBin, 16, exportDotBin.length));
             } catch (InvalidProtocolBufferException e) {
                 e.printStackTrace();
             }
