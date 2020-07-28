@@ -21,12 +21,9 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.formatter.IValueFormatter;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
-import com.github.mikephil.charting.utils.ViewPortHandler;
 
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysImport;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
@@ -105,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
         chart3.setOnChartGestureListener(new Chart3GestureListener());
 
         ContactDbOnDisk contactDbOnDisk = new ContactDbOnDisk(this);
-        rpiList = contactDbOnDisk.getRpisFromContactDB();
+        rpiList = contactDbOnDisk.getRpisFromContactDB(DEMO_MODE);
 
         SortedSet<Integer> rpiListDaysSinceEpoch = rpiList.getAvailableDaysSinceEpoch();
         List<BarEntry> dataPoints1 = new ArrayList<>();

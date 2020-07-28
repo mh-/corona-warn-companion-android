@@ -2,6 +2,8 @@ package org.tosl.coronawarncompanion.gmsreadout;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.AssetManager;
+import android.os.Environment;
 import android.util.Log;
 
 import org.iq80.leveldb.CompressionType;
@@ -13,7 +15,10 @@ import org.iq80.leveldb.ReadOptions;
 import org.iq80.leveldb.impl.Iq80DBFactory;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
@@ -52,6 +57,75 @@ public class ContactDbOnDisk {
             Log.e(TAG, "ERROR: Super User rights not granted!");
             //TODO
         }
+    }
+
+    public static boolean deleteDir(File dir) {
+        if (dir != null && dir.isDirectory()) {
+            String[] children = dir.list();
+            for (String child : children) {
+                boolean success = deleteDir(new File(dir, child));
+                if (!success) {
+                    return false;
+                }
+            }
+            return dir.delete();
+        } else if(dir!= null && dir.isFile()) {
+            return dir.delete();
+        } else {
+            return false;
+        }
+    }
+
+    private void copyFile(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[1024];
+        int read;
+        while((read = in.read(buffer)) != -1){
+            out.write(buffer, 0, read);
+        }
+    }
+
+
+    public void copyFromAssets() {
+        // Copy the GMS LevelDB from our app's assets to local app cache
+
+        // delete cache:
+        try {
+            File dir = context.getCacheDir();
+            deleteDir(dir);
+        } catch (Exception e) { e.printStackTrace();}
+
+        Log.d(TAG, "Trying to copy LevelDB");
+        String cachePathStr = Objects.requireNonNull(context.getExternalCacheDir()).getPath();
+
+        AssetManager assetManager = context.getAssets();
+        String[] files = null;
+        try {
+            files = assetManager.list("demo_rpi_db/");
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to get asset file list.", e);
+        }
+        for (String filename : files) {
+            InputStream in = null;
+            OutputStream out = null;
+            try {
+                in = assetManager.open("demo_rpi_db/"+filename);
+                String outDir = cachePathStr+'/'+dbNameModified;
+                File outFile = new File(outDir, filename);
+                out = new FileOutputStream(outFile);
+                copyFile(in, out);
+                in.close();
+                //noinspection UnusedAssignment
+                in = null;
+                out.flush();
+                out.close();
+                //noinspection UnusedAssignment
+                out = null;
+            } catch(IOException e) {
+                Log.e(TAG, "Failed to copy asset file: " + filename, e);
+            }
+        }
+
+        Log.d(TAG, "Copied LevelDB.");
     }
 
     public void open() throws IOException {
@@ -97,11 +171,14 @@ public class ContactDbOnDisk {
         return rpiList;
     }
 
-    public RpiList getRpisFromContactDB() {
+    public RpiList getRpisFromContactDB(boolean demoMode) {
         RpiList rpiList = null;
         try {
-            copyFromGMS();
-
+            if (!demoMode) {
+                copyFromGMS();
+            } else {
+                copyFromAssets();
+            }
             open();
             try {
                 // Use the db in here....
