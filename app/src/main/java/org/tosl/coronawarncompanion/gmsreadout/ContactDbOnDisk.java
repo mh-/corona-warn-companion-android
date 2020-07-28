@@ -100,20 +100,19 @@ public class ContactDbOnDisk {
     public RpiList getRpisFromContactDB() {
         RpiList rpiList = null;
         try {
-            ContactDbOnDisk contactDBonDisk = new ContactDbOnDisk(context);
-            contactDBonDisk.copyFromGMS();
+            copyFromGMS();
 
-            contactDBonDisk.open();
+            open();
             try {
                 // Use the db in here....
-                rpiList = contactDBonDisk.readToRpiList();
+                rpiList = readToRpiList();
             } catch (Exception e) {
                 Log.e(TAG, "Exception", e);
                 e.printStackTrace();
             } finally {
                 // Make sure you close the db to shutdown the
                 // database and avoid resource leaks.
-                contactDBonDisk.close();
+                close();
             }
         } catch (IOException e) {
             Log.e(TAG, "IOException", e);
