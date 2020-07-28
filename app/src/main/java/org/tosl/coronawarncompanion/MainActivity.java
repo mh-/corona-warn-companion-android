@@ -21,9 +21,12 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.formatter.IValueFormatter;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
+import com.github.mikephil.charting.utils.ViewPortHandler;
 
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysImport;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
@@ -32,7 +35,9 @@ import org.tosl.coronawarncompanion.gmsreadout.ContactDbOnDisk;
 import org.tosl.coronawarncompanion.gmsreadout.RpiList;
 import org.tosl.coronawarncompanion.matcher.Matcher;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -54,6 +59,8 @@ import static org.tosl.coronawarncompanion.tools.Utils.standardRollingPeriod;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
+
+    private static final boolean DEMO_MODE = false;
 
     private RpiList rpiList;
     private Date minDate;
@@ -80,6 +87,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (DEMO_MODE) {
+            Log.i(TAG, "--- DEMO MODE ---");
+        }
 
         // 1st Section: Get RPIs from database (requires root)
 
@@ -131,6 +142,21 @@ public class MainActivity extends AppCompatActivity {
                 return dateFormat.format(getDateFromDaysSinceEpoch((int) value));
             }
         };
+        // the labels that should be drawn on the YAxis
+        ValueFormatter yAxisFormatter1 = new ValueFormatter() {
+            @Override
+            public String getAxisLabel(float value, AxisBase axis) {
+                return String.format("%5d", (int) value);
+            }
+        };
+        // the bar labels
+        ValueFormatter BarFormatter1 = new ValueFormatter() {
+            @Override
+            public String getBarLabel(BarEntry barEntry) {
+                return String.valueOf((int) barEntry.getY());
+            }
+        };
+        barData1.setValueFormatter(BarFormatter1);
         XAxis xAxis = chart1.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setValueFormatter(xAxisFormatter1);
@@ -143,6 +169,7 @@ public class MainActivity extends AppCompatActivity {
         yAxis.setGranularityEnabled(true);
         yAxis.setAxisMinimum(0.0f);
         yAxis.setGridColor(gridColor);
+        yAxis.setValueFormatter(yAxisFormatter1);
 
         chart1.getAxisRight().setAxisMinimum(0.0f);
         chart1.getAxisRight().setDrawLabels(false);
@@ -154,10 +181,30 @@ public class MainActivity extends AppCompatActivity {
 
         // 2nd Section: Diagnosis Keys
 
-        diagnosisKeysDownload = new DKDownload(this);
-        diagnosisKeysDownload.availableDatesRequest(new availableDatesResponseCallbackCommand());
-        // (the rest is done asynchronously in callback functions)
+        if (!DEMO_MODE) {
+            diagnosisKeysDownload = new DKDownload(this);
+            diagnosisKeysDownload.availableDatesRequest(new availableDatesResponseCallbackCommand());
+            // (the rest is done asynchronously in callback functions)
+        } else {
+            try {
+                InputStream inputStream = getAssets().open("demo_dks.zip");
+                byte[] buffer = new byte[150000];
+                int bytesRead;
+                ByteArrayOutputStream output = new ByteArrayOutputStream();
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    output.write(buffer, 0, bytesRead);
+                }
+                DKDownload.FileResponse response = new DKDownload.FileResponse();
+                response.url = new URL("https://tosl.org/demo_dks.zip");
+                response.fileBytes = output.toByteArray();
+
+                new processUrlListCallbackCommand().execute(response);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
+
 
     public class availableDatesResponseCallbackCommand implements DKDownload.CallbackCommand {
         public void execute(Object data) {
@@ -276,6 +323,21 @@ public class MainActivity extends AppCompatActivity {
                 return dateFormat.format(getDateFromDaysSinceEpoch((int) value));
             }
         };
+        // the labels that should be drawn on the YAxis
+        ValueFormatter yAxisFormatter2 = new ValueFormatter() {
+            @Override
+            public String getAxisLabel(float value, AxisBase axis) {
+                return String.format("%5d", (int) value);
+            }
+        };
+        // the bar labels
+        ValueFormatter BarFormatter2 = new ValueFormatter() {
+            @Override
+            public String getBarLabel(BarEntry barEntry) {
+                return String.valueOf((int) barEntry.getY());
+            }
+        };
+        barData2.setValueFormatter(BarFormatter2);
         XAxis xAxis = chart2.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setValueFormatter(xAxisFormatter2);
@@ -288,6 +350,7 @@ public class MainActivity extends AppCompatActivity {
         yAxis.setGranularityEnabled(true);
         yAxis.setAxisMinimum(0.0f);
         yAxis.setGridColor(gridColor);
+        yAxis.setValueFormatter(yAxisFormatter2);
 
         chart2.getAxisRight().setAxisMinimum(0.0f);
         chart2.getAxisRight().setDrawLabels(false);
@@ -377,6 +440,21 @@ public class MainActivity extends AppCompatActivity {
                 return dateFormat.format(getDateFromDaysSinceEpoch((int) value));
             }
         };
+        // the labels that should be drawn on the YAxis
+        ValueFormatter yAxisFormatter3 = new ValueFormatter() {
+            @Override
+            public String getAxisLabel(float value, AxisBase axis) {
+                return String.format("%5d", (int) value);
+            }
+        };
+        // the bar labels
+        ValueFormatter BarFormatter3 = new ValueFormatter() {
+            @Override
+            public String getBarLabel(BarEntry barEntry) {
+                return String.valueOf((int) barEntry.getY());
+            }
+        };
+        barData3.setValueFormatter(BarFormatter3);
         XAxis xAxis = chart3.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setValueFormatter(xAxisFormatter3);
@@ -389,6 +467,7 @@ public class MainActivity extends AppCompatActivity {
         yAxis.setGranularityEnabled(true);
         yAxis.setAxisMinimum(0.0f);
         yAxis.setGridColor(gridColor);
+        yAxis.setValueFormatter(yAxisFormatter3);
 
         chart3.getAxisRight().setAxisMinimum(0.0f);
         chart3.getAxisRight().setDrawLabels(false);

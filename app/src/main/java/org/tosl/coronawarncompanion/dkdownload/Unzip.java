@@ -22,15 +22,19 @@ public class Unzip {
         while (zipEntry != null) {
             if (zipEntry.getName().equals(filename)) {
                 int bufferLen = 10*zipFileBytes.length;  //TODO: find a nicer way to do this. Unfortunately, zipEntry.getSize() returns -1.
+                //Log.d(TAG, "Unzipping... Buffer Length: "+bufferLen);
                 tmpBuffer = new byte[bufferLen];
                 int pos = 0;
                 int bytesRead;
                 while (zis.available() != 0) {
                     bytesRead = zis.read(tmpBuffer, pos, bufferLen-pos);
-                    pos += bytesRead;
+                    //Log.d(TAG, "Read: "+bytesRead);
+                    if (bytesRead>0) {  // bytesRead could be -1
+                        pos += bytesRead;
+                    }
                 }
-                //Log.d(TAG, "Unzipped file. Length: "+pos);
-                result = Arrays.copyOf(tmpBuffer, pos+1);
+                result = Arrays.copyOf(tmpBuffer, pos);
+                Log.d(TAG, "Unzipped file. Length: "+result.length);
                 //noinspection UnusedAssignment
                 tmpBuffer = null;
                 break;

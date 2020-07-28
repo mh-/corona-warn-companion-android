@@ -79,7 +79,7 @@ public class crypto {
             padded_data_template.write(new byte[] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
             AesEcbEncryptor encryptor = AesEcbEncryptor.create();
             encryptor.init(rpiKey);
-            for (int interval=intervalNumber; interval <= intervalNumber + intervalCount; interval++) {
+            for (int interval=intervalNumber; interval < intervalNumber + intervalCount; interval++) {
                 ByteArrayOutputStream padded_data = new ByteArrayOutputStream();
                 padded_data.write(padded_data_template.toByteArray());
                 padded_data.write(encodedEnIntervalNumber(interval));
