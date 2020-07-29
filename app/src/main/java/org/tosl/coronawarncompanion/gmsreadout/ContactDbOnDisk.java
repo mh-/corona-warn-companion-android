@@ -3,7 +3,6 @@ package org.tosl.coronawarncompanion.gmsreadout;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.os.Environment;
 import android.util.Log;
 
 import org.iq80.leveldb.CompressionType;
@@ -52,7 +51,7 @@ public class ContactDbOnDisk {
                 "mv "+gmsPathStr+"/"+dbNameModified+" "+gmsPathStr+"/"+dbName,
                 "ls -la "+cachePathStr+"/"+dbNameModified
         );
-        Log.d(TAG, "Copied LevelDB: "+result);
+        Log.d(TAG, "Result from trying to copy LevelDB: "+result);
         if (result.length() < 10) {
             Log.e(TAG, "ERROR: Super User rights not granted!");
             //TODO
@@ -62,10 +61,12 @@ public class ContactDbOnDisk {
     public static boolean deleteDir(File dir) {
         if (dir != null && dir.isDirectory()) {
             String[] children = dir.list();
-            for (String child : children) {
-                boolean success = deleteDir(new File(dir, child));
-                if (!success) {
-                    return false;
+            if (children != null) {
+                for (String child : children) {
+                    boolean success = deleteDir(new File(dir, child));
+                    if (!success) {
+                        return false;
+                    }
                 }
             }
             return dir.delete();
@@ -84,17 +85,10 @@ public class ContactDbOnDisk {
         }
     }
 
-
     public void copyFromAssets() {
         // Copy the GMS LevelDB from our app's assets to local app cache
 
-        // delete cache:
-        try {
-            File dir = context.getCacheDir();
-            deleteDir(dir);
-        } catch (Exception e) { e.printStackTrace();}
-
-        Log.d(TAG, "Trying to copy LevelDB");
+        Log.d(TAG, "Trying to copy LevelDB from Assets");
         String cachePathStr = Objects.requireNonNull(context.getExternalCacheDir()).getPath();
 
         AssetManager assetManager = context.getAssets();
@@ -104,39 +98,49 @@ public class ContactDbOnDisk {
         } catch (IOException e) {
             Log.e(TAG, "Failed to get asset file list.", e);
         }
-        for (String filename : files) {
-            InputStream in = null;
-            OutputStream out = null;
-            try {
-                in = assetManager.open("demo_rpi_db/"+filename);
-                String outDir = cachePathStr+'/'+dbNameModified;
-                File outFile = new File(outDir, filename);
-                out = new FileOutputStream(outFile);
-                copyFile(in, out);
-                in.close();
-                //noinspection UnusedAssignment
-                in = null;
-                out.flush();
-                out.close();
-                //noinspection UnusedAssignment
-                out = null;
-            } catch(IOException e) {
-                Log.e(TAG, "Failed to copy asset file: " + filename, e);
+        String outDir = cachePathStr+'/'+dbNameModified;
+        File outDirFile = new File(outDir);
+        boolean mkdirResult = outDirFile.mkdir();
+        if (files != null) {
+            for (String filename : files) {
+                InputStream in;
+                OutputStream out;
+                try {
+                    in = assetManager.open("demo_rpi_db/"+filename);
+                    File outFile = new File(outDir, filename);
+                    out = new FileOutputStream(outFile);
+                    copyFile(in, out);
+                    in.close();
+                    //noinspection UnusedAssignment
+                    in = null;
+                    out.flush();
+                    out.close();
+                    //noinspection UnusedAssignment
+                    out = null;
+                } catch(IOException e) {
+                    Log.e(TAG, "Failed to copy asset file: " + filename, e);
+                }
             }
         }
 
         Log.d(TAG, "Copied LevelDB.");
     }
 
-    public void open() throws IOException {
+    public void open() {
         // Now open our locally cached copy
         Options options = new Options();
         options.createIfMissing(false);
         options.compressionType(CompressionType.NONE);
         DBFactory factory = new Iq80DBFactory();
         String cachePathStr = Objects.requireNonNull(context.getExternalCacheDir()).getPath();
-        levelDBStore = factory.open(new File(cachePathStr+"/"+dbNameModified), options);
-        Log.d(TAG, "Opened LevelDB.");
+        try {
+            levelDBStore = factory.open(new File(cachePathStr + "/" + dbNameModified), options);
+        } catch (IllegalArgumentException | IOException e) { Log.d(TAG, e.getMessage()); }
+        if (levelDBStore != null) {
+            Log.d(TAG, "Opened LevelDB.");
+        } else {
+            Log.d(TAG, "LevelDB not found.");
+        }
     }
 
     public void close() throws IOException {
@@ -174,22 +178,30 @@ public class ContactDbOnDisk {
     public RpiList getRpisFromContactDB(boolean demoMode) {
         RpiList rpiList = null;
         try {
+            // delete cache:
+            try {
+                File dir = context.getExternalCacheDir();
+                deleteDir(dir);
+            } catch (Exception e) { e.printStackTrace();}
+
             if (!demoMode) {
                 copyFromGMS();
             } else {
                 copyFromAssets();
             }
             open();
-            try {
-                // Use the db in here....
-                rpiList = readToRpiList();
-            } catch (Exception e) {
-                Log.e(TAG, "Exception", e);
-                e.printStackTrace();
-            } finally {
-                // Make sure you close the db to shutdown the
-                // database and avoid resource leaks.
-                close();
+            if (levelDBStore != null) {
+                try {
+                    // Use the db in here...
+                    rpiList = readToRpiList();
+                } catch (Exception e) {
+                    Log.e(TAG, "Exception", e);
+                    e.printStackTrace();
+                } finally {
+                    // Make sure you close the db to shutdown the
+                    // database and avoid resource leaks.
+                    close();
+                }
             }
         } catch (IOException e) {
             Log.e(TAG, "IOException", e);

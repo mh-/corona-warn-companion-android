@@ -2,6 +2,7 @@ package org.tosl.coronawarncompanion;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.os.Bundle;
@@ -21,9 +22,12 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysImport;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
@@ -55,13 +59,15 @@ import static org.tosl.coronawarncompanion.tools.Utils.standardRollingPeriod;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
-
     private static final boolean DEMO_MODE = false;
 
+    private static final String TAG = "MainActivity";
+    public static final String DAY_EXTRA_MESSAGE = "org.tosl.coronawarncompanion.DAY_MESSAGE";
+
     private RpiList rpiList;
-    private Date minDate;
-    private Date maxDate;
+    private final long todayLastMidnightInMillis = System.currentTimeMillis() / (24*3600*1000L) * (24*3600*1000L);
+    private Date maxDate = new Date(todayLastMidnightInMillis);
+    private Date minDate = new Date(todayLastMidnightInMillis -14*24*3600*1000L);
     private Date currentDate;  // usually the same as maxDate
 
     private DKDownload diagnosisKeysDownload;
@@ -70,8 +76,10 @@ public class MainActivity extends AppCompatActivity {
     private LinkedList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList = new LinkedList<>();
 
     private LinkedList<Matcher.MatchEntry> matches = new LinkedList<>();
+    private boolean matchingDone = false;
 
     private final int gridColor = Color.parseColor("#E0E0E0");
+    private final int matchBarColor = Color.parseColor("#FF0000");
 
     private BarChart chart1;
     private BarChart chart2;
@@ -100,88 +108,97 @@ public class MainActivity extends AppCompatActivity {
         chart1.setOnChartGestureListener(new Chart1GestureListener());
         chart2.setOnChartGestureListener(new Chart2GestureListener());
         chart3.setOnChartGestureListener(new Chart3GestureListener());
+        chart3.setOnChartValueSelectedListener(new Chart3ValueSelectedListener());
 
-        ContactDbOnDisk contactDbOnDisk = new ContactDbOnDisk(this);
-        rpiList = contactDbOnDisk.getRpisFromContactDB(DEMO_MODE);
-
-        SortedSet<Integer> rpiListDaysSinceEpoch = rpiList.getAvailableDaysSinceEpoch();
-        List<BarEntry> dataPoints1 = new ArrayList<>();
-
-        int count = 0;
-        for (Integer daysSinceEpoch : rpiListDaysSinceEpoch) {
-            int numEntries = rpiList.getRpiEntriesForDaysSinceEpoch(daysSinceEpoch).size();
-            //Log.d(TAG, "Datapoint: " + daysSinceEpoch + ": " + numEntries);
-            dataPoints1.add(new BarEntry(daysSinceEpoch, numEntries));
-            count += numEntries;
+        if (rpiList == null) {  // when coming back from another activity, there's no need to do this again
+            ContactDbOnDisk contactDbOnDisk = new ContactDbOnDisk(this);
+            rpiList = contactDbOnDisk.getRpisFromContactDB(DEMO_MODE);
         }
 
-        // set date label formatter
-        DateFormat dateFormat = new SimpleDateFormat("d.M.");
+        if (rpiList != null) {  // if getting RPIs failed, e.g. because we didn't get root rights
+            SortedSet<Integer> rpiListDaysSinceEpoch = rpiList.getAvailableDaysSinceEpoch();
+            List<BarEntry> dataPoints1 = new ArrayList<>();
 
-        minDate = new Date(getMillisFromDaysSinceEpoch(rpiListDaysSinceEpoch.first()));
-        String minDateStr = dateFormat.format(minDate);
-        maxDate = new Date(getMillisFromDaysSinceEpoch(rpiListDaysSinceEpoch.last()));
-        String maxDateStr = dateFormat.format(maxDate);
-
-        textView1.setText("RPIs: " + count + " entries (" + minDateStr + "-" + maxDateStr + ")");
-
-        BarDataSet dataSet1 = new BarDataSet(dataPoints1, "RPIs"); // add entries to dataSet1
-        dataSet1.setAxisDependency(YAxis.AxisDependency.LEFT);
-
-        BarData barData1 = new BarData(dataSet1);
-        chart1.setData(barData1);
-        //chart1.setFitBars(true); // make the x-axis fit exactly all bars
-
-        // the labels that should be drawn on the XAxis
-        ValueFormatter xAxisFormatter1 = new ValueFormatter() {
-            @Override
-            public String getAxisLabel(float value, AxisBase axis) {
-                return dateFormat.format(getDateFromDaysSinceEpoch((int) value));
+            int count = 0;
+            for (Integer daysSinceEpoch : rpiListDaysSinceEpoch) {
+                int numEntries = rpiList.getRpiEntriesForDaysSinceEpoch(daysSinceEpoch).size();
+                //Log.d(TAG, "Datapoint: " + daysSinceEpoch + ": " + numEntries);
+                dataPoints1.add(new BarEntry(daysSinceEpoch, numEntries));
+                count += numEntries;
             }
-        };
-        // the labels that should be drawn on the YAxis
-        ValueFormatter yAxisFormatter1 = new ValueFormatter() {
-            @Override
-            public String getAxisLabel(float value, AxisBase axis) {
-                return String.format("%5d", (int) value);
-            }
-        };
-        // the bar labels
-        ValueFormatter BarFormatter1 = new ValueFormatter() {
-            @Override
-            public String getBarLabel(BarEntry barEntry) {
-                return String.valueOf((int) barEntry.getY());
-            }
-        };
-        barData1.setValueFormatter(BarFormatter1);
-        XAxis xAxis = chart1.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setValueFormatter(xAxisFormatter1);
-        xAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
-        xAxis.setGranularityEnabled(true);
-        xAxis.setDrawGridLines(false);
 
-        YAxis yAxis = chart1.getAxisLeft();
-        yAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
-        yAxis.setGranularityEnabled(true);
-        yAxis.setAxisMinimum(0.0f);
-        yAxis.setGridColor(gridColor);
-        yAxis.setValueFormatter(yAxisFormatter1);
+            // set date label formatter
+            DateFormat dateFormat = new SimpleDateFormat("d.M.");
 
-        chart1.getAxisRight().setAxisMinimum(0.0f);
-        chart1.getAxisRight().setDrawLabels(false);
-        chart1.getLegend().setEnabled(false);
-        chart1.getDescription().setEnabled(false);
-        chart1.setScaleYEnabled(false);
-        chart1.invalidate(); // refresh
+            minDate = new Date(getMillisFromDaysSinceEpoch(rpiListDaysSinceEpoch.first()));
+            String minDateStr = dateFormat.format(minDate);
+            maxDate = new Date(getMillisFromDaysSinceEpoch(rpiListDaysSinceEpoch.last()));
+            String maxDateStr = dateFormat.format(maxDate);
 
+            textView1.setText("RPIs: " + count + " entries (" + minDateStr + "-" + maxDateStr + ")");
+
+            BarDataSet dataSet1 = new BarDataSet(dataPoints1, "RPIs"); // add entries to dataSet1
+            dataSet1.setAxisDependency(YAxis.AxisDependency.LEFT);
+
+            BarData barData1 = new BarData(dataSet1);
+            dataSet1.setHighlightEnabled(false);
+            chart1.setData(barData1);
+            //chart1.setFitBars(true); // make the x-axis fit exactly all bars
+
+            // the labels that should be drawn on the XAxis
+            ValueFormatter xAxisFormatter1 = new ValueFormatter() {
+                @Override
+                public String getAxisLabel(float value, AxisBase axis) {
+                    return dateFormat.format(getDateFromDaysSinceEpoch((int) value));
+                }
+            };
+            // the labels that should be drawn on the YAxis
+            ValueFormatter yAxisFormatter1 = new ValueFormatter() {
+                @Override
+                public String getAxisLabel(float value, AxisBase axis) {
+                    return String.format("%5d", (int) value);
+                }
+            };
+            // the bar labels
+            ValueFormatter BarFormatter1 = new ValueFormatter() {
+                @Override
+                public String getBarLabel(BarEntry barEntry) {
+                    return String.valueOf((int) barEntry.getY());
+                }
+            };
+            barData1.setValueFormatter(BarFormatter1);
+            XAxis xAxis = chart1.getXAxis();
+            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+            xAxis.setValueFormatter(xAxisFormatter1);
+            xAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
+            xAxis.setGranularityEnabled(true);
+            xAxis.setDrawGridLines(false);
+
+            YAxis yAxis = chart1.getAxisLeft();
+            yAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
+            yAxis.setGranularityEnabled(true);
+            yAxis.setAxisMinimum(0.0f);
+            yAxis.setGridColor(gridColor);
+            yAxis.setValueFormatter(yAxisFormatter1);
+
+            chart1.getAxisRight().setAxisMinimum(0.0f);
+            chart1.getAxisRight().setDrawLabels(false);
+            chart1.getLegend().setEnabled(false);
+            chart1.getDescription().setEnabled(false);
+            chart1.setScaleYEnabled(false);
+            chart1.invalidate(); // refresh
+        }
 
         // 2nd Section: Diagnosis Keys
 
         if (!DEMO_MODE) {
-            diagnosisKeysDownload = new DKDownload(this);
-            diagnosisKeysDownload.availableDatesRequest(new availableDatesResponseCallbackCommand());
-            // (the rest is done asynchronously in callback functions)
+            if (diagnosisKeysList.size() == 0) {  // when coming back from another activity, there's no need to do this again
+                diagnosisKeysDownload = new DKDownload(this);
+                diagnosisKeysDownload.availableDatesRequest(new availableDatesResponseCallbackCommand());
+                // (the rest is done asynchronously in callback functions)
+            } else {
+                processDownloadedDiagnosisKeys();
+            }
         } else {
             try {
                 InputStream inputStream = getAssets().open("demo_dks.zip");
@@ -307,6 +324,7 @@ public class MainActivity extends AppCompatActivity {
         DateFormat dateFormat = new SimpleDateFormat("d.M.");
 
         BarDataSet dataSet2 = new BarDataSet(dataPoints2, "DKs"); // add entries to dataSet2
+        dataSet2.setHighlightEnabled(false);
         dataSet2.setAxisDependency(YAxis.AxisDependency.LEFT);
 
         BarData barData2 = new BarData(dataSet2);
@@ -362,18 +380,22 @@ public class MainActivity extends AppCompatActivity {
     public Handler uiThreadHandler;
 
     private void startMatching() {
-        uiThreadHandler = new Handler(Looper.getMainLooper()) {
-            @Override
-            public void handleMessage(@SuppressWarnings("NullableProblems") Message inputMessage) {
-                Log.d(TAG, "Message received.");
-                presentMatchResults();
-            }
-        };
+        if (!matchingDone) {  // when coming back from another activity, there's no need to do this again
+            uiThreadHandler = new Handler(Looper.getMainLooper()) {
+                @Override
+                public void handleMessage(@SuppressWarnings("NullableProblems") Message inputMessage) {
+                    Log.d(TAG, "Message received.");
+                    presentMatchResults();
+                }
+            };
 
-        HandlerThread ht = new HandlerThread("BackgroundMatcher");
-        ht.start();
-        Handler backgroundThreadHandler = new Handler(ht.getLooper());
-        backgroundThreadHandler.post(new BackgroundMatching(this));
+            HandlerThread ht = new HandlerThread("BackgroundMatcher");
+            ht.start();
+            Handler backgroundThreadHandler = new Handler(ht.getLooper());
+            backgroundThreadHandler.post(new BackgroundMatching(this));
+        } else {
+            presentMatchResults();
+        }
     }
 
     private class BackgroundMatching implements Runnable {
@@ -387,95 +409,102 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
 
-            Matcher matcher = new Matcher(rpiList, diagnosisKeysList);
-            mainActivity.matches = matcher.findMatches();
-            Log.d(TAG, "Finished matching, sending the message...");
+            if ((rpiList != null) && (diagnosisKeysList != null)) {
+                Matcher matcher = new Matcher(rpiList, diagnosisKeysList);
+                mainActivity.matches = matcher.findMatches();
+                Log.d(TAG, "Finished matching, sending the message...");
+                matchingDone = true;
+            }
             Message completeMessage = mainActivity.uiThreadHandler.obtainMessage();
             completeMessage.sendToTarget();
         }
     }
 
     private void presentMatchResults() {
-        int numberOfMatches = matches.size();
-        if (numberOfMatches == 0) {
-            textView3.setText("No matches found.");
-        } else {
-            textView3.setText("Matches found: " + numberOfMatches);
-        }
-        Log.d(TAG, "Number of matches: "+numberOfMatches);
+        if ((rpiList != null) && (diagnosisKeysList != null)) {
+            int numberOfMatches = matches.size();
+            if (numberOfMatches == 0) {
+                textView3.setText("No matches found.");
+            } else {
+                textView3.setText("Matches found: " + numberOfMatches);
+                textView3.setTextColor(matchBarColor);
+            }
+            Log.d(TAG, "Number of matches: " + numberOfMatches);
 
-        List<BarEntry> dataPoints3 = new ArrayList<>();
-        SortedSet<Integer> rpiListDaysSinceEpoch = rpiList.getAvailableDaysSinceEpoch();
-        int total = 0;
-        for (Integer daysSinceEpoch : rpiListDaysSinceEpoch) {
-            int count = 0;
-            for (Matcher.MatchEntry matchEntry : matches) {
-                if (getDaysSinceEpochFromENIN(matchEntry.diagnosisKey.getRollingStartIntervalNumber()) == daysSinceEpoch) {
-                    count++;
+            List<BarEntry> dataPoints3 = new ArrayList<>();
+            SortedSet<Integer> rpiListDaysSinceEpoch = rpiList.getAvailableDaysSinceEpoch();
+            int total = 0;
+            for (Integer daysSinceEpoch : rpiListDaysSinceEpoch) {
+                int count = 0;
+                for (Matcher.MatchEntry matchEntry : matches) {
+                    if (getDaysSinceEpochFromENIN(matchEntry.diagnosisKey.getRollingStartIntervalNumber()) == daysSinceEpoch) {
+                        count++;
+                    }
                 }
+                //Log.d(TAG, "Datapoint: " + daysSinceEpoch + ": " + count);
+                dataPoints3.add(new BarEntry(daysSinceEpoch, count));
+                total += count;
             }
-            //Log.d(TAG, "Datapoint: " + daysSinceEpoch + ": " + count);
-            dataPoints3.add(new BarEntry(daysSinceEpoch, count));
-            total += count;
+            Log.d(TAG, "Number of matches displayed: " + total);
+
+            // set date label formatter
+            DateFormat dateFormat = new SimpleDateFormat("d.M.");
+
+            BarDataSet dataSet3 = new BarDataSet(dataPoints3, "Matches"); // add entries to dataSet3
+            dataSet3.setAxisDependency(YAxis.AxisDependency.LEFT);
+            dataSet3.setColor(matchBarColor);
+
+            BarData barData3 = new BarData(dataSet3);
+            chart3.setData(barData3);
+            //chart3.setFitBars(true); // make the x-axis fit exactly all bars
+
+            // the labels that should be drawn on the XAxis
+            ValueFormatter xAxisFormatter3 = new ValueFormatter() {
+                @Override
+                public String getAxisLabel(float value, AxisBase axis) {
+                    return dateFormat.format(getDateFromDaysSinceEpoch((int) value));
+                }
+            };
+            // the labels that should be drawn on the YAxis
+            ValueFormatter yAxisFormatter3 = new ValueFormatter() {
+                @Override
+                public String getAxisLabel(float value, AxisBase axis) {
+                    return String.format("%5d", (int) value);
+                }
+            };
+            // the bar labels
+            ValueFormatter BarFormatter3 = new ValueFormatter() {
+                @Override
+                public String getBarLabel(BarEntry barEntry) {
+                    return String.valueOf((int) barEntry.getY());
+                }
+            };
+            barData3.setValueFormatter(BarFormatter3);
+            XAxis xAxis = chart3.getXAxis();
+            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+            xAxis.setValueFormatter(xAxisFormatter3);
+            xAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
+            xAxis.setGranularityEnabled(true);
+            xAxis.setDrawGridLines(false);
+
+            YAxis yAxis = chart3.getAxisLeft();
+            yAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
+            yAxis.setGranularityEnabled(true);
+            yAxis.setAxisMinimum(0.0f);
+            yAxis.setGridColor(gridColor);
+            yAxis.setValueFormatter(yAxisFormatter3);
+
+            chart3.getAxisRight().setAxisMinimum(0.0f);
+            chart3.getAxisRight().setDrawLabels(false);
+            chart3.getLegend().setEnabled(false);
+            chart3.getDescription().setEnabled(false);
+            chart3.setScaleYEnabled(false);
+            chart3.invalidate(); // refresh
+
+
+
+            //TODO
         }
-        Log.d(TAG, "Number of matches displayed: "+total);
-
-        // set date label formatter
-        DateFormat dateFormat = new SimpleDateFormat("d.M.");
-
-        BarDataSet dataSet3 = new BarDataSet(dataPoints3, "Matches"); // add entries to dataSet3
-        dataSet3.setAxisDependency(YAxis.AxisDependency.LEFT);
-
-        BarData barData3 = new BarData(dataSet3);
-        chart3.setData(barData3);
-        //chart3.setFitBars(true); // make the x-axis fit exactly all bars
-
-        // the labels that should be drawn on the XAxis
-        ValueFormatter xAxisFormatter3 = new ValueFormatter() {
-            @Override
-            public String getAxisLabel(float value, AxisBase axis) {
-                return dateFormat.format(getDateFromDaysSinceEpoch((int) value));
-            }
-        };
-        // the labels that should be drawn on the YAxis
-        ValueFormatter yAxisFormatter3 = new ValueFormatter() {
-            @Override
-            public String getAxisLabel(float value, AxisBase axis) {
-                return String.format("%5d", (int) value);
-            }
-        };
-        // the bar labels
-        ValueFormatter BarFormatter3 = new ValueFormatter() {
-            @Override
-            public String getBarLabel(BarEntry barEntry) {
-                return String.valueOf((int) barEntry.getY());
-            }
-        };
-        barData3.setValueFormatter(BarFormatter3);
-        XAxis xAxis = chart3.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setValueFormatter(xAxisFormatter3);
-        xAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
-        xAxis.setGranularityEnabled(true);
-        xAxis.setDrawGridLines(false);
-
-        YAxis yAxis = chart3.getAxisLeft();
-        yAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
-        yAxis.setGranularityEnabled(true);
-        yAxis.setAxisMinimum(0.0f);
-        yAxis.setGridColor(gridColor);
-        yAxis.setValueFormatter(yAxisFormatter3);
-
-        chart3.getAxisRight().setAxisMinimum(0.0f);
-        chart3.getAxisRight().setDrawLabels(false);
-        chart3.getLegend().setEnabled(false);
-        chart3.getDescription().setEnabled(false);
-        chart3.setScaleYEnabled(false);
-        chart3.invalidate(); // refresh
-
-
-
-        //TODO
     }
 
 
@@ -502,7 +531,10 @@ public class MainActivity extends AppCompatActivity {
         public void onChartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) { }
         public void onChartGestureEnd(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) { }
         public void onChartLongPressed(MotionEvent me) { }
-        public void onChartDoubleTapped(MotionEvent me) { }
+        public void onChartDoubleTapped(MotionEvent me) {
+            BarChart[] otherCharts = {chart2, chart3};
+            syncCharts(chart1, otherCharts);
+        }
         public void onChartSingleTapped(MotionEvent me) { }
         public void onChartFling(MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) {
             BarChart[] otherCharts = {chart2, chart3};
@@ -522,7 +554,10 @@ public class MainActivity extends AppCompatActivity {
         public void onChartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) { }
         public void onChartGestureEnd(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) { }
         public void onChartLongPressed(MotionEvent me) { }
-        public void onChartDoubleTapped(MotionEvent me) { }
+        public void onChartDoubleTapped(MotionEvent me) {
+            BarChart[] otherCharts = {chart1, chart3};
+            syncCharts(chart2, otherCharts);
+        }
         public void onChartSingleTapped(MotionEvent me) { }
         public void onChartFling(MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) {
             BarChart[] otherCharts = {chart1, chart3};
@@ -542,7 +577,10 @@ public class MainActivity extends AppCompatActivity {
         public void onChartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) { }
         public void onChartGestureEnd(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) { }
         public void onChartLongPressed(MotionEvent me) { }
-        public void onChartDoubleTapped(MotionEvent me) { }
+        public void onChartDoubleTapped(MotionEvent me) {
+            BarChart[] otherCharts = {chart1, chart2};
+            syncCharts(chart3, otherCharts);
+        }
         public void onChartSingleTapped(MotionEvent me) { }
         public void onChartFling(MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) {
             BarChart[] otherCharts = {chart1, chart2};
@@ -556,5 +594,24 @@ public class MainActivity extends AppCompatActivity {
             BarChart[] otherCharts = {chart1, chart2};
             syncCharts(chart3, otherCharts);
         }
+    }
+
+    class Chart3ValueSelectedListener implements OnChartValueSelectedListener {
+        @Override
+        public void onValueSelected(Entry e, Highlight h) {
+            if (e == null)
+                return;
+            int y = (int) e.getY();
+            if (y > 0) {
+                Log.d(TAG, "Detected selection "+(int)e.getX()+" ("+y+")");
+                Intent intent = new Intent(getApplicationContext(), DisplayDetailsActivity.class);
+                String message = String.valueOf(y);
+                intent.putExtra(DAY_EXTRA_MESSAGE, message);
+                startActivity(intent);
+            }
+        }
+
+        @Override
+        public void onNothingSelected() { }
     }
 }
