@@ -64,7 +64,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     public static final String DAY_EXTRA_MESSAGE = "org.tosl.coronawarncompanion.DAY_MESSAGE";
 
-    private RpiList rpiList;
+    CWCApplication app = null;
+    private RpiList rpiList = null;
     private final long todayLastMidnightInMillis = System.currentTimeMillis() / (24*3600*1000L) * (24*3600*1000L);
     private Date maxDate = new Date(todayLastMidnightInMillis);
     private Date minDate = new Date(todayLastMidnightInMillis -14*24*3600*1000L);
@@ -72,11 +73,9 @@ public class MainActivity extends AppCompatActivity {
 
     private DKDownload diagnosisKeysDownload;
     private final LinkedList<URL> diagnosisKeysUrls = new LinkedList<>();
+    private LinkedList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList = null;
 
-    private LinkedList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList = new LinkedList<>();
-
-    private LinkedList<Matcher.MatchEntry> matches = new LinkedList<>();
-    private boolean matchingDone = false;
+    private LinkedList<Matcher.MatchEntry> matches = null;
 
     private final int gridColor = Color.parseColor("#E0E0E0");
     private final int matchBarColor = Color.parseColor("#FF0000");
@@ -97,6 +96,8 @@ public class MainActivity extends AppCompatActivity {
             Log.i(TAG, "--- DEMO MODE ---");
         }
 
+        app = (CWCApplication) getApplicationContext();
+
         // 1st Section: Get RPIs from database (requires root)
 
         textView1 = findViewById(R.id.textView1);
@@ -110,9 +111,11 @@ public class MainActivity extends AppCompatActivity {
         chart3.setOnChartGestureListener(new Chart3GestureListener());
         chart3.setOnChartValueSelectedListener(new Chart3ValueSelectedListener());
 
-        if (rpiList == null) {  // when coming back from another activity, there's no need to do this again
+        rpiList = app.getRpiList();
+        if (rpiList == null) {
             ContactDbOnDisk contactDbOnDisk = new ContactDbOnDisk(this);
             rpiList = contactDbOnDisk.getRpisFromContactDB(DEMO_MODE);
+            app.setRpiList(rpiList);
         }
 
         if (rpiList != null) {  // if getting RPIs failed, e.g. because we didn't get root rights
@@ -192,7 +195,9 @@ public class MainActivity extends AppCompatActivity {
         // 2nd Section: Diagnosis Keys
 
         if (!DEMO_MODE) {
-            if (diagnosisKeysList.size() == 0) {  // when coming back from another activity, there's no need to do this again
+
+            diagnosisKeysList = app.getDiagnosisKeysList();
+            if (diagnosisKeysList == null) {
                 diagnosisKeysDownload = new DKDownload(this);
                 diagnosisKeysDownload.availableDatesRequest(new availableDatesResponseCallbackCommand());
                 // (the rest is done asynchronously in callback functions)
@@ -218,7 +223,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
 
     public class availableDatesResponseCallbackCommand implements DKDownload.CallbackCommand {
         public void execute(Object data) {
@@ -273,6 +277,8 @@ public class MainActivity extends AppCompatActivity {
             }
 
             DiagnosisKeysImport diagnosisKeysImport = new DiagnosisKeysImport(exportDotBinBytes);
+
+            if (diagnosisKeysList == null) diagnosisKeysList = new LinkedList<>();
             diagnosisKeysList.addAll(diagnosisKeysImport.getDiagnosisKeys());
 
             diagnosisKeysUrls.remove(fileResponse.url);
@@ -285,8 +291,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void processDownloadedDiagnosisKeys() {
 
+        app.setDiagnosisKeysList(diagnosisKeysList);
         // Count the downloaded Diagnosis Keys
-
         Log.d(TAG, "Number of keys that have been downloaded: " + diagnosisKeysList.size());
 
         TreeMap<Integer, Integer> diagnosisKeyCountMap = new TreeMap<>();  // Key: ENIN (==date), Value: count
@@ -380,7 +386,8 @@ public class MainActivity extends AppCompatActivity {
     public Handler uiThreadHandler;
 
     private void startMatching() {
-        if (!matchingDone) {  // when coming back from another activity, there's no need to do this again
+        matches = app.getMatches();
+        if (matches == null) {  // when coming back from another activity, there's no need to do this again
             uiThreadHandler = new Handler(Looper.getMainLooper()) {
                 @Override
                 public void handleMessage(@SuppressWarnings("NullableProblems") Message inputMessage) {
@@ -413,7 +420,7 @@ public class MainActivity extends AppCompatActivity {
                 Matcher matcher = new Matcher(rpiList, diagnosisKeysList);
                 mainActivity.matches = matcher.findMatches();
                 Log.d(TAG, "Finished matching, sending the message...");
-                matchingDone = true;
+                app.setMatches(mainActivity.matches);
             }
             Message completeMessage = mainActivity.uiThreadHandler.obtainMessage();
             completeMessage.sendToTarget();
@@ -501,9 +508,9 @@ public class MainActivity extends AppCompatActivity {
             chart3.setScaleYEnabled(false);
             chart3.invalidate(); // refresh
 
-
-
-            //TODO
+            // End of this path.
+            // From now on, the user can scroll the charts,
+            // or tap on a match to reach the DisplayDetailsActivity.
         }
     }
 
@@ -603,9 +610,10 @@ public class MainActivity extends AppCompatActivity {
                 return;
             int y = (int) e.getY();
             if (y > 0) {
-                Log.d(TAG, "Detected selection "+(int)e.getX()+" ("+y+")");
+                int x = (int)e.getX();
+                Log.d(TAG, "Detected selection "+x+" ("+y+")");
                 Intent intent = new Intent(getApplicationContext(), DisplayDetailsActivity.class);
-                String message = String.valueOf(y);
+                String message = String.valueOf(x);
                 intent.putExtra(DAY_EXTRA_MESSAGE, message);
                 startActivity(intent);
             }
