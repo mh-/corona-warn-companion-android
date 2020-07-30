@@ -21,6 +21,7 @@ public class Matcher {
         public final DiagnosisKeysProtos.TemporaryExposureKey diagnosisKey;
         public final byte[] rpi;
         public final ContactRecordsProtos.ContactRecords contactRecords;
+
         public MatchEntry(DiagnosisKeysProtos.TemporaryExposureKey dk, byte[] rpiBytes, ContactRecordsProtos.ContactRecords contactRecords) {
             this.diagnosisKey = dk;
             this.rpi = rpiBytes;

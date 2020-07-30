@@ -10,7 +10,7 @@ import java.util.LinkedList;
 
 public class CWCApplication extends Application {
 
-    public static final boolean DEMO_MODE = false;  // Set this to true to enable app-wide DEMO MODE
+    public static final boolean DEMO_MODE = true;  // Set this to true to enable app-wide DEMO MODE
 
     private RpiList rpiList = null;
     public RpiList getRpiList() {return rpiList;}
@@ -22,6 +22,6 @@ public class CWCApplication extends Application {
 
     private LinkedList<Matcher.MatchEntry> matches = null;
     public LinkedList<Matcher.MatchEntry> getMatches() {return matches;}
-    public void setMatches(LinkedList<Matcher.MatchEntry> rpiList) {this.matches = matches;}
+    public void setMatches(LinkedList<Matcher.MatchEntry> matches) {this.matches = matches;}
 }
 

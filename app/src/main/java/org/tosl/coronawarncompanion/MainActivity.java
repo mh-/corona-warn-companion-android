@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
     private final LinkedList<URL> diagnosisKeysUrls = new LinkedList<>();
     private LinkedList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList = null;
 
-    private LinkedList<Matcher.MatchEntry> matches = null;
+    public LinkedList<Matcher.MatchEntry> matches = null;
 
     private final int gridColor = Color.parseColor("#E0E0E0");
     private final int matchBarColor = Color.parseColor("#FF0000");
