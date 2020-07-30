@@ -94,7 +94,7 @@ public class ContactDbOnDisk {
         AssetManager assetManager = context.getAssets();
         String[] files = null;
         try {
-            files = assetManager.list("demo_rpi_db/");
+            files = assetManager.list("demo_rpi_db");
         } catch (IOException e) {
             Log.e(TAG, "Failed to get asset file list.", e);
         }
