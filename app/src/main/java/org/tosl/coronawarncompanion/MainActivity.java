@@ -1,5 +1,6 @@
 package org.tosl.coronawarncompanion;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -59,11 +60,9 @@ import static org.tosl.coronawarncompanion.tools.Utils.standardRollingPeriod;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final boolean DEMO_MODE = false;
-
     private static final String TAG = "MainActivity";
     public static final String DAY_EXTRA_MESSAGE = "org.tosl.coronawarncompanion.DAY_MESSAGE";
-
+    private static boolean DEMO_MODE;
     CWCApplication app = null;
     private RpiList rpiList = null;
     private final long todayLastMidnightInMillis = System.currentTimeMillis() / (24*3600*1000L) * (24*3600*1000L);
@@ -92,11 +91,22 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (DEMO_MODE) {
-            Log.i(TAG, "--- DEMO MODE ---");
+        DEMO_MODE = CWCApplication.DEMO_MODE;
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            if (!DEMO_MODE) {
+                actionBar.setTitle("Corona Warn Companion");
+            } else {
+                actionBar.setTitle("Corona Warn Companion DEMO");
+            }
         }
 
         app = (CWCApplication) getApplicationContext();
+
+        if (DEMO_MODE) {
+            Log.i(TAG, "--- DEMO MODE ---");
+        }
 
         // 1st Section: Get RPIs from database (requires root)
 

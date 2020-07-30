@@ -1,8 +1,8 @@
 package org.tosl.coronawarncompanion;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ListView;
@@ -15,13 +15,23 @@ import static org.tosl.coronawarncompanion.tools.Utils.getDateFromDaysSinceEpoch
 
 public class DisplayDetailsActivity extends AppCompatActivity {
 
+    private static boolean DEMO_MODE;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_details);
-        ActionBar actionBar = getActionBar();
+
+        DEMO_MODE = CWCApplication.DEMO_MODE;
+
+        ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
+            if (!DEMO_MODE) {
+                actionBar.setTitle("Corona Warn Companion");
+            } else {
+                actionBar.setTitle("DEMO Corona Warn Companion");
+            }
         }
 
         // set date label formatter
