@@ -119,7 +119,18 @@ public class DKDownload {
                 doCallback(callbackCommand, result);
             }
         };
-        startHttpRequestForStringResponse(CWA_URL+"/"+getStringFromDate(date)+"/"+"hour", responseListener, errorResponseListener);
+        Response.ErrorListener localErrorResponseListener = new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                //TODO
+                Log.i(TAG, "VolleyError "+error);
+                Log.i(TAG, "No hourly downloads available yet.");
+                LinkedList<String> result = new LinkedList<>();
+                doCallback(callbackCommand, result);
+            }
+        };
+
+        startHttpRequestForStringResponse(CWA_URL+"/"+getStringFromDate(date)+"/"+"hour", responseListener, localErrorResponseListener);
     }
 
     void startHttpRequestForByteArrayResponse(String urlStr, Listener<byte[]> responseListener,
