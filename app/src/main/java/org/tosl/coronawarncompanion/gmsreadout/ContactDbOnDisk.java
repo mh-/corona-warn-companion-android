@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.util.Log;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBFactory;
@@ -100,7 +102,7 @@ public class ContactDbOnDisk {
         }
         String outDir = cachePathStr+'/'+dbNameModified;
         File outDirFile = new File(outDir);
-        boolean mkdirResult = outDirFile.mkdir();
+        @SuppressWarnings("unused") boolean mkdirResult = outDirFile.mkdir();
         if (files != null) {
             for (String filename : files) {
                 InputStream in;
@@ -162,14 +164,19 @@ public class ContactDbOnDisk {
             byte[] key = iterator.peekNext().getKey();
             byte[] value = iterator.peekNext().getValue();
 
-            ByteBuffer keyBuf = ByteBuffer.wrap(key);
-            int daysSinceEpoch = keyBuf.getShort();
-            // Log.d(TAG, "Days since Epoch: "+ daysSinceEpoch + ", Date: " + date);
-
             byte[] rpiBytes = new byte[16];
-            keyBuf.get(rpiBytes);
-            RpiList.RpiEntry rpiEntry = new RpiList.RpiEntry(rpiBytes, value);
+            ByteBuffer keyBuf = ByteBuffer.wrap(key);
+            int daysSinceEpoch = keyBuf.getShort();  // get first 2 bytes: date
+            keyBuf.get(rpiBytes); // get the next 16 bytes: RPI
 
+            ContactRecordsProtos.ContactRecords contactRecords = null;
+            try {
+                contactRecords = ContactRecordsProtos.ContactRecords.parseFrom(value);
+            } catch (InvalidProtocolBufferException e) {
+                e.printStackTrace();
+            }
+
+            RpiList.RpiEntry rpiEntry = new RpiList.RpiEntry(rpiBytes, contactRecords);
             rpiList.addEntry(daysSinceEpoch, rpiEntry);
         }
         return rpiList;

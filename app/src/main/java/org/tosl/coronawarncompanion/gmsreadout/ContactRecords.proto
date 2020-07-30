@@ -1,0 +1,16 @@
+syntax = "proto2";
+
+package gmsreadout;
+
+option java_package = "org.tosl.coronawarncompanion.gmsreadout";
+option java_outer_classname = "ContactRecordsProtos";
+
+message ScanRecord {
+  optional uint32 timestamp = 1;
+  optional int64 rssi = 3;
+  optional bytes aem = 4;
+}
+
+message ContactRecords {
+  repeated ScanRecord record = 1;
+}

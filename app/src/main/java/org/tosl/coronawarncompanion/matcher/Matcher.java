@@ -3,6 +3,7 @@ package org.tosl.coronawarncompanion.matcher;
 import android.util.Log;
 
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
+import org.tosl.coronawarncompanion.gmsreadout.ContactRecordsProtos;
 import org.tosl.coronawarncompanion.gmsreadout.RpiList;
 
 import java.util.LinkedList;
@@ -19,11 +20,11 @@ public class Matcher {
     public static class MatchEntry {
         public final DiagnosisKeysProtos.TemporaryExposureKey diagnosisKey;
         public final byte[] rpi;
-        public final byte[] scanData;
-        public MatchEntry(DiagnosisKeysProtos.TemporaryExposureKey dk, byte[] rpiBytes, byte[] scanDataBytes) {
-            diagnosisKey = dk;
-            rpi = rpiBytes;
-            scanData = scanDataBytes;
+        public final ContactRecordsProtos.ContactRecords contactRecords;
+        public MatchEntry(DiagnosisKeysProtos.TemporaryExposureKey dk, byte[] rpiBytes, ContactRecordsProtos.ContactRecords contactRecords) {
+            this.diagnosisKey = dk;
+            this.rpi = rpiBytes;
+            this.contactRecords = contactRecords;
         }
     }
 
@@ -46,8 +47,8 @@ public class Matcher {
         LinkedList<MatchEntry> matchEntries = new LinkedList<>();
         for (DiagnosisKeysProtos.TemporaryExposureKey dk : diagnosisKeysList) {
 
-            boolean testKeyfound = false;
             /*
+            boolean testKeyfound = false;
             if (Arrays.equals(dk.getKeyData().toByteArray(), testKey)) {
                 Log.d(TAG, "testKey found in downloaded DKs! enin: "+dk.getRollingStartIntervalNumber()+", " +
                         "rolling period: "+dk.getRollingPeriod());
@@ -70,12 +71,13 @@ public class Matcher {
                  intervalNumber <= dkIntervalNumber + standardRollingPeriod;
                  intervalNumber += standardRollingPeriod) {
                 for (byte[] dkRpi : dkRpis) {
-                    byte[] scanData = rpiList.getFirstScanDataForDaysSinceEpochAndRpi(getDaysSinceEpochFromENIN(intervalNumber),
-                            dkRpi,
-                            testKeyfound);
-                    if (scanData != null) {
+                    ContactRecordsProtos.ContactRecords contactRecords =
+                            rpiList.getFirstContactRecordsForDaysSinceEpochAndRpi(getDaysSinceEpochFromENIN(intervalNumber),
+                            dkRpi
+                    );
+                    if (contactRecords != null) {
                         Log.i(TAG, "Match found!");
-                        matchEntries.add(new MatchEntry(dk, dkRpi, scanData));
+                        matchEntries.add(new MatchEntry(dk, dkRpi, contactRecords));
                     }
                 }
             }

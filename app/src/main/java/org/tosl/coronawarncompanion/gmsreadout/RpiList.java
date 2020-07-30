@@ -1,10 +1,6 @@
 package org.tosl.coronawarncompanion.gmsreadout;
 
-import android.util.Log;
-
 import java.util.*;
-
-import static org.tosl.coronawarncompanion.tools.Utils.byteArrayToHex;
 
 public class RpiList {
     private static final String TAG = "RpiList";
@@ -17,12 +13,12 @@ public class RpiList {
     }
 
     public static class RpiEntry {
-        public final byte[] rpi;        // RPI bytes
-        public final byte[] scanData;   // ProtoBuf-encoded list of all scans
+        public final byte[] rpi;  // RPI bytes
+        public final ContactRecordsProtos.ContactRecords contactRecords;  // list of all ScanRecords
 
-        public RpiEntry(byte[] rpiBytes, byte[] scanDataBytes) {
+        public RpiEntry(byte[] rpiBytes, ContactRecordsProtos.ContactRecords scanRecords) {
             rpi = rpiBytes;
-            scanData = scanDataBytes;
+            contactRecords = scanRecords;
         }
     }
 
@@ -36,7 +32,7 @@ public class RpiList {
 
     public void addEntry(Integer daysSinceEpoch, RpiEntry entry) {
         DayEntry dayEntry;
-        if (!map.containsKey(daysSinceEpoch)) {
+        if (!map.containsKey(daysSinceEpoch)) {  // day not yet in list, create new entry
             dayEntry = new DayEntry();
             map.put(daysSinceEpoch, dayEntry);
             //Log.d(TAG, "Added date: " + date);
@@ -57,13 +53,8 @@ public class RpiList {
         }
     }
 
-    public byte[] getFirstScanDataForDaysSinceEpochAndRpi(Integer daysSinceEpoch, byte[] searchRpi, boolean test) {
-        /*
-        if (test) {
-            Log.d(TAG, "daysSinceEpoch: "+daysSinceEpoch+", searchRpi: "+byteArrayToHex(searchRpi));
-        }
-        */
-        byte[] scanData = null;
+    public ContactRecordsProtos.ContactRecords getFirstContactRecordsForDaysSinceEpochAndRpi(Integer daysSinceEpoch, byte[] searchRpi) {
+        ContactRecordsProtos.ContactRecords contactRecords = null;
         DayEntry dayEntry = map.get(daysSinceEpoch);
         if (dayEntry != null) {
             if (dayEntry.rpi32Bits.contains(getIntegerFromFirstBytesOfByteArray(searchRpi))) {
@@ -71,18 +62,18 @@ public class RpiList {
                 for (RpiEntry rpiEntry : dayEntry.rpiEntries) {
                     if (Arrays.equals(rpiEntry.rpi, searchRpi)) {
                         //Log.d(TAG, "Match confirmed!");
-                        scanData = rpiEntry.scanData;
+                        contactRecords = rpiEntry.contactRecords;
                         break;
                     }
                 }
-                if (scanData == null) {
+                if (contactRecords == null) {
                     //Log.d(TAG, "Match based on 32 bits was not confirmed based on 128 bits.");
                 }
             } else {
                 //Log.d(TAG, "Match not found during this attempt.");
             }
         }
-        return scanData;
+        return contactRecords;
     }
 
     public SortedSet<Integer> getAvailableDaysSinceEpoch() {
