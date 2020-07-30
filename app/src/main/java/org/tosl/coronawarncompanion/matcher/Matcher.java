@@ -1,7 +1,9 @@
 package org.tosl.coronawarncompanion.matcher;
 
+import android.content.Context;
 import android.util.Log;
 
+import org.tosl.coronawarncompanion.CWCApplication;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
 import org.tosl.coronawarncompanion.gmsreadout.ContactRecordsProtos;
 import org.tosl.coronawarncompanion.gmsreadout.RpiList;
@@ -17,24 +19,35 @@ public class Matcher {
 
     private static final String TAG = "Matcher";
 
+    private CWCApplication app;
+    private Context context = null;
+    int timeZoneOffsetSeconds;
+
     public static class MatchEntry {
         public final DiagnosisKeysProtos.TemporaryExposureKey diagnosisKey;
         public final byte[] rpi;
         public final ContactRecordsProtos.ContactRecords contactRecords;
+        public final int daysSinceEpochInLocalTimeZone;
 
-        public MatchEntry(DiagnosisKeysProtos.TemporaryExposureKey dk, byte[] rpiBytes, ContactRecordsProtos.ContactRecords contactRecords) {
+        public MatchEntry(DiagnosisKeysProtos.TemporaryExposureKey dk, byte[] rpiBytes,
+                          ContactRecordsProtos.ContactRecords contactRecords,
+                          int daysSinceEpochInLocalTimeZone) {
             this.diagnosisKey = dk;
             this.rpi = rpiBytes;
             this.contactRecords = contactRecords;
+            this.daysSinceEpochInLocalTimeZone = daysSinceEpochInLocalTimeZone;
         }
     }
 
     private final RpiList rpiList;
     private final LinkedList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList;
 
-    public Matcher(RpiList rpis, LinkedList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeys) {
+    public Matcher(RpiList rpis, LinkedList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeys, Context appContext) {
         rpiList = rpis;
         diagnosisKeysList = diagnosisKeys;
+        context = appContext;
+        app = (CWCApplication) context.getApplicationContext();
+        timeZoneOffsetSeconds = app.getTimeZoneOffsetSeconds();
     }
 
     /*
@@ -78,7 +91,9 @@ public class Matcher {
                     );
                     if (contactRecords != null) {
                         Log.i(TAG, "Match found!");
-                        matchEntries.add(new MatchEntry(dk, dkRpi, contactRecords));
+                        int daysSinceEpochInLocalTimezone = (contactRecords.getRecord(0).getTimestamp()
+                                + timeZoneOffsetSeconds) / (24 * 3600);
+                        matchEntries.add(new MatchEntry(dk, dkRpi, contactRecords,daysSinceEpochInLocalTimezone));
                     }
                 }
             }

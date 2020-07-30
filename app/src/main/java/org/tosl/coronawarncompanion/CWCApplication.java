@@ -7,6 +7,7 @@ import org.tosl.coronawarncompanion.gmsreadout.RpiList;
 import org.tosl.coronawarncompanion.matcher.Matcher;
 
 import java.util.LinkedList;
+import java.util.TimeZone;
 
 public class CWCApplication extends Application {
 
@@ -23,5 +24,14 @@ public class CWCApplication extends Application {
     private LinkedList<Matcher.MatchEntry> matches = null;
     public LinkedList<Matcher.MatchEntry> getMatches() {return matches;}
     public void setMatches(LinkedList<Matcher.MatchEntry> matches) {this.matches = matches;}
+
+    private int timeZoneOffsetSeconds;
+    public int getTimeZoneOffsetSeconds() {return timeZoneOffsetSeconds;}
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        timeZoneOffsetSeconds = TimeZone.getDefault().getOffset(System.currentTimeMillis()) / 1000;
+    }
 }
 

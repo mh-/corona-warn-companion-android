@@ -153,7 +153,7 @@ public class ContactDbOnDisk {
 
 
     public RpiList readToRpiList() {
-        RpiList rpiList = new RpiList();
+        RpiList rpiList = new RpiList(context);
 
         ReadOptions readOptions = new ReadOptions();
         readOptions.verifyChecksums(true);

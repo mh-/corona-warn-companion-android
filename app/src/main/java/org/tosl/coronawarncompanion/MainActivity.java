@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String DAY_EXTRA_MESSAGE = "org.tosl.coronawarncompanion.DAY_MESSAGE";
     private static boolean DEMO_MODE;
     CWCApplication app = null;
+    private int timeZoneOffsetSeconds;
     private RpiList rpiList = null;
     private final long todayLastMidnightInMillis = System.currentTimeMillis() / (24*3600*1000L) * (24*3600*1000L);
     private Date maxDate = new Date(todayLastMidnightInMillis);
@@ -102,11 +103,13 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        app = (CWCApplication) getApplicationContext();
-
         if (DEMO_MODE) {
             Log.i(TAG, "--- DEMO MODE ---");
         }
+
+        app = (CWCApplication) getApplicationContext();
+        timeZoneOffsetSeconds = app.getTimeZoneOffsetSeconds();
+        Log.d(TAG, "Local TimeZone Offset in seconds: "+ timeZoneOffsetSeconds);
 
         // 1st Section: Get RPIs from database (requires root)
 
@@ -128,13 +131,13 @@ public class MainActivity extends AppCompatActivity {
             app.setRpiList(rpiList);
         }
 
-        if (rpiList != null) {  // if getting RPIs failed, e.g. because we didn't get root rights
-            SortedSet<Integer> rpiListDaysSinceEpoch = rpiList.getAvailableDaysSinceEpoch();
+        if (rpiList != null) {  // check that getting the RPIs didn't fail, e.g. because we didn't get root rights
+            SortedSet<Integer> rpiListDaysSinceEpochInLocalTimezone = rpiList.getAvailableDaysSinceEpochInLocalTimezone();
             List<BarEntry> dataPoints1 = new ArrayList<>();
 
             int count = 0;
-            for (Integer daysSinceEpoch : rpiListDaysSinceEpoch) {
-                int numEntries = rpiList.getRpiEntriesForDaysSinceEpoch(daysSinceEpoch).size();
+            for (Integer daysSinceEpoch : rpiListDaysSinceEpochInLocalTimezone) {
+                int numEntries = rpiList.getRpiCountForDaysSinceEpochInLocalTime(daysSinceEpoch);
                 //Log.d(TAG, "Datapoint: " + daysSinceEpoch + ": " + numEntries);
                 dataPoints1.add(new BarEntry(daysSinceEpoch, numEntries));
                 count += numEntries;
@@ -143,9 +146,9 @@ public class MainActivity extends AppCompatActivity {
             // set date label formatter
             DateFormat dateFormat = new SimpleDateFormat("d.M.");
 
-            minDate = new Date(getMillisFromDaysSinceEpoch(rpiListDaysSinceEpoch.first()));
+            minDate = new Date(getMillisFromDaysSinceEpoch(rpiListDaysSinceEpochInLocalTimezone.first()));
             String minDateStr = dateFormat.format(minDate);
-            maxDate = new Date(getMillisFromDaysSinceEpoch(rpiListDaysSinceEpoch.last()));
+            maxDate = new Date(getMillisFromDaysSinceEpoch(rpiListDaysSinceEpochInLocalTimezone.last()));
             String maxDateStr = dateFormat.format(maxDate);
 
             textView1.setText("RPIs: " + count + " entries (" + minDateStr + "-" + maxDateStr + ")");
@@ -205,7 +208,6 @@ public class MainActivity extends AppCompatActivity {
         // 2nd Section: Diagnosis Keys
 
         if (!DEMO_MODE) {
-
             diagnosisKeysList = app.getDiagnosisKeysList();
             if (diagnosisKeysList == null) {
                 diagnosisKeysDownload = new DKDownload(this);
@@ -427,7 +429,7 @@ public class MainActivity extends AppCompatActivity {
             android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
 
             if ((rpiList != null) && (diagnosisKeysList != null)) {
-                Matcher matcher = new Matcher(rpiList, diagnosisKeysList);
+                Matcher matcher = new Matcher(rpiList, diagnosisKeysList, app.getApplicationContext());
                 mainActivity.matches = matcher.findMatches();
                 Log.d(TAG, "Finished matching, sending the message...");
                 app.setMatches(mainActivity.matches);
@@ -449,12 +451,12 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "Number of matches: " + numberOfMatches);
 
             List<BarEntry> dataPoints3 = new ArrayList<>();
-            SortedSet<Integer> rpiListDaysSinceEpoch = rpiList.getAvailableDaysSinceEpoch();
+            SortedSet<Integer> rpiListDaysSinceEpoch = rpiList.getAvailableDaysSinceEpochInLocalTimezone();
             int total = 0;
             for (Integer daysSinceEpoch : rpiListDaysSinceEpoch) {
                 int count = 0;
                 for (Matcher.MatchEntry matchEntry : matches) {
-                    if (getDaysSinceEpochFromENIN(matchEntry.diagnosisKey.getRollingStartIntervalNumber()) == daysSinceEpoch) {
+                    if (matchEntry.daysSinceEpochInLocalTimeZone == daysSinceEpoch) {
                         count++;
                     }
                 }
