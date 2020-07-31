@@ -26,7 +26,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.github.mikephil.charting.charts.BarChart
-            android:id="@+id/chart1"
+            android:id="@+id/chart"
             android:layout_width="match_parent"
             android:layout_height="160dip"
             app:layout_constraintTop_toBottomOf="@+id/textView1" />
@@ -41,7 +41,7 @@
             android:text="DKs: 0 entries"
             android:textSize="18sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/chart1" />
+            app:layout_constraintTop_toBottomOf="@+id/chart" />
 
         <com.github.mikephil.charting.charts.BarChart
             android:id="@+id/chart2"
