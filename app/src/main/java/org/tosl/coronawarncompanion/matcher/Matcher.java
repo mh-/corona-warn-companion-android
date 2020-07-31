@@ -57,14 +57,14 @@ public class Matcher {
         LinkedList<MatchEntry> matchEntries = new LinkedList<>();
         for (DiagnosisKeysProtos.TemporaryExposureKey dk : diagnosisKeysList) {
             int dkIntervalNumber = dk.getRollingStartIntervalNumber();
-            LinkedList<byte[]> dkRpis = createListOfRpisForIntervalRange(deriveRpiKey(dk.getKeyData().toByteArray()),
+            LinkedList<crypto.RpiWithInterval> dkRpisWithIntervals = createListOfRpisForIntervalRange(deriveRpiKey(dk.getKeyData().toByteArray()),
                     dkIntervalNumber, dk.getRollingPeriod());
-            for (byte[] dkRpi : dkRpis) {
+            for (crypto.RpiWithInterval dkRpiWithInterval : dkRpisWithIntervals) {
                 RpiList.RpiEntry rpiEntry =
-                        rpiList.searchForRpiOnDaySinceEpochUTCWith2HoursTolerance(dkRpi, getDaysSinceEpochFromENIN(dkIntervalNumber));
+                        rpiList.searchForRpiOnDaySinceEpochUTCWith2HoursTolerance(dkRpiWithInterval, getDaysSinceEpochFromENIN(dkIntervalNumber));
                 if (rpiEntry != null) {
                     Log.i(TAG, "Match found!");
-                    matchEntries.add(new MatchEntry(dk, dkRpi, rpiEntry.contactRecords,
+                    matchEntries.add(new MatchEntry(dk, dkRpiWithInterval.rpiBytes, rpiEntry.contactRecords,
                             rpiEntry.startTimeStampLocalTZ, rpiEntry.endTimeStampLocalTZ));
                 }
             }

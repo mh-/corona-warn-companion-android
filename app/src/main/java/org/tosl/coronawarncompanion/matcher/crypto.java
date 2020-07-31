@@ -66,8 +66,17 @@ public class crypto {
         return ciphertext;
     }
 
-    public static LinkedList<byte[]> createListOfRpisForIntervalRange(byte[] rpiKey, int intervalNumber, int intervalCount) {
-        LinkedList<byte[]> rpis = new LinkedList<>();
+    public static class RpiWithInterval {
+        public byte[] rpiBytes;
+        public int intervalNumber;
+        public RpiWithInterval(byte[] rpiBytes, int intervalNumber) {
+            this.rpiBytes = rpiBytes;
+            this.intervalNumber = intervalNumber;
+        }
+    }
+
+    public static LinkedList<RpiWithInterval> createListOfRpisForIntervalRange(byte[] rpiKey, int startIntervalNumber, int intervalCount) {
+        LinkedList<RpiWithInterval> rpis = new LinkedList<>();
 
         ByteArrayOutputStream padded_data_template = new ByteArrayOutputStream();
         try {
@@ -75,11 +84,12 @@ public class crypto {
             padded_data_template.write(new byte[] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
             AesEcbEncryptor encryptor = AesEcbEncryptor.create();
             encryptor.init(rpiKey);
-            for (int interval=intervalNumber; interval < intervalNumber + intervalCount; interval++) {
+            for (int interval=startIntervalNumber; interval < startIntervalNumber + intervalCount; interval++) {
                 ByteArrayOutputStream padded_data = new ByteArrayOutputStream();
                 padded_data.write(padded_data_template.toByteArray());
                 padded_data.write(encodedEnIntervalNumber(interval));
-                rpis.add(encryptor.encrypt(padded_data.toByteArray()));
+                RpiWithInterval rpiWithInterval = new RpiWithInterval(encryptor.encrypt(padded_data.toByteArray()), interval);
+                rpis.add(rpiWithInterval);
             }
         } catch (CryptoException | IOException e) {
             e.printStackTrace();
