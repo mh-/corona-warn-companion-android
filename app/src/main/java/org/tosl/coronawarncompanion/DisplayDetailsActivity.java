@@ -9,15 +9,22 @@ import android.util.Log;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.github.mikephil.charting.data.BarEntry;
+
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
 import org.tosl.coronawarncompanion.gmsreadout.ContactRecordsProtos;
 import org.tosl.coronawarncompanion.matcher.Matcher;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.TimeZone;
 
 import static org.tosl.coronawarncompanion.tools.Utils.getDateFromDaysSinceEpoch;
+import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromSeconds;
 
 public class DisplayDetailsActivity extends AppCompatActivity {
 
@@ -60,14 +67,33 @@ public class DisplayDetailsActivity extends AppCompatActivity {
 
         LinkedList<Matcher.MatchEntry> matches = app.getMatches();
         if (matches != null) {
+            int[] numMatchesPerHour = new int[24];
+
             for (Matcher.MatchEntry match : matches) {
                 DiagnosisKeysProtos.TemporaryExposureKey diagnosisKey = match.diagnosisKey;
                 byte[] rpi = match.rpi;
                 ContactRecordsProtos.ContactRecords contactRecords = match.contactRecords;
 
+                Calendar startTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                // UTC because we don't want Calendar to do additional time zone compensation
+                startTime.setTimeInMillis(getMillisFromSeconds(match.startTimestampLocalTZ));
+                int startHour = startTime.get(Calendar.HOUR_OF_DAY);
+                Log.d(TAG, "Hour: "+startHour);
+
                 Log.d(TAG, "Number of Scans: "+contactRecords.getRecordCount());
 
             }
+
+            /*
+            List<BarEntry> dataPoints1 = new ArrayList<>();
+            int count = 0;
+            for (Integer daysSinceEpochLocalTZ : rpiListDaysSinceEpochLocalTZ) {
+                int numEntries = rpiList.getRpiCountForDaysSinceEpochLocalTZ(daysSinceEpochLocalTZ);
+                //Log.d(TAG, "Datapoint: " + daysSinceEpochLocalTZ + ": " + numEntries);
+                dataPoints1.add(new BarEntry(daysSinceEpochLocalTZ, numEntries));
+                count += numEntries;
+            }
+            */
         }
     }
 }

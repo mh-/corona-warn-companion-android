@@ -9,6 +9,10 @@ public class Utils {
         return (long) days * 24*3600*1000L;
     }
 
+    public static long getMillisFromSeconds(int seconds) {
+        return (long) seconds * 1000L;
+    }
+
     public static int getSecondsFromDays(int days) {
         return days * 24*3600;
     }

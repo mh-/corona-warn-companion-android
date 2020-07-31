@@ -7,13 +7,13 @@ import org.tosl.coronawarncompanion.CWCApplication;
 import org.tosl.coronawarncompanion.matcher.crypto;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 import static java.lang.Math.abs;
 import static org.tosl.coronawarncompanion.tools.Utils.byteArrayToHex;
 import static org.tosl.coronawarncompanion.tools.Utils.getDateFromENIN;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromSeconds;
 import static org.tosl.coronawarncompanion.tools.Utils.getENINFromSeconds;
+import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromSeconds;
 import static org.tosl.coronawarncompanion.tools.Utils.getSecondsFromDays;
 
 public class RpiList {
@@ -72,10 +72,18 @@ public class RpiList {
             // get start and end timestamps of the scan records (UTC)
             int startTimeStampUTC = contactRecords.getRecord(0).getTimestamp();
             int endTimeStampUTC = contactRecords.getRecord(contactRecords.getRecordCount() - 1).getTimestamp();
-            if (TimeUnit.SECONDS.toHours(startTimeStampUTC) >= 2) {
+
+            Calendar startTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            startTime.setTimeInMillis(getMillisFromSeconds(startTimeStampUTC));
+            int startHour = startTime.get(Calendar.HOUR_OF_DAY);
+            Calendar endTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            endTime.setTimeInMillis(getMillisFromSeconds(endTimeStampUTC));
+            int endHour = endTime.get(Calendar.HOUR_OF_DAY);
+
+            if (startHour >= 2) {
                 early = false;
             }
-            if (TimeUnit.SECONDS.toHours(endTimeStampUTC) <= 21) {
+            if (endHour <= 21) {
                 late = false;
             }
 
