@@ -176,8 +176,7 @@ public class ContactDbOnDisk {
                 e.printStackTrace();
             }
 
-            RpiList.RpiEntry rpiEntry = new RpiList.RpiEntry(rpiBytes, contactRecords);
-            rpiList.addEntry(daysSinceEpoch, rpiEntry);
+            rpiList.addEntry(daysSinceEpoch, rpiBytes, contactRecords);
         }
         return rpiList;
     }

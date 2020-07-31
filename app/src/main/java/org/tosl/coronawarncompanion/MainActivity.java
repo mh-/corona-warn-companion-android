@@ -54,8 +54,10 @@ import java.util.TreeMap;
 import static org.tosl.coronawarncompanion.dkdownload.Unzip.getUnzippedBytesFromZipFileBytes;
 import static org.tosl.coronawarncompanion.tools.Utils.getDateFromDaysSinceEpoch;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysSinceEpochFromENIN;
+import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromMillis;
+import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromSeconds;
 import static org.tosl.coronawarncompanion.tools.Utils.getENINFromDate;
-import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromDaysSinceEpoch;
+import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromDays;
 import static org.tosl.coronawarncompanion.tools.Utils.standardRollingPeriod;
 
 public class MainActivity extends AppCompatActivity {
@@ -66,9 +68,9 @@ public class MainActivity extends AppCompatActivity {
     CWCApplication app = null;
     private int timeZoneOffsetSeconds;
     private RpiList rpiList = null;
-    private final long todayLastMidnightInMillis = System.currentTimeMillis() / (24*3600*1000L) * (24*3600*1000L);
+    private final long todayLastMidnightInMillis = getMillisFromDays(getDaysFromMillis(System.currentTimeMillis()));
     private Date maxDate = new Date(todayLastMidnightInMillis);
-    private Date minDate = new Date(todayLastMidnightInMillis -14*24*3600*1000L);
+    private Date minDate = new Date(todayLastMidnightInMillis - getMillisFromDays(14));
     private Date currentDate;  // usually the same as maxDate
 
     private DKDownload diagnosisKeysDownload;
@@ -132,23 +134,23 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (rpiList != null) {  // check that getting the RPIs didn't fail, e.g. because we didn't get root rights
-            SortedSet<Integer> rpiListDaysSinceEpochInLocalTimezone = rpiList.getAvailableDaysSinceEpochInLocalTimezone();
+            SortedSet<Integer> rpiListDaysSinceEpochLocalTZ = rpiList.getAvailableDaysSinceEpochLocalTZ();
             List<BarEntry> dataPoints1 = new ArrayList<>();
 
             int count = 0;
-            for (Integer daysSinceEpoch : rpiListDaysSinceEpochInLocalTimezone) {
-                int numEntries = rpiList.getRpiCountForDaysSinceEpochInLocalTime(daysSinceEpoch);
-                //Log.d(TAG, "Datapoint: " + daysSinceEpoch + ": " + numEntries);
-                dataPoints1.add(new BarEntry(daysSinceEpoch, numEntries));
+            for (Integer daysSinceEpochLocalTZ : rpiListDaysSinceEpochLocalTZ) {
+                int numEntries = rpiList.getRpiCountForDaysSinceEpochLocalTZ(daysSinceEpochLocalTZ);
+                //Log.d(TAG, "Datapoint: " + daysSinceEpochLocalTZ + ": " + numEntries);
+                dataPoints1.add(new BarEntry(daysSinceEpochLocalTZ, numEntries));
                 count += numEntries;
             }
 
             // set date label formatter
             DateFormat dateFormat = new SimpleDateFormat("d.M.");
 
-            minDate = new Date(getMillisFromDaysSinceEpoch(rpiListDaysSinceEpochInLocalTimezone.first()));
+            minDate = new Date(getMillisFromDays(rpiListDaysSinceEpochLocalTZ.first()));
             String minDateStr = dateFormat.format(minDate);
-            maxDate = new Date(getMillisFromDaysSinceEpoch(rpiListDaysSinceEpochInLocalTimezone.last()));
+            maxDate = new Date(getMillisFromDays(rpiListDaysSinceEpochLocalTZ.last()));
             String maxDateStr = dateFormat.format(maxDate);
 
             textView1.setText("RPIs: " + count + " entries (" + minDateStr + "-" + maxDateStr + ")");
@@ -451,17 +453,17 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "Number of matches: " + numberOfMatches);
 
             List<BarEntry> dataPoints3 = new ArrayList<>();
-            SortedSet<Integer> rpiListDaysSinceEpoch = rpiList.getAvailableDaysSinceEpochInLocalTimezone();
+            SortedSet<Integer> rpiListDaysSinceEpochLocalTZ = rpiList.getAvailableDaysSinceEpochLocalTZ();
             int total = 0;
-            for (Integer daysSinceEpoch : rpiListDaysSinceEpoch) {
+            for (Integer daysSinceEpochLocalTZ : rpiListDaysSinceEpochLocalTZ) {
                 int count = 0;
                 for (Matcher.MatchEntry matchEntry : matches) {
-                    if (matchEntry.daysSinceEpochInLocalTimeZone == daysSinceEpoch) {
+                    if (getDaysFromSeconds(matchEntry.startTimestampLocalTZ) == daysSinceEpochLocalTZ) {
                         count++;
                     }
                 }
-                //Log.d(TAG, "Datapoint: " + daysSinceEpoch + ": " + count);
-                dataPoints3.add(new BarEntry(daysSinceEpoch, count));
+                //Log.d(TAG, "Datapoint: " + daysSinceEpochLocalTZ + ": " + count);
+                dataPoints3.add(new BarEntry(daysSinceEpochLocalTZ, count));
                 total += count;
             }
             Log.d(TAG, "Number of matches displayed: " + total);

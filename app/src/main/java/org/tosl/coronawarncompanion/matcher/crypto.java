@@ -18,10 +18,6 @@ public class crypto {
     private static final int intervalLengthMinutes = 10;
     private static final int tekRollingPeriod = 144;
 
-    public static int en_interval_number(int timestamp_seconds) {
-        return timestamp_seconds / (60 * intervalLengthMinutes);
-    }
-
     public static byte[] encodedEnIntervalNumber(int enin) {
         final ByteBuffer bb = ByteBuffer.allocate(4);
         bb.order(ByteOrder.LITTLE_ENDIAN);
