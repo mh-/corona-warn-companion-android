@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
         textView1 = findViewById(R.id.textView1);
         textView2 = findViewById(R.id.textView2);
         textView3 = findViewById(R.id.textView3);
-        chart1 = findViewById(R.id.chart);
+        chart1 = findViewById(R.id.chart1);
         chart2 = findViewById(R.id.chart2);
         chart3 = findViewById(R.id.chart3);
         chart1.setOnChartGestureListener(new Chart1GestureListener());

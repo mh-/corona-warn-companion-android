@@ -38,7 +38,7 @@ public class DisplayDetailsActivity extends AppCompatActivity {
     private static boolean DEMO_MODE;
     CWCApplication app = null;
 
-    private BarChart chart;
+    private BarChart chart1;
     private final int gridColor = Color.parseColor("#E0E0E0");
     private final int matchBarColor = Color.parseColor("#FF0000");
 
@@ -90,7 +90,7 @@ public class DisplayDetailsActivity extends AppCompatActivity {
                 numMatchesPerHour[startHour]++;
             }
 
-            chart = findViewById(R.id.chart);
+            chart1 = findViewById(R.id.chart1);
             List<BarEntry> dataPoints1 = new ArrayList<>();
             for (int i=0; i<=23; i++) {
                 if (numMatchesPerHour[i] > 0) {
@@ -104,7 +104,7 @@ public class DisplayDetailsActivity extends AppCompatActivity {
 
             BarData barData1 = new BarData(dataSet1);
             dataSet1.setHighlightEnabled(true);
-            chart.setData(barData1);
+            chart1.setData(barData1);
 
             // the labels that should be drawn on the XAxis
             ValueFormatter xAxisFormatter1 = new ValueFormatter() {
@@ -128,29 +128,29 @@ public class DisplayDetailsActivity extends AppCompatActivity {
                 }
             };
             barData1.setValueFormatter(BarFormatter1);
-            XAxis xAxis = chart.getXAxis();
+            XAxis xAxis = chart1.getXAxis();
             xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
             xAxis.setValueFormatter(xAxisFormatter1);
             xAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
             xAxis.setGranularityEnabled(true);
             xAxis.setDrawGridLines(false);
-            xAxis.setAxisMinimum(0);
-            xAxis.setAxisMaximum(23);
+            xAxis.setAxisMinimum(-0.5f);
+            xAxis.setAxisMaximum(23.5f);
 
-            YAxis yAxis = chart.getAxisLeft();
+            YAxis yAxis = chart1.getAxisLeft();
             yAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
             yAxis.setGranularityEnabled(true);
             yAxis.setAxisMinimum(0.0f);
             yAxis.setGridColor(gridColor);
             yAxis.setValueFormatter(yAxisFormatter1);
 
-            chart.getAxisRight().setAxisMinimum(0.0f);
-            chart.getAxisRight().setDrawLabels(false);
-            chart.getLegend().setEnabled(false);
-            chart.getDescription().setEnabled(false);
-            chart.setScaleYEnabled(false);
-            chart.setScaleXEnabled(true);
-            chart.invalidate(); // refresh
+            chart1.getAxisRight().setAxisMinimum(0.0f);
+            chart1.getAxisRight().setDrawLabels(false);
+            chart1.getLegend().setEnabled(false);
+            chart1.getDescription().setEnabled(false);
+            chart1.setScaleYEnabled(false);
+            chart1.setScaleXEnabled(true);
+            chart1.invalidate(); // refresh
 
 
             // ListView listView = findViewById(R.id.listView);
