@@ -3,6 +3,8 @@ package org.tosl.coronawarncompanion.matcher;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.core.util.Consumer;
+
 import org.tosl.coronawarncompanion.CWCApplication;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
 import org.tosl.coronawarncompanion.gmsreadout.ContactRecordsProtos;
@@ -52,10 +54,22 @@ public class Matcher {
         timeZoneOffsetSeconds = app.getTimeZoneOffsetSeconds();
     }
 
-    public LinkedList<MatchEntry> findMatches() {
+    public LinkedList<MatchEntry> findMatches(Consumer<Integer> progressCallback) {
         Log.d(TAG, "Started matching...");
         LinkedList<MatchEntry> matchEntries = new LinkedList<>();
+        int diagnosisKeysListLength = diagnosisKeysList.size();
+        int currentDiagnosisKey = 0;
+        int lastProgress = 0;
+        int currentProgress;
         for (DiagnosisKeysProtos.TemporaryExposureKey dk : diagnosisKeysList) {
+            currentDiagnosisKey += 1;
+            currentProgress = (int) (100f * currentDiagnosisKey / diagnosisKeysListLength);
+            if (currentProgress != lastProgress) {
+                lastProgress = currentProgress;
+                if (progressCallback != null) {
+                    progressCallback.accept(currentProgress);
+                }
+            }
             int dkIntervalNumber = dk.getRollingStartIntervalNumber();
             LinkedList<crypto.RpiWithInterval> dkRpisWithIntervals = createListOfRpisForIntervalRange(deriveRpiKey(dk.getKeyData().toByteArray()),
                     dkIntervalNumber, dk.getRollingPeriod());
