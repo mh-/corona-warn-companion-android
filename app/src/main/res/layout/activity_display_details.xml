@@ -13,11 +13,12 @@
         android:layout_marginTop="16dp"
         android:fontFamily="sans-serif-medium"
         android:text="Matches on [day]"
-        android:textSize="18sp"
+        android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.052"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="HardcodedText" />
 
     <com.github.mikephil.charting.charts.BarChart
         android:id="@+id/chart1"

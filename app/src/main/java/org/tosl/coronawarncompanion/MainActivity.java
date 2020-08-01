@@ -3,7 +3,9 @@ package org.tosl.coronawarncompanion;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.os.Bundle;
@@ -48,6 +50,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
@@ -146,14 +149,15 @@ public class MainActivity extends AppCompatActivity {
             }
 
             // set date label formatter
-            DateFormat dateFormat = new SimpleDateFormat("d.M.");
+            String deviceDateFormat = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "dM");
+            DateFormat dateFormat = new SimpleDateFormat(deviceDateFormat, Locale.getDefault());
 
             minDate = new Date(getMillisFromDays(rpiListDaysSinceEpochLocalTZ.first()));
             String minDateStr = dateFormat.format(minDate);
             maxDate = new Date(getMillisFromDays(rpiListDaysSinceEpochLocalTZ.last()));
             String maxDateStr = dateFormat.format(maxDate);
 
-            textView1.setText("RPIs: " + count + " entries (" + minDateStr + "-" + maxDateStr + ")");
+            textView1.setText(getString(R.string.rpis_extracted, count, minDateStr, maxDateStr));
 
             BarDataSet dataSet1 = new BarDataSet(dataPoints1, "RPIs"); // add entries to dataSet1
             dataSet1.setAxisDependency(YAxis.AxisDependency.LEFT);
@@ -172,6 +176,7 @@ public class MainActivity extends AppCompatActivity {
             };
             // the labels that should be drawn on the YAxis
             ValueFormatter yAxisFormatter1 = new ValueFormatter() {
+                @SuppressLint("DefaultLocale")
                 @Override
                 public String getAxisLabel(float value, AxisBase axis) {
                     return String.format("%5d", (int) value);
@@ -241,7 +246,7 @@ public class MainActivity extends AppCompatActivity {
     public class availableDatesResponseCallbackCommand implements DKDownload.CallbackCommand {
         public void execute(Object data) {
             // get Daily Diagnosis Keys URLs for the previous days
-            LinkedList<Date> availableDates = (LinkedList<Date>) data;
+            @SuppressWarnings("unchecked") LinkedList<Date> availableDates = (LinkedList<Date>) data;
             for (Date date : availableDates) {
                 if (date.compareTo(minDate) >= 0) {  // date >= minDate
                     diagnosisKeysUrls.add(diagnosisKeysDownload.getDailyDKsURLForDate(date));
@@ -260,7 +265,7 @@ public class MainActivity extends AppCompatActivity {
     public class availableHoursResponseCallbackCommand implements DKDownload.CallbackCommand {
         public void execute(Object data) {
             // get Daily Diagnosis Keys URLs for the previous days
-            LinkedList<String> availableHours = (LinkedList<String>) data;
+            @SuppressWarnings("unchecked") LinkedList<String> availableHours = (LinkedList<String>) data;
             for (String hour : availableHours) {
                 diagnosisKeysUrls.add(diagnosisKeysDownload.getHourlyDKsURLForDateAndHour(currentDate, hour));
             }
@@ -329,7 +334,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        textView2.setText("DKs: " + count + " entries");
+        textView2.setText(getString(R.string.diagnosis_keys_downloaded, count));
 
         List<BarEntry> dataPoints2 = new ArrayList<>();
 
@@ -341,7 +346,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // set date label formatter
-        DateFormat dateFormat = new SimpleDateFormat("d.M.");
+        String deviceDateFormat = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "dM");
+        DateFormat dateFormat = new SimpleDateFormat(deviceDateFormat, Locale.getDefault());
 
         BarDataSet dataSet2 = new BarDataSet(dataPoints2, "DKs"); // add entries to dataSet2
         dataSet2.setHighlightEnabled(false);
@@ -360,6 +366,7 @@ public class MainActivity extends AppCompatActivity {
         };
         // the labels that should be drawn on the YAxis
         ValueFormatter yAxisFormatter2 = new ValueFormatter() {
+            @SuppressLint("DefaultLocale")
             @Override
             public String getAxisLabel(float value, AxisBase axis) {
                 return String.format("%5d", (int) value);
@@ -444,11 +451,12 @@ public class MainActivity extends AppCompatActivity {
     private void presentMatchResults() {
         if ((rpiList != null) && (diagnosisKeysList != null)) {
             int numberOfMatches = matches.size();
-            if (numberOfMatches == 0) {
-                textView3.setText("No matches found.");
-            } else {
-                textView3.setText("Matches found: " + numberOfMatches);
+            Resources res = getResources();
+            if (numberOfMatches > 0) {
+                textView3.setText(res.getQuantityString(R.plurals.number_of_matches_found, numberOfMatches, numberOfMatches));
                 textView3.setTextColor(matchBarColor);
+            } else {
+                textView3.setText(R.string.no_matches_found);
             }
             Log.d(TAG, "Number of matches: " + numberOfMatches);
 
@@ -469,7 +477,8 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "Number of matches displayed: " + total);
 
             // set date label formatter
-            DateFormat dateFormat = new SimpleDateFormat("d.M.");
+            String deviceDateFormat = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "dM");
+            DateFormat dateFormat = new SimpleDateFormat(deviceDateFormat, Locale.getDefault());
 
             BarDataSet dataSet3 = new BarDataSet(dataPoints3, "Matches"); // add entries to dataSet3
             dataSet3.setAxisDependency(YAxis.AxisDependency.LEFT);
@@ -488,6 +497,7 @@ public class MainActivity extends AppCompatActivity {
             };
             // the labels that should be drawn on the YAxis
             ValueFormatter yAxisFormatter3 = new ValueFormatter() {
+                @SuppressLint("DefaultLocale")
                 @Override
                 public String getAxisLabel(float value, AxisBase axis) {
                     return String.format("%5d", (int) value);

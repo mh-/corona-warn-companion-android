@@ -3,6 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="org.tosl.coronawarncompanion">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+
     <application
         android:name=".CWCApplication"
         android:allowBackup="true"
@@ -25,9 +29,5 @@
                 android:value=".MainActivity" />
         </activity>
     </application>
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 
 </manifest>

@@ -3,9 +3,11 @@ package org.tosl.coronawarncompanion;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.BarChart;
@@ -20,6 +22,7 @@ import com.github.mikephil.charting.formatter.ValueFormatter;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
 import org.tosl.coronawarncompanion.gmsreadout.ContactRecordsProtos;
 import org.tosl.coronawarncompanion.matcher.Matcher;
+import org.tosl.coronawarncompanion.matcher.Matcher.MatchEntry;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -27,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import static org.tosl.coronawarncompanion.tools.Utils.getDateFromDaysSinceEpoch;
@@ -62,7 +66,8 @@ public class DisplayDetailsActivity extends AppCompatActivity {
         }
 
         // set date label formatter
-        DateFormat dateFormat = new SimpleDateFormat("d.M.");
+        String deviceDateFormat = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "dM");
+        DateFormat dateFormat = new SimpleDateFormat(deviceDateFormat, Locale.getDefault());
 
         // Get the Intent that started this activity and extract the string
         Intent intent = getIntent();
@@ -72,17 +77,18 @@ public class DisplayDetailsActivity extends AppCompatActivity {
         String dateStr = dateFormat.format(getDateFromDaysSinceEpoch(selectedDaysSinceEpoch));
 
         TextView textView = findViewById(R.id.textView);
-        textView.setText("Matches on "+dateStr);
+        textView.setText(getString(R.string.matches_on_day, dateStr));
 
-        LinkedList<Matcher.MatchEntry> matches = app.getMatches();
+        LinkedList<MatchEntry> matches = app.getMatches();
         if (matches != null) {
             int[] numMatchesPerHour = new int[24];
-            LinkedList<Matcher.MatchEntry>[] matchesPerHour = new LinkedList[24];
+
+            @SuppressWarnings("unchecked") LinkedList<MatchEntry>[] matchesPerHour = (LinkedList<MatchEntry>[]) new LinkedList<?>[24];
             for (int i=0; i<24; i++) {
-                matchesPerHour[i] = new LinkedList<Matcher.MatchEntry>();
+                matchesPerHour[i] = new LinkedList<>();
             }
 
-            for (Matcher.MatchEntry match : matches) {
+            for (MatchEntry match : matches) {
                 if (getDaysFromSeconds(match.startTimestampLocalTZ) == selectedDaysSinceEpoch) {
                     /*
                     DiagnosisKeysProtos.TemporaryExposureKey diagnosisKey = match.diagnosisKey;
@@ -120,11 +126,12 @@ public class DisplayDetailsActivity extends AppCompatActivity {
             ValueFormatter xAxisFormatter1 = new ValueFormatter() {
                 @Override
                 public String getAxisLabel(float value, AxisBase axis) {
-                    return String.valueOf((int) value);
+                    return String.valueOf((int) value).concat("h");
                 }
             };
             // the labels that should be drawn on the YAxis
             ValueFormatter yAxisFormatter1 = new ValueFormatter() {
+                @SuppressLint("DefaultLocale")
                 @Override
                 public String getAxisLabel(float value, AxisBase axis) {
                     return String.format("%5d", (int) value);
