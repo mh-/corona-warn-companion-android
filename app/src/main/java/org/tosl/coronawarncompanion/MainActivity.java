@@ -617,9 +617,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // global variables
+    protected static Entry entry;
+    protected static Highlight highlight;
+
     class Chart3ValueSelectedListener implements OnChartValueSelectedListener {
         @Override
         public void onValueSelected(Entry e, Highlight h) {
+            Log.d(TAG, "onValueSelected");
+            // set global variables
+            entry = e;
+            highlight = h;
+
             if (e == null)
                 return;
             int y = (int) e.getY();
@@ -630,10 +639,14 @@ public class MainActivity extends AppCompatActivity {
                 String message = String.valueOf(x);
                 intent.putExtra(DAY_EXTRA_MESSAGE, message);
                 startActivity(intent);
+                chart3.highlightValues(null);
             }
         }
 
         @Override
-        public void onNothingSelected() { }
+        public void onNothingSelected() {
+            Log.d(TAG, "onNothingSelected");
+            onValueSelected(entry, highlight);
+        }
     }
 }

@@ -93,7 +93,9 @@ public class DisplayDetailsActivity extends AppCompatActivity {
             chart = findViewById(R.id.chart);
             List<BarEntry> dataPoints1 = new ArrayList<>();
             for (int i=0; i<=23; i++) {
-                dataPoints1.add(new BarEntry(i, numMatchesPerHour[i]));
+                if (numMatchesPerHour[i] > 0) {
+                    dataPoints1.add(new BarEntry(i, numMatchesPerHour[i]));
+                }
             }
 
             BarDataSet dataSet1 = new BarDataSet(dataPoints1, "Matches"); // add entries to dataSet1
@@ -132,6 +134,8 @@ public class DisplayDetailsActivity extends AppCompatActivity {
             xAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
             xAxis.setGranularityEnabled(true);
             xAxis.setDrawGridLines(false);
+            xAxis.setAxisMinimum(0);
+            xAxis.setAxisMaximum(23);
 
             YAxis yAxis = chart.getAxisLeft();
             yAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
