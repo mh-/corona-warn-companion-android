@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 import static org.tosl.coronawarncompanion.tools.Utils.getDateFromDaysSinceEpoch;
+import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromSeconds;
 import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromSeconds;
 
 public class DisplayDetailsActivity extends AppCompatActivity {
@@ -67,8 +68,8 @@ public class DisplayDetailsActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String message = intent.getStringExtra(MainActivity.DAY_EXTRA_MESSAGE);
         assert message != null;
-        int daysSinceEpoch = Integer.parseInt(message);
-        String dateStr = dateFormat.format(getDateFromDaysSinceEpoch(daysSinceEpoch));
+        int selectedDaysSinceEpoch = Integer.parseInt(message);
+        String dateStr = dateFormat.format(getDateFromDaysSinceEpoch(selectedDaysSinceEpoch));
 
         TextView textView = findViewById(R.id.textView);
         textView.setText("Matches on "+dateStr);
@@ -76,18 +77,27 @@ public class DisplayDetailsActivity extends AppCompatActivity {
         LinkedList<Matcher.MatchEntry> matches = app.getMatches();
         if (matches != null) {
             int[] numMatchesPerHour = new int[24];
+            LinkedList<Matcher.MatchEntry>[] matchesPerHour = new LinkedList[24];
+            for (int i=0; i<24; i++) {
+                matchesPerHour[i] = new LinkedList<Matcher.MatchEntry>();
+            }
 
             for (Matcher.MatchEntry match : matches) {
-                DiagnosisKeysProtos.TemporaryExposureKey diagnosisKey = match.diagnosisKey;
-                byte[] rpi = match.rpi;
-                ContactRecordsProtos.ContactRecords contactRecords = match.contactRecords;
+                if (getDaysFromSeconds(match.startTimestampLocalTZ) == selectedDaysSinceEpoch) {
+                    /*
+                    DiagnosisKeysProtos.TemporaryExposureKey diagnosisKey = match.diagnosisKey;
+                    byte[] rpi = match.rpi;
+                    ContactRecordsProtos.ContactRecords contactRecords = match.contactRecords;
+                    */
 
-                Calendar startTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-                // UTC because we don't want Calendar to do additional time zone compensation
-                startTime.setTimeInMillis(getMillisFromSeconds(match.startTimestampLocalTZ));
-                int startHour = startTime.get(Calendar.HOUR_OF_DAY);
-                //Log.d(TAG, "Hour: "+startHour);
-                numMatchesPerHour[startHour]++;
+                    Calendar startDateTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                    // UTC because we don't want Calendar to do additional time zone compensation
+                    startDateTime.setTimeInMillis(getMillisFromSeconds(match.startTimestampLocalTZ));
+                    int startHour = startDateTime.get(Calendar.HOUR_OF_DAY);
+                    //Log.d(TAG, "Hour: "+startHour);
+                    numMatchesPerHour[startHour]++;
+                    matchesPerHour[startHour].add(match);
+                }
             }
 
             chart1 = findViewById(R.id.chart1);
