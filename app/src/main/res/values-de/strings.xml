@@ -10,5 +10,5 @@
     <string name="rpis_extracted">%d Begegnungen erfasst (%s-%s).</string>
     <string name="diagnosis_keys_downloaded">%d Diagnoseschlüssel heruntergeladen.</string>
     <string name="matching_not_done_yet">Abgleich wird erstellt…</string>
-    <string name="matching_not_done_yet_with_progress">Abgleich wird erstellt… %1$d%%</string>
+    <string name="matching_not_done_yet_with_progress">Abgleich wird erstellt… %1$d%% (%2$d gefunden)</string>
 </resources>

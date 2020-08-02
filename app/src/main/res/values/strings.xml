@@ -6,7 +6,7 @@
     <string name="rpis_extracted">%d encounters scanned (%s-%s).</string>
     <string name="diagnosis_keys_downloaded">%d diagnosis keys downloaded."</string>
     <string name="matching_not_done_yet">Matching in progress…</string>
-    <string name="matching_not_done_yet_with_progress">Matching in progress… %1$d%%</string>
+    <string name="matching_not_done_yet_with_progress">Matching in progress… %1$d%% (%2$d found)</string>
     <plurals name="number_of_matches_found">
         <item quantity="one">%d risk encounter. Tap to see details…</item>
         <item quantity="other">%d risk encounters. Tap to see details…</item>

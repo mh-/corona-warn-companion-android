@@ -2,6 +2,7 @@ package org.tosl.coronawarncompanion.matcher;
 
 import android.content.Context;
 import android.util.Log;
+import android.util.Pair;
 
 import androidx.core.util.Consumer;
 
@@ -15,7 +16,6 @@ import java.util.LinkedList;
 import static org.tosl.coronawarncompanion.matcher.crypto.createListOfRpisForIntervalRange;
 import static org.tosl.coronawarncompanion.matcher.crypto.deriveRpiKey;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysSinceEpochFromENIN;
-import static org.tosl.coronawarncompanion.tools.Utils.standardRollingPeriod;
 
 public class Matcher {
 
@@ -54,20 +54,21 @@ public class Matcher {
         timeZoneOffsetSeconds = app.getTimeZoneOffsetSeconds();
     }
 
-    public LinkedList<MatchEntry> findMatches(Consumer<Integer> progressCallback) {
+    public LinkedList<MatchEntry> findMatches(Consumer<Pair<Integer, Integer>> progressCallback) {
         Log.d(TAG, "Started matching...");
         LinkedList<MatchEntry> matchEntries = new LinkedList<>();
         int diagnosisKeysListLength = diagnosisKeysList.size();
         int currentDiagnosisKey = 0;
         int lastProgress = 0;
         int currentProgress;
+        int numMatches = 0;
         for (DiagnosisKeysProtos.TemporaryExposureKey dk : diagnosisKeysList) {
             currentDiagnosisKey += 1;
             currentProgress = (int) (100f * currentDiagnosisKey / diagnosisKeysListLength);
             if (currentProgress != lastProgress) {
                 lastProgress = currentProgress;
                 if (progressCallback != null) {
-                    progressCallback.accept(currentProgress);
+                    progressCallback.accept(new Pair<>(currentProgress, numMatches));
                 }
             }
             int dkIntervalNumber = dk.getRollingStartIntervalNumber();
@@ -80,6 +81,7 @@ public class Matcher {
                     Log.i(TAG, "Match found!");
                     matchEntries.add(new MatchEntry(dk, dkRpiWithInterval.rpiBytes, rpiEntry.contactRecords,
                             rpiEntry.startTimeStampLocalTZ, rpiEntry.endTimeStampLocalTZ));
+                    numMatches++;
                 }
             }
         }

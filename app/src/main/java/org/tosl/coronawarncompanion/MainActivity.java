@@ -441,7 +441,8 @@ public class MainActivity extends AppCompatActivity {
                 Matcher matcher = new Matcher(rpiList, diagnosisKeysList, app.getApplicationContext());
                 mainActivity.matches = matcher.findMatches(
                         progress -> runOnUiThread(
-                                () -> textView3.setText(getResources().getString(R.string.matching_not_done_yet_with_progress, progress))));
+                                () -> textView3.setText(getResources().getString(R.string.
+                                        matching_not_done_yet_with_progress, progress.first, progress.second))));
                 Log.d(TAG, "Finished matching, sending the message...");
                 app.setMatches(mainActivity.matches);
             }
