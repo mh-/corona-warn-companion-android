@@ -25,14 +25,11 @@ public class Unzip {
                 //Log.d(TAG, "Unzipping... Buffer Length: "+bufferLen);
                 tmpBuffer = new byte[bufferLen];
                 int pos = 0;
-                int bytesRead;
-                while (zis.available() != 0) {  // Note: always != 0 with Android 6
+                int bytesRead = 0;
+                while (pos < bufferLen && bytesRead != -1) {
                     bytesRead = zis.read(tmpBuffer, pos, bufferLen-pos);
-                    //Log.d(TAG, "Read: "+bytesRead);
-                    if (bytesRead>0) {  // bytesRead could be -1
+                    if (bytesRead>0) {
                         pos += bytesRead;
-                    } else if (bytesRead == -1) {
-                        break;
                     }
                 }
                 result = Arrays.copyOf(tmpBuffer, pos);
