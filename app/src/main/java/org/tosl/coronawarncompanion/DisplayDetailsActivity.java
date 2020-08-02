@@ -31,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import static org.tosl.coronawarncompanion.tools.Utils.getDateFromDaysSinceEpoch;
 
@@ -78,6 +79,8 @@ public class DisplayDetailsActivity extends AppCompatActivity {
             // set date label formatter
             String deviceDateFormat = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "dM");
             DateFormat dateFormat = new SimpleDateFormat(deviceDateFormat, Locale.getDefault());
+            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+            // UTC because we don't want DateFormat to do additional time zone compensation
             String dateStr = dateFormat.format(getDateFromDaysSinceEpoch(selectedDaysSinceEpochLocalTZ));
 
             TextView textView = findViewById(R.id.textView);

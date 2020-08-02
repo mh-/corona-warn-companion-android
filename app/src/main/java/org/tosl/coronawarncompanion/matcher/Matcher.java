@@ -17,6 +17,8 @@ import java.util.LinkedList;
 import java.util.TimeZone;
 
 import static org.tosl.coronawarncompanion.matcher.crypto.createListOfRpisForIntervalRange;
+import static org.tosl.coronawarncompanion.matcher.crypto.decryptAem;
+import static org.tosl.coronawarncompanion.matcher.crypto.deriveAemKey;
 import static org.tosl.coronawarncompanion.matcher.crypto.deriveRpiKey;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromSeconds;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysSinceEpochFromENIN;
@@ -36,15 +38,17 @@ public class Matcher {
         public final ContactRecordsProtos.ContactRecords contactRecords;
         public final int startTimestampLocalTZ;
         public final int endTimestampLocalTZ;
+        public final byte[] aemXorBytes;
 
         public MatchEntry(DiagnosisKeysProtos.TemporaryExposureKey dk, byte[] rpiBytes,
                           ContactRecordsProtos.ContactRecords contactRecords,
-                          int startTimestampLocalTZ, int endTimestampLocalTZ) {
+                          int startTimestampLocalTZ, int endTimestampLocalTZ, byte[] aemXorBytes) {
             this.diagnosisKey = dk;
             this.rpi = rpiBytes;
             this.contactRecords = contactRecords;
             this.startTimestampLocalTZ = startTimestampLocalTZ;
             this.endTimestampLocalTZ = endTimestampLocalTZ;
+            this.aemXorBytes = aemXorBytes;
         }
     }
 
@@ -87,8 +91,13 @@ public class Matcher {
                     // UTC because we don't want Calendar to do additional time zone compensation
                     startDateTimeLocalTZ.setTimeInMillis(getMillisFromSeconds(rpiEntry.startTimeStampLocalTZ));
                     int startHourLocalTZ = startDateTimeLocalTZ.get(Calendar.HOUR_OF_DAY);
+
+                    byte[] aemKey = deriveAemKey(dk.getKeyData().toByteArray());
+                    byte[] zeroAem = {0x00, 0x00, 0x00, 0x00};
+                    byte[] aemXorBytes = decryptAem(aemKey, zeroAem, rpiEntry.rpi);
+
                     this.matchEntryContent.matchEntries.add(new MatchEntry(dk, dkRpiWithInterval.rpiBytes, rpiEntry.contactRecords,
-                            rpiEntry.startTimeStampLocalTZ, rpiEntry.endTimeStampLocalTZ),
+                            rpiEntry.startTimeStampLocalTZ, rpiEntry.endTimeStampLocalTZ, aemXorBytes),
                             getDaysFromSeconds(rpiEntry.startTimeStampLocalTZ),
                             startHourLocalTZ);
                     numMatches++;

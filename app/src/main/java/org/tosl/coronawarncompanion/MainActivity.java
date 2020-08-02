@@ -53,6 +53,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.SortedSet;
+import java.util.TimeZone;
 import java.util.TreeMap;
 
 import static org.tosl.coronawarncompanion.dkdownload.Unzip.getUnzippedBytesFromZipFileBytes;
@@ -149,6 +150,8 @@ public class MainActivity extends AppCompatActivity {
             // set date label formatter
             String deviceDateFormat = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "dM");
             DateFormat dateFormat = new SimpleDateFormat(deviceDateFormat, Locale.getDefault());
+            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+            // UTC because we don't want DateFormat to do additional time zone compensation
 
             minDate = new Date(getMillisFromDays(rpiListDaysSinceEpochLocalTZ.first()));
             String minDateStr = dateFormat.format(minDate);
@@ -346,6 +349,8 @@ public class MainActivity extends AppCompatActivity {
         // set date label formatter
         String deviceDateFormat = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "dM");
         DateFormat dateFormat = new SimpleDateFormat(deviceDateFormat, Locale.getDefault());
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        // UTC because we don't want DateFormat to do additional time zone compensation
 
         BarDataSet dataSet2 = new BarDataSet(dataPoints2, "DKs"); // add entries to dataSet2
         dataSet2.setHighlightEnabled(false);
@@ -476,7 +481,9 @@ public class MainActivity extends AppCompatActivity {
             // set date label formatter
             String deviceDateFormat = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "dM");
             DateFormat dateFormat = new SimpleDateFormat(deviceDateFormat, Locale.getDefault());
-
+            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+            // UTC because we don't want DateFormat to do additional time zone compensation
+            
             BarDataSet dataSet3 = new BarDataSet(dataPoints3, "Matches"); // add entries to dataSet3
             dataSet3.setAxisDependency(YAxis.AxisDependency.LEFT);
             dataSet3.setColor(matchBarColor);

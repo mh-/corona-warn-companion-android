@@ -10,4 +10,4 @@
     android:layout_marginRight="16dp"
     app:layoutManager="LinearLayoutManager"
     tools:context=".ContactRecordRecyclerViewFragment"
-    tools:listitem="@layout/item_fragment" />
+    tools:listitem="@layout/match_fragment" />

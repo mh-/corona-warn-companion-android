@@ -49,6 +49,14 @@ public class Utils {
         return ENIN/standardRollingPeriod;
     }
 
+    public static byte[] xorTwoByteArrays(byte[] array1, byte[] array2) {
+        byte[] result = new byte[array1.length];
+        for (int i=0; i<array1.length; i++) {
+            result[i] = (byte)(array1[i] ^ array2[i]);
+        }
+        return result;
+    }
+
     public static String byteArrayToHex(byte[] a) {
         StringBuilder sb = new StringBuilder(a.length * 2);
         for(byte b: a)
