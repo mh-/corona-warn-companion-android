@@ -10,20 +10,25 @@ import org.tosl.coronawarncompanion.CWCApplication;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
 import org.tosl.coronawarncompanion.gmsreadout.ContactRecordsProtos;
 import org.tosl.coronawarncompanion.gmsreadout.RpiList;
+import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
 
+import java.util.Calendar;
 import java.util.LinkedList;
+import java.util.TimeZone;
 
 import static org.tosl.coronawarncompanion.matcher.crypto.createListOfRpisForIntervalRange;
 import static org.tosl.coronawarncompanion.matcher.crypto.deriveRpiKey;
+import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromSeconds;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysSinceEpochFromENIN;
+import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromSeconds;
 
 public class Matcher {
 
     private static final String TAG = "Matcher";
 
-    private CWCApplication app;
-    private Context context = null;
-    int timeZoneOffsetSeconds;
+    private final CWCApplication app;
+    private final Context context;
+    private final MatchEntryContent matchEntryContent;
 
     public static class MatchEntry {
         public final DiagnosisKeysProtos.TemporaryExposureKey diagnosisKey;
@@ -46,17 +51,16 @@ public class Matcher {
     private final RpiList rpiList;
     private final LinkedList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList;
 
-    public Matcher(RpiList rpis, LinkedList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeys, Context appContext) {
-        rpiList = rpis;
-        diagnosisKeysList = diagnosisKeys;
-        context = appContext;
-        app = (CWCApplication) context.getApplicationContext();
-        timeZoneOffsetSeconds = app.getTimeZoneOffsetSeconds();
+    public Matcher(RpiList rpis, LinkedList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeys, Context appContext, MatchEntryContent matchEntryContent) {
+        this.rpiList = rpis;
+        this.diagnosisKeysList = diagnosisKeys;
+        this.context = appContext;
+        this.matchEntryContent = matchEntryContent;
+        this.app = (CWCApplication) context.getApplicationContext();
     }
 
-    public LinkedList<MatchEntry> findMatches(Consumer<Pair<Integer, Integer>> progressCallback) {
+    public void findMatches(Consumer<Pair<Integer, Integer>> progressCallback) {
         Log.d(TAG, "Started matching...");
-        LinkedList<MatchEntry> matchEntries = new LinkedList<>();
         int diagnosisKeysListLength = diagnosisKeysList.size();
         int currentDiagnosisKey = 0;
         int lastProgress = 0;
@@ -79,13 +83,18 @@ public class Matcher {
                         rpiList.searchForRpiOnDaySinceEpochUTCWith2HoursTolerance(dkRpiWithInterval, getDaysSinceEpochFromENIN(dkIntervalNumber));
                 if (rpiEntry != null) {
                     Log.i(TAG, "Match found!");
-                    matchEntries.add(new MatchEntry(dk, dkRpiWithInterval.rpiBytes, rpiEntry.contactRecords,
-                            rpiEntry.startTimeStampLocalTZ, rpiEntry.endTimeStampLocalTZ));
+                    Calendar startDateTimeLocalTZ = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                    // UTC because we don't want Calendar to do additional time zone compensation
+                    startDateTimeLocalTZ.setTimeInMillis(getMillisFromSeconds(rpiEntry.startTimeStampLocalTZ));
+                    int startHourLocalTZ = startDateTimeLocalTZ.get(Calendar.HOUR_OF_DAY);
+                    this.matchEntryContent.matchEntries.add(new MatchEntry(dk, dkRpiWithInterval.rpiBytes, rpiEntry.contactRecords,
+                            rpiEntry.startTimeStampLocalTZ, rpiEntry.endTimeStampLocalTZ),
+                            getDaysFromSeconds(rpiEntry.startTimeStampLocalTZ),
+                            startHourLocalTZ);
                     numMatches++;
                 }
             }
         }
         Log.d(TAG, "Finished matching...");
-        return matchEntries;
     }
 }

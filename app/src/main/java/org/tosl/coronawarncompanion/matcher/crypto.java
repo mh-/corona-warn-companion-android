@@ -67,8 +67,8 @@ public class crypto {
     }
 
     public static class RpiWithInterval {
-        public byte[] rpiBytes;
-        public int intervalNumber;
+        public final byte[] rpiBytes;
+        public final int intervalNumber;
         public RpiWithInterval(byte[] rpiBytes, int intervalNumber) {
             this.rpiBytes = rpiBytes;
             this.intervalNumber = intervalNumber;

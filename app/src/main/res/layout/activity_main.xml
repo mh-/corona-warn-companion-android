@@ -21,7 +21,8 @@
             android:textAlignment="viewStart"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="HardcodedText" />
 
         <com.github.mikephil.charting.charts.BarChart
             android:id="@+id/chart1"
@@ -39,7 +40,8 @@
             android:text="DKs: 0 entries"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/chart1" />
+            app:layout_constraintTop_toBottomOf="@+id/chart1"
+            tools:ignore="HardcodedText" />
 
         <com.github.mikephil.charting.charts.BarChart
             android:id="@+id/chart2"

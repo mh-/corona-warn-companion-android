@@ -37,6 +37,7 @@ import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
 import org.tosl.coronawarncompanion.dkdownload.DKDownload;
 import org.tosl.coronawarncompanion.gmsreadout.ContactDbOnDisk;
 import org.tosl.coronawarncompanion.gmsreadout.RpiList;
+import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
 import org.tosl.coronawarncompanion.matcher.Matcher;
 
 import java.io.ByteArrayOutputStream;
@@ -58,7 +59,6 @@ import static org.tosl.coronawarncompanion.dkdownload.Unzip.getUnzippedBytesFrom
 import static org.tosl.coronawarncompanion.tools.Utils.getDateFromDaysSinceEpoch;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysSinceEpochFromENIN;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromMillis;
-import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromSeconds;
 import static org.tosl.coronawarncompanion.tools.Utils.getENINFromDate;
 import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromDays;
 import static org.tosl.coronawarncompanion.tools.Utils.standardRollingPeriod;
@@ -79,8 +79,6 @@ public class MainActivity extends AppCompatActivity {
     private DKDownload diagnosisKeysDownload;
     private final LinkedList<URL> diagnosisKeysUrls = new LinkedList<>();
     private LinkedList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList = null;
-
-    public LinkedList<Matcher.MatchEntry> matches = null;
 
     private final int gridColor = Color.parseColor("#E0E0E0");
     private final int matchBarColor = Color.parseColor("#FF0000");
@@ -407,23 +405,18 @@ public class MainActivity extends AppCompatActivity {
     public Handler uiThreadHandler;
 
     private void startMatching() {
-        matches = app.getMatches();
-        if (matches == null) {  // when coming back from another activity, there's no need to do this again
-            uiThreadHandler = new Handler(Looper.getMainLooper()) {
-                @Override
-                public void handleMessage(@SuppressWarnings("NullableProblems") Message inputMessage) {
-                    Log.d(TAG, "Message received.");
-                    presentMatchResults();
-                }
-            };
+        uiThreadHandler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(@SuppressWarnings("NullableProblems") Message inputMessage) {
+                Log.d(TAG, "Message received.");
+                presentMatchResults();
+            }
+        };
 
-            HandlerThread ht = new HandlerThread("BackgroundMatcher");
-            ht.start();
-            Handler backgroundThreadHandler = new Handler(ht.getLooper());
-            backgroundThreadHandler.post(new BackgroundMatching(this));
-        } else {
-            presentMatchResults();
-        }
+        HandlerThread ht = new HandlerThread("BackgroundMatcher");
+        ht.start();
+        Handler backgroundThreadHandler = new Handler(ht.getLooper());
+        backgroundThreadHandler.post(new BackgroundMatching(this));
     }
 
     private class BackgroundMatching implements Runnable {
@@ -438,13 +431,14 @@ public class MainActivity extends AppCompatActivity {
             android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
 
             if ((rpiList != null) && (diagnosisKeysList != null)) {
-                Matcher matcher = new Matcher(rpiList, diagnosisKeysList, app.getApplicationContext());
-                mainActivity.matches = matcher.findMatches(
+                MatchEntryContent matchEntryContent = new MatchEntryContent();
+                Matcher matcher = new Matcher(rpiList, diagnosisKeysList, app.getApplicationContext(), matchEntryContent);
+                matcher.findMatches(
                         progress -> runOnUiThread(
                                 () -> textView3.setText(getResources().getString(R.string.
                                         matching_not_done_yet_with_progress, progress.first, progress.second))));
                 Log.d(TAG, "Finished matching, sending the message...");
-                app.setMatches(mainActivity.matches);
+                app.setMatchEntryContent(matchEntryContent);
             }
             Message completeMessage = mainActivity.uiThreadHandler.obtainMessage();
             completeMessage.sendToTarget();
@@ -453,7 +447,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void presentMatchResults() {
         if ((rpiList != null) && (diagnosisKeysList != null)) {
-            int numberOfMatches = matches.size();
+            MatchEntryContent matchEntryContent = app.getMatchEntryContent();
+            int numberOfMatches = matchEntryContent.matchEntries.getTotalCount();
             Resources res = getResources();
             if (numberOfMatches > 0) {
                 textView3.setText(res.getQuantityString(R.plurals.number_of_matches_found, numberOfMatches, numberOfMatches));
@@ -467,15 +462,14 @@ public class MainActivity extends AppCompatActivity {
             SortedSet<Integer> rpiListDaysSinceEpochLocalTZ = rpiList.getAvailableDaysSinceEpochLocalTZ();
             int total = 0;
             for (Integer daysSinceEpochLocalTZ : rpiListDaysSinceEpochLocalTZ) {
-                int count = 0;
-                for (Matcher.MatchEntry matchEntry : matches) {
-                    if (getDaysFromSeconds(matchEntry.startTimestampLocalTZ) == daysSinceEpochLocalTZ) {
-                        count++;
-                    }
+                int dailyCount = 0;
+                MatchEntryContent.DailyMatchEntries dailyMatchEntries = matchEntryContent.matchEntries.getDailyMatchEntries(daysSinceEpochLocalTZ);
+                if (dailyMatchEntries != null) {
+                    dailyCount = dailyMatchEntries.getDailyCount();
                 }
                 //Log.d(TAG, "Datapoint: " + daysSinceEpochLocalTZ + ": " + count);
-                dataPoints3.add(new BarEntry(daysSinceEpochLocalTZ, count));
-                total += count;
+                dataPoints3.add(new BarEntry(daysSinceEpochLocalTZ, dailyCount));
+                total += dailyCount;
             }
             Log.d(TAG, "Number of matches displayed: " + total);
 
@@ -637,7 +631,6 @@ public class MainActivity extends AppCompatActivity {
     class Chart3ValueSelectedListener implements OnChartValueSelectedListener {
         @Override
         public void onValueSelected(Entry e, Highlight h) {
-            Log.d(TAG, "onValueSelected");
             // set global variables
             entry = e;
             highlight = h;
@@ -658,7 +651,6 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onNothingSelected() {
-            Log.d(TAG, "onNothingSelected");
             onValueSelected(entry, highlight);
         }
     }

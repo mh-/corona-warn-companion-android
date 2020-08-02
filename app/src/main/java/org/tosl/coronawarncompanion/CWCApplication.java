@@ -4,7 +4,7 @@ import android.app.Application;
 
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
 import org.tosl.coronawarncompanion.gmsreadout.RpiList;
-import org.tosl.coronawarncompanion.matcher.Matcher;
+import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
 
 import java.util.LinkedList;
 import java.util.TimeZone;
@@ -21,9 +21,9 @@ public class CWCApplication extends Application {
     public LinkedList<DiagnosisKeysProtos.TemporaryExposureKey> getDiagnosisKeysList() {return diagnosisKeysList;}
     public void setDiagnosisKeysList(LinkedList<DiagnosisKeysProtos.TemporaryExposureKey>  diagnosisKeysList) {this.diagnosisKeysList = diagnosisKeysList;}
 
-    private LinkedList<Matcher.MatchEntry> matches = null;
-    public LinkedList<Matcher.MatchEntry> getMatches() {return matches;}
-    public void setMatches(LinkedList<Matcher.MatchEntry> matches) {this.matches = matches;}
+    private MatchEntryContent matchEntryContent = null;
+    public MatchEntryContent getMatchEntryContent() {return matchEntryContent;}
+    public void setMatchEntryContent(MatchEntryContent matchEntryContent) {this.matchEntryContent = matchEntryContent;}
 
     private int timeZoneOffsetSeconds;
     public int getTimeZoneOffsetSeconds() {return timeZoneOffsetSeconds;}

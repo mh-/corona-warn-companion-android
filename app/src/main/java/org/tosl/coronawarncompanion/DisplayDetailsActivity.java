@@ -2,6 +2,8 @@ package org.tosl.coronawarncompanion;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -17,31 +19,27 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
-import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
-import org.tosl.coronawarncompanion.gmsreadout.ContactRecordsProtos;
-import org.tosl.coronawarncompanion.matcher.Matcher;
-import org.tosl.coronawarncompanion.matcher.Matcher.MatchEntry;
+import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
 
 import static org.tosl.coronawarncompanion.tools.Utils.getDateFromDaysSinceEpoch;
-import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromSeconds;
-import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromSeconds;
 
 public class DisplayDetailsActivity extends AppCompatActivity {
 
     private static final String TAG = "DisplayDetailsActivity";
     private static boolean DEMO_MODE;
-    CWCApplication app = null;
+    private CWCApplication app = null;
+    private MatchEntryContent matchEntryContent;
 
     private BarChart chart1;
     private final int gridColor = Color.parseColor("#E0E0E0");
@@ -52,65 +50,52 @@ public class DisplayDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_details);
 
-        DEMO_MODE = CWCApplication.DEMO_MODE;
-        app = (CWCApplication) getApplicationContext();
-
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            if (!DEMO_MODE) {
-                actionBar.setTitle("Corona Warn Companion");
-            } else {
-                actionBar.setTitle("DEMO Corona Warn Companion");
-            }
-        }
-
-        // set date label formatter
-        String deviceDateFormat = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "dM");
-        DateFormat dateFormat = new SimpleDateFormat(deviceDateFormat, Locale.getDefault());
-
         // Get the Intent that started this activity and extract the string
         Intent intent = getIntent();
         String message = intent.getStringExtra(MainActivity.DAY_EXTRA_MESSAGE);
         assert message != null;
-        int selectedDaysSinceEpoch = Integer.parseInt(message);
-        String dateStr = dateFormat.format(getDateFromDaysSinceEpoch(selectedDaysSinceEpoch));
+        int selectedDaysSinceEpochLocalTZ = Integer.parseInt(message);
 
-        TextView textView = findViewById(R.id.textView);
-        textView.setText(getString(R.string.matches_on_day, dateStr));
+        DEMO_MODE = CWCApplication.DEMO_MODE;
+        app = (CWCApplication) getApplicationContext();
+        matchEntryContent = app.getMatchEntryContent();
 
-        LinkedList<MatchEntry> matches = app.getMatches();
-        if (matches != null) {
-            int[] numMatchesPerHour = new int[24];
+        if (savedInstanceState == null) {
 
-            @SuppressWarnings("unchecked") LinkedList<MatchEntry>[] matchesPerHour = (LinkedList<MatchEntry>[]) new LinkedList<?>[24];
-            for (int i=0; i<24; i++) {
-                matchesPerHour[i] = new LinkedList<>();
-            }
-
-            for (MatchEntry match : matches) {
-                if (getDaysFromSeconds(match.startTimestampLocalTZ) == selectedDaysSinceEpoch) {
-                    /*
-                    DiagnosisKeysProtos.TemporaryExposureKey diagnosisKey = match.diagnosisKey;
-                    byte[] rpi = match.rpi;
-                    ContactRecordsProtos.ContactRecords contactRecords = match.contactRecords;
-                    */
-
-                    Calendar startDateTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-                    // UTC because we don't want Calendar to do additional time zone compensation
-                    startDateTime.setTimeInMillis(getMillisFromSeconds(match.startTimestampLocalTZ));
-                    int startHour = startDateTime.get(Calendar.HOUR_OF_DAY);
-                    //Log.d(TAG, "Hour: "+startHour);
-                    numMatchesPerHour[startHour]++;
-                    matchesPerHour[startHour].add(match);
+            // Action Bar:
+            ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setDisplayHomeAsUpEnabled(true);
+                if (!DEMO_MODE) {
+                    actionBar.setTitle("Corona Warn Companion");
+                } else {
+                    actionBar.setTitle("DEMO Corona Warn Companion");
                 }
             }
 
+            // Chart:
+
+            // set date label formatter
+            String deviceDateFormat = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "dM");
+            DateFormat dateFormat = new SimpleDateFormat(deviceDateFormat, Locale.getDefault());
+            String dateStr = dateFormat.format(getDateFromDaysSinceEpoch(selectedDaysSinceEpochLocalTZ));
+
+            TextView textView = findViewById(R.id.textView);
+            textView.setText(getString(R.string.matches_on_day, dateStr));
+
             chart1 = findViewById(R.id.chart1);
+            chart1.setOnChartValueSelectedListener(new Chart1ValueSelectedListener());
+
             List<BarEntry> dataPoints1 = new ArrayList<>();
-            for (int i=0; i<=23; i++) {
-                if (numMatchesPerHour[i] > 0) {
-                    dataPoints1.add(new BarEntry(i, numMatchesPerHour[i]));
+            int minHourWithData = -1;
+            for (int i = 0; i <= 23; i++) {
+                int numMatchesPerHour = matchEntryContent.matchEntries.
+                        getDailyMatchEntries(selectedDaysSinceEpochLocalTZ).getHourlyMatchEntries(i).getHourlyCount();
+                if (numMatchesPerHour > 0) {
+                    dataPoints1.add(new BarEntry(i, numMatchesPerHour));
+                    if (minHourWithData == -1) {
+                        minHourWithData = i;
+                    }
                 }
             }
 
@@ -167,12 +152,59 @@ public class DisplayDetailsActivity extends AppCompatActivity {
             chart1.getDescription().setEnabled(false);
             chart1.setScaleYEnabled(false);
             chart1.setScaleXEnabled(true);
+            if (minHourWithData >= 0) {
+                chart1.highlightValue((float) minHourWithData, 0);
+            }
             chart1.invalidate(); // refresh
 
+            // RecyclerView List:
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            ContactRecordRecyclerViewFragment contactRecordRecyclerViewFragment =
+                    new ContactRecordRecyclerViewFragment(selectedDaysSinceEpochLocalTZ, minHourWithData, matchEntryContent);
+            transaction.replace(R.id.contentFragment, contactRecordRecyclerViewFragment);
+            transaction.commit();
 
-            // ListView listView = findViewById(R.id.listView);
+            // End of this path.
+            // From now on, the user can scroll the chart,
+            // or tap on a match.
+        }
+    }
+    // global variables
+    protected static Entry entry;
+    protected static Highlight highlight;
 
+    class Chart1ValueSelectedListener implements OnChartValueSelectedListener {
+        @Override
+        public void onValueSelected(Entry e, Highlight h) {
+            // set global variables
+            entry = e;
+            highlight = h;
 
+            if (e == null)
+                return;
+            int y = (int) e.getY();
+            if (y > 0) {
+                int x = (int)e.getX();
+                Log.d(TAG, "Detected selection "+x+" ("+y+")");
+
+                ContactRecordRecyclerViewFragment fragment = (ContactRecordRecyclerViewFragment) getSupportFragmentManager().findFragmentById(R.id.contentFragment);
+                if (fragment != null) {
+                    RecyclerView recyclerView = (RecyclerView) fragment.getView();
+                    if (recyclerView != null) {
+                        ContactRecordRecyclerViewAdapter adapter = (ContactRecordRecyclerViewAdapter) recyclerView.getAdapter();
+                        if (adapter != null) {
+                            adapter.setHour(x);
+                            adapter.notifyDataSetChanged();
+                        }
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onNothingSelected() {
+            chart1.highlightValue(highlight);
+            onValueSelected(entry, highlight);
         }
     }
 }

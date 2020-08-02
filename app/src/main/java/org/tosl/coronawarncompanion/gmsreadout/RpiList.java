@@ -9,12 +9,10 @@ import org.tosl.coronawarncompanion.matcher.crypto;
 import java.util.*;
 
 import static java.lang.Math.abs;
-import static org.tosl.coronawarncompanion.tools.Utils.byteArrayToHex;
 import static org.tosl.coronawarncompanion.tools.Utils.getDateFromENIN;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromSeconds;
 import static org.tosl.coronawarncompanion.tools.Utils.getENINFromSeconds;
 import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromSeconds;
-import static org.tosl.coronawarncompanion.tools.Utils.getSecondsFromDays;
 
 public class RpiList {
     private static final String TAG = "RpiList";
@@ -22,17 +20,17 @@ public class RpiList {
     private final TreeMap<Integer, ListsPerDayUTC> mapOfDaysUTCAndListsOfRPIs;  // daysSinceEpoch, ListsPerDayUTC
     private final TreeMap<Integer, Integer> mapOfDailyCountsLocalTZ;  // daysSinceEpoch, numberOfEntries
 
-    private CWCApplication app;
-    private Context context;
-    int timeZoneOffsetSeconds;
+    private final CWCApplication app;
+    private final Context context;
+    final int timeZoneOffsetSeconds;
 
     public static class ListsPerDayUTC {
-        public TreeSet<Integer> rpi32Bits = new TreeSet<>();              // Some of the RPI bytes, used for fast search - all day
-        public TreeSet<Integer> rpi32BitsEarly = new TreeSet<>();         // (same) - first 2 hours of the day only
-        public TreeSet<Integer> rpi32BitsLate = new TreeSet<>();          // (same) - last 2 hours of the day only
-        public LinkedList<RpiEntry> rpiEntries = new LinkedList<>();      // Full RpiEntries
-        public LinkedList<RpiEntry> rpiEntriesEarly = new LinkedList<>(); // (same) - first 2 hours of the day only
-        public LinkedList<RpiEntry> rpiEntriesLate = new LinkedList<>();  // (same) - last 2 hours of the day only
+        public final TreeSet<Integer> rpi32Bits = new TreeSet<>();              // Some of the RPI bytes, used for fast search - all day
+        public final TreeSet<Integer> rpi32BitsEarly = new TreeSet<>();         // (same) - first 2 hours of the day only
+        public final TreeSet<Integer> rpi32BitsLate = new TreeSet<>();          // (same) - last 2 hours of the day only
+        public final LinkedList<RpiEntry> rpiEntries = new LinkedList<>();      // Full RpiEntries
+        public final LinkedList<RpiEntry> rpiEntriesEarly = new LinkedList<>(); // (same) - first 2 hours of the day only
+        public final LinkedList<RpiEntry> rpiEntriesLate = new LinkedList<>();  // (same) - last 2 hours of the day only
     }
 
     public static class RpiEntry {
