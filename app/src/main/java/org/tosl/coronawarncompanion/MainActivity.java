@@ -439,7 +439,9 @@ public class MainActivity extends AppCompatActivity {
 
             if ((rpiList != null) && (diagnosisKeysList != null)) {
                 Matcher matcher = new Matcher(rpiList, diagnosisKeysList, app.getApplicationContext());
-                mainActivity.matches = matcher.findMatches();
+                mainActivity.matches = matcher.findMatches(
+                        progress -> runOnUiThread(
+                                () -> textView3.setText(getResources().getString(R.string.matching_not_done_yet_with_progress, progress))));
                 Log.d(TAG, "Finished matching, sending the message...");
                 app.setMatches(mainActivity.matches);
             }
