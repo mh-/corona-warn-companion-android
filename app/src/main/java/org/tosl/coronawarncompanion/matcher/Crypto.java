@@ -17,6 +17,14 @@ public class Crypto {
 
     private static final int intervalLengthMinutes = 10;
     private static final int tekRollingPeriod = 144;
+    private static AesEcbEncryptor encryptor;
+    static {
+        try {
+            encryptor = AesEcbEncryptor.create();
+        } catch (CryptoException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static byte[] encodedEnIntervalNumber(int enin) {
         final ByteBuffer bb = ByteBuffer.allocate(4);
@@ -57,7 +65,6 @@ public class Crypto {
         }
         byte[] ciphertext = null;
         try {
-            AesEcbEncryptor encryptor = AesEcbEncryptor.create();
             encryptor.init(rpiKey);
             ciphertext = encryptor.encrypt(padded_data.toByteArray());
         } catch (CryptoException e) {
