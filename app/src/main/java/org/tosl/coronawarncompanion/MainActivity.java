@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
 
     private DKDownload diagnosisKeysDownload;
     private final LinkedList<URL> diagnosisKeysUrls = new LinkedList<>();
-    private LinkedList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList = null;
+    private ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList = null;
 
     private final int gridColor = Color.parseColor("#E0E0E0");
     private final int matchBarColor = Color.parseColor("#FF0000");
@@ -299,7 +299,7 @@ public class MainActivity extends AppCompatActivity {
 
             DiagnosisKeysImport diagnosisKeysImport = new DiagnosisKeysImport(exportDotBinBytes);
 
-            if (diagnosisKeysList == null) diagnosisKeysList = new LinkedList<>();
+            if (diagnosisKeysList == null) diagnosisKeysList = new ArrayList<>();
             diagnosisKeysList.addAll(diagnosisKeysImport.getDiagnosisKeys());
 
             diagnosisKeysUrls.remove(fileResponse.url);

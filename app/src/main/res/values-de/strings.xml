@@ -14,7 +14,7 @@
     <string name="diagnosis_keys_downloaded">%d Diagnoseschlüssel heruntergeladen.</string>
     <string name="matching_not_done_yet">Abgleich wird erstellt…</string>
     <string name="matching_not_done_yet_with_progress">Abgleich wird erstellt… %1$d%% (%2$d gefunden)</string>
-    <string name="time">Uhrzeit</string>
+    <string name="time">Zeitraum</string>
     <string name="transmission_risk_level">Übertragungsrisiko</string>
     <string name="min_attenuation">Minimale Dämpfung</string>
 </resources>

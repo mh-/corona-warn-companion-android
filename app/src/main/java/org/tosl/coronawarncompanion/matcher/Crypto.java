@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 import static org.tosl.coronawarncompanion.crypto.AesCtrEncryptor.aesCtr;
 import static org.tosl.coronawarncompanion.crypto.KeyDerivation.hkdfSha256;
@@ -75,23 +75,22 @@ public class Crypto {
         }
     }
 
-    public static LinkedList<RpiWithInterval> createListOfRpisForIntervalRange(byte[] rpiKey, int startIntervalNumber, int intervalCount) {
-        LinkedList<RpiWithInterval> rpis = new LinkedList<>();
-
-        ByteArrayOutputStream padded_data_template = new ByteArrayOutputStream();
+    public static ArrayList<RpiWithInterval> createListOfRpisForIntervalRange(byte[] rpiKey, int startIntervalNumber, int intervalCount) {
+        ArrayList<RpiWithInterval> rpis = new ArrayList<>(144);
+        byte[] padded_data = {0x45, 0x4E, 0x2D, 0x52, 0x50, 0x49, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
         try {
-            padded_data_template.write("EN-RPI".getBytes(StandardCharsets.UTF_8));
-            padded_data_template.write(new byte[] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
             AesEcbEncryptor encryptor = AesEcbEncryptor.create();
             encryptor.init(rpiKey);
             for (int interval=startIntervalNumber; interval < startIntervalNumber + intervalCount; interval++) {
-                ByteArrayOutputStream padded_data = new ByteArrayOutputStream();
-                padded_data.write(padded_data_template.toByteArray());
-                padded_data.write(encodedEnIntervalNumber(interval));
-                RpiWithInterval rpiWithInterval = new RpiWithInterval(encryptor.encrypt(padded_data.toByteArray()), interval);
+                padded_data[12] = (byte) (interval&0x000000ff);
+                padded_data[13] = (byte) ((interval&0x0000ff00)>>8);
+                padded_data[14] = (byte) ((interval&0x00ff0000)>>16);
+                padded_data[15] = (byte) ((interval&0xff000000)>>24);
+
+                RpiWithInterval rpiWithInterval = new RpiWithInterval(encryptor.encrypt(padded_data), interval);
                 rpis.add(rpiWithInterval);
             }
-        } catch (CryptoException | IOException e) {
+        } catch (CryptoException e) {
             e.printStackTrace();
         }
         return rpis;

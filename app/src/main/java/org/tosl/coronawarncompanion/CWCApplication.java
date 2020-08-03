@@ -7,7 +7,7 @@ import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
 import org.tosl.coronawarncompanion.gmsreadout.RpiList;
 import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.TimeZone;
 
 public class CWCApplication extends Application {
@@ -18,9 +18,9 @@ public class CWCApplication extends Application {
     public RpiList getRpiList() {return rpiList;}
     public void setRpiList(RpiList rpiList) {this.rpiList = rpiList;}
 
-    private LinkedList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList = null;
-    public LinkedList<DiagnosisKeysProtos.TemporaryExposureKey> getDiagnosisKeysList() {return diagnosisKeysList;}
-    public void setDiagnosisKeysList(LinkedList<DiagnosisKeysProtos.TemporaryExposureKey>  diagnosisKeysList) {this.diagnosisKeysList = diagnosisKeysList;}
+    private ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList = null;
+    public ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> getDiagnosisKeysList() {return diagnosisKeysList;}
+    public void setDiagnosisKeysList(ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList) {this.diagnosisKeysList = diagnosisKeysList;}
 
     private MatchEntryContent matchEntryContent = null;
     public MatchEntryContent getMatchEntryContent() {return matchEntryContent;}

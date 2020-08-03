@@ -10,8 +10,8 @@ import org.tosl.coronawarncompanion.gmsreadout.ContactRecordsProtos;
 import org.tosl.coronawarncompanion.gmsreadout.RpiList;
 import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
 
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.LinkedList;
 import java.util.TimeZone;
 
 import static org.tosl.coronawarncompanion.matcher.Crypto.createListOfRpisForIntervalRange;
@@ -49,9 +49,9 @@ public class Matcher {
     }
 
     private final RpiList rpiList;
-    private final LinkedList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList;
+    private final ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList;
 
-    public Matcher(RpiList rpis, LinkedList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeys, MatchEntryContent matchEntryContent) {
+    public Matcher(RpiList rpis, ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeys, MatchEntryContent matchEntryContent) {
         this.rpiList = rpis;
         this.diagnosisKeysList = diagnosisKeys;
         this.matchEntryContent = matchEntryContent;
@@ -74,7 +74,7 @@ public class Matcher {
                 }
             }
             int dkIntervalNumber = dk.getRollingStartIntervalNumber();
-            LinkedList<Crypto.RpiWithInterval> dkRpisWithIntervals = createListOfRpisForIntervalRange(deriveRpiKey(dk.getKeyData().toByteArray()),
+            ArrayList<Crypto.RpiWithInterval> dkRpisWithIntervals = createListOfRpisForIntervalRange(deriveRpiKey(dk.getKeyData().toByteArray()),
                     dkIntervalNumber, dk.getRollingPeriod());
             for (Crypto.RpiWithInterval dkRpiWithInterval : dkRpisWithIntervals) {
                 RpiList.RpiEntry rpiEntry =

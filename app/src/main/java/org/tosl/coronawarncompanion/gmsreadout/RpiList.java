@@ -26,9 +26,9 @@ public class RpiList {
         public final TreeSet<Integer> rpi32Bits = new TreeSet<>();              // Some of the RPI bytes, used for fast search - all day
         public final TreeSet<Integer> rpi32BitsEarly = new TreeSet<>();         // (same) - first 2 hours of the day only
         public final TreeSet<Integer> rpi32BitsLate = new TreeSet<>();          // (same) - last 2 hours of the day only
-        public final LinkedList<RpiEntry> rpiEntries = new LinkedList<>();      // Full RpiEntries
-        public final LinkedList<RpiEntry> rpiEntriesEarly = new LinkedList<>(); // (same) - first 2 hours of the day only
-        public final LinkedList<RpiEntry> rpiEntriesLate = new LinkedList<>();  // (same) - last 2 hours of the day only
+        public final ArrayList<RpiEntry> rpiEntries = new ArrayList<>();        // Full RpiEntries
+        public final ArrayList<RpiEntry> rpiEntriesEarly = new ArrayList<>();   // (same) - first 2 hours of the day only
+        public final ArrayList<RpiEntry> rpiEntriesLate = new ArrayList<>();    // (same) - last 2 hours of the day only
     }
 
     public static class RpiEntry {
@@ -123,7 +123,7 @@ public class RpiList {
         }
     }
 
-    public LinkedList<RpiEntry> getRpiEntriesForDaysSinceEpoch(Integer daysSinceEpoch) {
+    public ArrayList<RpiEntry> getRpiEntriesForDaysSinceEpoch(Integer daysSinceEpoch) {
         ListsPerDayUTC listsPerDayUTC = mapOfDaysUTCAndListsOfRPIs.get(daysSinceEpoch);
         if (listsPerDayUTC != null) {
             return listsPerDayUTC.rpiEntries;
@@ -167,7 +167,7 @@ public class RpiList {
                     //Log.d(TAG, "Potential match found, based on 32 bits comparison!");
 
                     // Do a full search
-                    LinkedList<RpiEntry> searchList = null;
+                    ArrayList<RpiEntry> searchList = null;
                     switch (i) {
                         case 1: searchList = listsPerDayUTC.rpiEntriesLate; break;
                         case 2: searchList = listsPerDayUTC.rpiEntries; break;
