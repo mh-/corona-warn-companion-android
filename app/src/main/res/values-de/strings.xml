@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Corona-Warn-Companion</string>
-    <string name="matches_on_day">Risiko-Begegnungen am %s - tippe für Details…</string>
+    <plurals name="matches_on_day">
+        <item quantity="one">Risiko-Begegnung am %s:</item>
+        <item quantity="other">Risiko-Begegnungen am %s:</item>
+    </plurals>
     <string name="no_matches_found">Keine Risiko-Begegnungen gefunden.</string>
     <plurals name="number_of_matches_found">
         <item quantity="one">%d Risiko-Begegnung. Tippe für Details…</item>
@@ -11,4 +14,7 @@
     <string name="diagnosis_keys_downloaded">%d Diagnoseschlüssel heruntergeladen.</string>
     <string name="matching_not_done_yet">Abgleich wird erstellt…</string>
     <string name="matching_not_done_yet_with_progress">Abgleich wird erstellt… %1$d%% (%2$d gefunden)</string>
+    <string name="time">Uhrzeit</string>
+    <string name="transmission_risk_level">Übertragungsrisiko</string>
+    <string name="min_attenuation">Minimale Dämpfung</string>
 </resources>

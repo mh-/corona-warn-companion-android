@@ -1,6 +1,7 @@
 package org.tosl.coronawarncompanion;
 
 import android.app.Application;
+import android.content.Context;
 
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
 import org.tosl.coronawarncompanion.gmsreadout.RpiList;
@@ -28,10 +29,16 @@ public class CWCApplication extends Application {
     private int timeZoneOffsetSeconds;
     public int getTimeZoneOffsetSeconds() {return timeZoneOffsetSeconds;}
 
+    private static Context context;
+    public static Context getAppContext() {
+        return CWCApplication.context;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
         timeZoneOffsetSeconds = TimeZone.getDefault().getOffset(System.currentTimeMillis()) / 1000;
+        //TODO: refactor this, time zones can be handled by DateFormat, Calendar, etc., instead of manually adding Offset
+        CWCApplication.context = getApplicationContext();
     }
 }
-

@@ -1,10 +1,9 @@
 package org.tosl.coronawarncompanion.gmsreadout;
 
-import android.content.Context;
 import android.util.Log;
 
 import org.tosl.coronawarncompanion.CWCApplication;
-import org.tosl.coronawarncompanion.matcher.crypto;
+import org.tosl.coronawarncompanion.matcher.Crypto;
 
 import java.util.*;
 
@@ -21,7 +20,6 @@ public class RpiList {
     private final TreeMap<Integer, Integer> mapOfDailyCountsLocalTZ;  // daysSinceEpoch, numberOfEntries
 
     private final CWCApplication app;
-    private final Context context;
     final int timeZoneOffsetSeconds;
 
     public static class ListsPerDayUTC {
@@ -50,11 +48,10 @@ public class RpiList {
         }
     }
 
-    public RpiList(Context context) {
+    public RpiList() {
         mapOfDaysUTCAndListsOfRPIs = new TreeMap<>();
         mapOfDailyCountsLocalTZ = new TreeMap<>();
-        this.context = context;
-        app = (CWCApplication) context.getApplicationContext();
+        app = (CWCApplication) CWCApplication.getAppContext();
         timeZoneOffsetSeconds = app.getTimeZoneOffsetSeconds();
     }
 
@@ -144,7 +141,7 @@ public class RpiList {
      but also in the "late" entries (last 2 hours) of the previous day,
      and in the "early" entries (first 2 hours) of the next day.
      */
-    public RpiEntry searchForRpiOnDaySinceEpochUTCWith2HoursTolerance(crypto.RpiWithInterval searchRpiWithInterval,
+    public RpiEntry searchForRpiOnDaySinceEpochUTCWith2HoursTolerance(Crypto.RpiWithInterval searchRpiWithInterval,
                                                                       Integer daysSinceEpochUTC) {
         RpiEntry matchingRpiEntry = null;
 

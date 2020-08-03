@@ -5,6 +5,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,8 +20,10 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 
+import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
 import org.tosl.coronawarncompanion.gmsreadout.ContactRecordsProtos;
 import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
+import org.tosl.coronawarncompanion.matchentries.MatchEntryContent.DailyMatchEntries;
 import org.tosl.coronawarncompanion.matcher.Matcher;
 
 import java.text.DateFormat;
@@ -29,10 +32,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 import static org.tosl.coronawarncompanion.tools.Utils.byteArrayToHex;
-import static org.tosl.coronawarncompanion.tools.Utils.getDateFromDaysSinceEpoch;
 import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromSeconds;
 import static org.tosl.coronawarncompanion.tools.Utils.xorTwoByteArrays;
 
@@ -45,12 +48,16 @@ public class ContactRecordRecyclerViewAdapter extends RecyclerView.Adapter<Conta
     private final int gridColor = Color.parseColor("#E0E0E0");
     private final int lineColor = Color.parseColor("#FF0000");
 
-    private final MatchEntryContent.DailyMatchEntries mDailyMatchEntries;
-    private List<Matcher.MatchEntry> mValues;
+    private final ArrayList<Pair<DiagnosisKeysProtos.TemporaryExposureKey, MatchEntryContent.GroupedByDkMatchEntries>> mValues;
+    private CWCApplication mApp;
 
-    public ContactRecordRecyclerViewAdapter(MatchEntryContent.DailyMatchEntries dailyMatchEntries) {
-        mDailyMatchEntries = dailyMatchEntries;
-        mValues = new ArrayList<>();
+    public ContactRecordRecyclerViewAdapter(DailyMatchEntries dailyMatchEntries) {
+        this.mApp = (CWCApplication) CWCApplication.getAppContext();
+        this.mValues = new ArrayList<>();
+        for (Map.Entry<DiagnosisKeysProtos.TemporaryExposureKey, MatchEntryContent.GroupedByDkMatchEntries> entry :
+                dailyMatchEntries.getMap().entrySet()) {
+            mValues.add(new Pair<>(entry.getKey(), entry.getValue()));
+        }
     }
 
     @Override
@@ -62,54 +69,77 @@ public class ContactRecordRecyclerViewAdapter extends RecyclerView.Adapter<Conta
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.mMatchEntry = mValues.get(position);
+        holder.mMatchEntriesPair = mValues.get(position);
+        DiagnosisKeysProtos.TemporaryExposureKey dk = holder.mMatchEntriesPair.first;
+        MatchEntryContent.GroupedByDkMatchEntries groupedByDkMatchEntries = holder.mMatchEntriesPair.second;
+        int timeZoneOffset = mApp.getTimeZoneOffsetSeconds();
+
+        // Text View:
+
+        ArrayList<Matcher.MatchEntry> list = groupedByDkMatchEntries.getList();
+        int minTimestampLocalTZ = Integer.MAX_VALUE;
+        int maxTimestampLocalTZ = Integer.MIN_VALUE;
+
+        for (Matcher.MatchEntry matchEntry : list) {
+            if (minTimestampLocalTZ > matchEntry.startTimestampLocalTZ) {
+                minTimestampLocalTZ = matchEntry.startTimestampLocalTZ;
+            }
+            if (maxTimestampLocalTZ < matchEntry.endTimestampLocalTZ) {
+                maxTimestampLocalTZ = matchEntry.endTimestampLocalTZ;
+            }
+        }
 
         // set date label formatter
         String deviceDateFormat = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "Hm");
         DateFormat dateFormat = new SimpleDateFormat(deviceDateFormat, Locale.getDefault());
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         // UTC because we don't want DateFormat to do additional time zone compensation
-
-        Date startDate = new Date(getMillisFromSeconds(mValues.get(position).startTimestampLocalTZ));
-        Date endDate = new Date(getMillisFromSeconds(mValues.get(position).endTimestampLocalTZ));
+        Date startDate = new Date(getMillisFromSeconds(minTimestampLocalTZ));
+        Date endDate = new Date(getMillisFromSeconds(maxTimestampLocalTZ));
         String startDateStr = dateFormat.format(startDate);
         String endDateStr = dateFormat.format(endDate);
-        String timeInfoStr;
-        if (startDateStr.equals(endDateStr)) {
-            timeInfoStr = startDateStr;
-        } else {
-            timeInfoStr = startDateStr+"-"+endDateStr;
-        }
+
+        @SuppressWarnings("deprecation") int transmissionRiskLevel = dk.getTransmissionRiskLevel();
 
         List<Entry> dataPoints = new ArrayList<>();
         int minAttenuation = Integer.MAX_VALUE;
-        for (ContactRecordsProtos.ScanRecord scanRecord : mValues.get(position).contactRecords.getRecordList()) {
-            byte[] aem = xorTwoByteArrays(scanRecord.getAem().toByteArray(), mValues.get(position).aemXorBytes);
-            if ((aem[0] != 0x40) || (aem[2] != 0x00) || (aem[3] != 0x00)) {
-                Log.w(TAG, "WARNING: Invalid AEM: "+byteArrayToHex(aem));
-            }
-            byte txPower = aem[1];
-            //Log.d(TAG, "TXPower: "+txPower+" dBm");
-            int rssi = (int) scanRecord.getRssi();
-            //Log.d(TAG, "RSSI: "+rssi+" dBm");
-            int attenuation = txPower-rssi;
-            //Log.d(TAG, "Attenuation: "+attenuation+" dB");
+        for (Matcher.MatchEntry matchEntry : list) {
+            for (ContactRecordsProtos.ScanRecord scanRecord : matchEntry.contactRecords.getRecordList()) {
+                byte[] aem = xorTwoByteArrays(scanRecord.getAem().toByteArray(), matchEntry.aemXorBytes);
+                if ((aem[0] != 0x40) || (aem[2] != 0x00) || (aem[3] != 0x00)) {
+                    Log.w(TAG, "WARNING: Invalid AEM: " + byteArrayToHex(aem));
+                }
+                byte txPower = aem[1];
+                //Log.d(TAG, "TXPower: "+txPower+" dBm");
+                int rssi = (int) scanRecord.getRssi();
+                //Log.d(TAG, "RSSI: "+rssi+" dBm");
+                int attenuation = txPower - rssi;
+                //Log.d(TAG, "Attenuation: "+attenuation+" dB");
 
-            int timestamp = scanRecord.getTimestamp();
-            dataPoints.add(new Entry(timestamp, attenuation));
+                int timestampLocalTZ = scanRecord.getTimestamp() + timeZoneOffset;
+                dataPoints.add(new Entry(timestampLocalTZ, attenuation));
 
-            if (minAttenuation > attenuation) {
-                minAttenuation = attenuation;
+                if (minAttenuation > attenuation) {
+                    minAttenuation = attenuation;
+                }
             }
         }
 
-        String text = timeInfoStr + ", min. "+minAttenuation+" dB:";
+        String text = CWCApplication.getAppContext().getResources().getString(R.string.time);
+        text += ": ";
+        if (startDateStr.equals(endDateStr)) {
+            text += startDateStr;
+        } else {
+            text += startDateStr+"-"+endDateStr;
+        }
+        text += ", ";
+        text += CWCApplication.getAppContext().getResources().getString(R.string.transmission_risk_level)+": "+transmissionRiskLevel+"\n";
+        text += CWCApplication.getAppContext().getResources().getString(R.string.min_attenuation)+": "+minAttenuation+"dB\n";
+        text += "("+byteArrayToHex(dk.getKeyData().toByteArray())+")";
+
         holder.mTextView.setText(text);
 
-
-        String deviceDateFormat2 = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "Hms");
-        DateFormat dateFormat2 = new SimpleDateFormat(deviceDateFormat2, Locale.getDefault());
-        // Don't set time zone UTC, so that DateFormat does the time zone compensation
+        // Graph:
 
         LineDataSet dataSet = new LineDataSet(dataPoints, "Attenuation"); // add entries to dataSet
         dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
@@ -124,7 +154,7 @@ public class ContactRecordRecyclerViewAdapter extends RecyclerView.Adapter<Conta
         ValueFormatter xAxisFormatter = new ValueFormatter() {
             @Override
             public String getAxisLabel(float value, AxisBase axis) {
-                return dateFormat2.format(new Date(getMillisFromSeconds((int) value)));
+                return dateFormat.format(new Date(getMillisFromSeconds((int) value)));
             }
         };
         // the labels that should be drawn on the YAxis
@@ -142,6 +172,8 @@ public class ContactRecordRecyclerViewAdapter extends RecyclerView.Adapter<Conta
         xAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
         xAxis.setGranularityEnabled(true);
         xAxis.setDrawGridLines(false);
+        xAxis.setAxisMinimum(minTimestampLocalTZ-50);
+        xAxis.setAxisMaximum(maxTimestampLocalTZ+100);
 
         YAxis yAxis = holder.mChartView.getAxisLeft();
         yAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
@@ -149,6 +181,7 @@ public class ContactRecordRecyclerViewAdapter extends RecyclerView.Adapter<Conta
         yAxis.setAxisMinimum(0.0f);
         yAxis.setGridColor(gridColor);
         yAxis.setValueFormatter(yAxisFormatter);
+        yAxis.setInverted(true);
 
         holder.mChartView.getAxisRight().setAxisMinimum(0.0f);
         holder.mChartView.getAxisRight().setDrawLabels(false);
@@ -163,19 +196,11 @@ public class ContactRecordRecyclerViewAdapter extends RecyclerView.Adapter<Conta
         return mValues.size();
     }
 
-    public void setHour(int hour) {
-        if (hour >=0 && hour <=23) {
-            mValues = mDailyMatchEntries.getHourlyMatchEntries(hour).getList();
-        } else {
-            mValues = new ArrayList<>();
-        }
-    }
-
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
         public final TextView mTextView;
         public final LineChart mChartView;
-        public Matcher.MatchEntry mMatchEntry;
+        public Pair<DiagnosisKeysProtos.TemporaryExposureKey, MatchEntryContent.GroupedByDkMatchEntries> mMatchEntriesPair;
 
         public ViewHolder(View view) {
             super(view);

@@ -1,7 +1,6 @@
 package org.tosl.coronawarncompanion.gmsreadout;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.res.AssetManager;
 import android.util.Log;
 
@@ -14,6 +13,7 @@ import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.ReadOptions;
 import org.iq80.leveldb.impl.Iq80DBFactory;
+import org.tosl.coronawarncompanion.CWCApplication;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -28,11 +28,6 @@ import static org.tosl.coronawarncompanion.gmsreadout.Sudo.sudo;
 public class ContactDbOnDisk {
     private static final String TAG = "ContactDbOnDisk";
     private DB levelDBStore = null;
-    private final Context context;
-
-    public ContactDbOnDisk(Context appContext) {
-        context = appContext;
-    }
 
     @SuppressLint("SdCardPath")
     private static final String gmsPathStr = "/data/data/com.google.android.gms";
@@ -43,7 +38,7 @@ public class ContactDbOnDisk {
     public void copyFromGMS() {
         // Copy the GMS LevelDB to local app cache
         Log.d(TAG, "Trying to copy LevelDB");
-        String cachePathStr = Objects.requireNonNull(context.getExternalCacheDir()).getPath();
+        String cachePathStr = Objects.requireNonNull(CWCApplication.getAppContext().getExternalCacheDir()).getPath();
 
         // First rename the LevelDB directory, then copy it, then rename to the original name
         String result = sudo(
@@ -91,9 +86,9 @@ public class ContactDbOnDisk {
         // Copy the GMS LevelDB from our app's assets to local app cache
 
         Log.d(TAG, "Trying to copy LevelDB from Assets");
-        String cachePathStr = Objects.requireNonNull(context.getExternalCacheDir()).getPath();
+        String cachePathStr = Objects.requireNonNull(CWCApplication.getAppContext().getExternalCacheDir()).getPath();
 
-        AssetManager assetManager = context.getAssets();
+        AssetManager assetManager = CWCApplication.getAppContext().getAssets();
         String[] files = null;
         try {
             files = assetManager.list("demo_rpi_db");
@@ -134,10 +129,15 @@ public class ContactDbOnDisk {
         options.createIfMissing(false);
         options.compressionType(CompressionType.NONE);
         DBFactory factory = new Iq80DBFactory();
-        String cachePathStr = Objects.requireNonNull(context.getExternalCacheDir()).getPath();
+        String cachePathStr = Objects.requireNonNull(CWCApplication.getAppContext().getExternalCacheDir()).getPath();
         try {
             levelDBStore = factory.open(new File(cachePathStr + "/" + dbNameModified), options);
-        } catch (IllegalArgumentException | IOException e) { Log.d(TAG, e.getMessage()); }
+        } catch (IllegalArgumentException | IOException e) {
+            String message = e.getMessage();
+            if (message != null) {
+                Log.d(TAG, message);
+            }
+        }
         if (levelDBStore != null) {
             Log.d(TAG, "Opened LevelDB.");
         } else {
@@ -153,7 +153,7 @@ public class ContactDbOnDisk {
 
 
     public RpiList readToRpiList() {
-        RpiList rpiList = new RpiList(context);
+        RpiList rpiList = new RpiList();
 
         ReadOptions readOptions = new ReadOptions();
         readOptions.verifyChecksums(true);
@@ -175,8 +175,9 @@ public class ContactDbOnDisk {
             } catch (InvalidProtocolBufferException e) {
                 e.printStackTrace();
             }
-
-            rpiList.addEntry(daysSinceEpoch, rpiBytes, contactRecords);
+            if (contactRecords != null) {
+                rpiList.addEntry(daysSinceEpoch, rpiBytes, contactRecords);
+            }
         }
         return rpiList;
     }
@@ -186,7 +187,7 @@ public class ContactDbOnDisk {
         try {
             // delete cache:
             try {
-                File dir = context.getExternalCacheDir();
+                File dir = CWCApplication.getAppContext().getExternalCacheDir();
                 deleteDir(dir);
             } catch (Exception e) { e.printStackTrace();}
 

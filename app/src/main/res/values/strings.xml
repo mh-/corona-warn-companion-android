@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Corona-Warn-Companion</string>
-    <string name="matches_on_day">Risk encounters on %s - tap to see details…</string>
+    <plurals name="matches_on_day">
+        <item quantity="one">Risk encounter on %s:</item>
+        <item quantity="other">Risk encounters on %s:</item>
+    </plurals>
     <string name="no_matches_found">No risk encounters found.</string>
     <string name="rpis_extracted" tools:ignore="PluralsCandidate">%d encounters scanned (%s-%s).</string>
     <string name="diagnosis_keys_downloaded" tools:ignore="PluralsCandidate">%d diagnosis keys downloaded."</string>
     <string name="matching_not_done_yet">Matching in progress…</string>
     <string name="matching_not_done_yet_with_progress" tools:ignore="PluralsCandidate">Matching in progress… %1$d%% (%2$d found)</string>
+    <string name="time">Time</string>
+    <string name="transmission_risk_level">Transmission Risk</string>
+    <string name="min_attenuation">Minimum Attenuation</string>
     <plurals name="number_of_matches_found">
         <item quantity="one">%d risk encounter. Tap to see details…</item>
         <item quantity="other">%d risk encounters. Tap to see details…</item>

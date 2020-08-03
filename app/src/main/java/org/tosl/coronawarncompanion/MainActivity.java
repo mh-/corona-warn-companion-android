@@ -67,7 +67,8 @@ import static org.tosl.coronawarncompanion.tools.Utils.standardRollingPeriod;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
-    public static final String DAY_EXTRA_MESSAGE = "org.tosl.coronawarncompanion.DAY_MESSAGE";
+    public static final String EXTRA_MESSAGE_DAY = "org.tosl.coronawarncompanion.DAY_MESSAGE";
+    public static final String EXTRA_MESSAGE_COUNT = "org.tosl.coronawarncompanion.COUNT_MESSAGE";
     private static boolean DEMO_MODE;
     CWCApplication app = null;
     private int timeZoneOffsetSeconds;
@@ -130,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
 
         rpiList = app.getRpiList();
         if (rpiList == null) {
-            ContactDbOnDisk contactDbOnDisk = new ContactDbOnDisk(this);
+            ContactDbOnDisk contactDbOnDisk = new ContactDbOnDisk();
             rpiList = contactDbOnDisk.getRpisFromContactDB(DEMO_MODE);
             app.setRpiList(rpiList);
         }
@@ -218,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
         if (!DEMO_MODE) {
             diagnosisKeysList = app.getDiagnosisKeysList();
             if (diagnosisKeysList == null) {
-                diagnosisKeysDownload = new DKDownload(this);
+                diagnosisKeysDownload = new DKDownload();
                 diagnosisKeysDownload.availableDatesRequest(new availableDatesResponseCallbackCommand());
                 // (the rest is done asynchronously in callback functions)
             } else {
@@ -437,7 +438,7 @@ public class MainActivity extends AppCompatActivity {
 
             if ((rpiList != null) && (diagnosisKeysList != null)) {
                 MatchEntryContent matchEntryContent = new MatchEntryContent();
-                Matcher matcher = new Matcher(rpiList, diagnosisKeysList, app.getApplicationContext(), matchEntryContent);
+                Matcher matcher = new Matcher(rpiList, diagnosisKeysList, matchEntryContent);
                 matcher.findMatches(
                         progress -> runOnUiThread(
                                 () -> textView3.setText(getResources().getString(R.string.
@@ -453,7 +454,7 @@ public class MainActivity extends AppCompatActivity {
     private void presentMatchResults() {
         if ((rpiList != null) && (diagnosisKeysList != null)) {
             MatchEntryContent matchEntryContent = app.getMatchEntryContent();
-            int numberOfMatches = matchEntryContent.matchEntries.getTotalCount();
+            int numberOfMatches = matchEntryContent.matchEntries.getTotalMatchingDkCount();
             Resources res = getResources();
             if (numberOfMatches > 0) {
                 textView3.setText(res.getQuantityString(R.plurals.number_of_matches_found, numberOfMatches, numberOfMatches));
@@ -470,7 +471,7 @@ public class MainActivity extends AppCompatActivity {
                 int dailyCount = 0;
                 MatchEntryContent.DailyMatchEntries dailyMatchEntries = matchEntryContent.matchEntries.getDailyMatchEntries(daysSinceEpochLocalTZ);
                 if (dailyMatchEntries != null) {
-                    dailyCount = dailyMatchEntries.getDailyCount();
+                    dailyCount = dailyMatchEntries.getDailyMatchingDkCount();
                 }
                 //Log.d(TAG, "Datapoint: " + daysSinceEpochLocalTZ + ": " + count);
                 dataPoints3.add(new BarEntry(daysSinceEpochLocalTZ, dailyCount));
@@ -483,7 +484,7 @@ public class MainActivity extends AppCompatActivity {
             DateFormat dateFormat = new SimpleDateFormat(deviceDateFormat, Locale.getDefault());
             dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             // UTC because we don't want DateFormat to do additional time zone compensation
-            
+
             BarDataSet dataSet3 = new BarDataSet(dataPoints3, "Matches"); // add entries to dataSet3
             dataSet3.setAxisDependency(YAxis.AxisDependency.LEFT);
             dataSet3.setColor(matchBarColor);
@@ -649,8 +650,8 @@ public class MainActivity extends AppCompatActivity {
                 int x = (int)e.getX();
                 Log.d(TAG, "Detected selection "+x+" ("+y+")");
                 Intent intent = new Intent(getApplicationContext(), DisplayDetailsActivity.class);
-                String message = String.valueOf(x);
-                intent.putExtra(DAY_EXTRA_MESSAGE, message);
+                intent.putExtra(EXTRA_MESSAGE_DAY, String.valueOf(x));
+                intent.putExtra(EXTRA_MESSAGE_COUNT, String.valueOf(y));
                 startActivity(intent);
                 chart3.highlightValues(null);
             }

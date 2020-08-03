@@ -13,7 +13,7 @@ import java.util.LinkedList;
 import static org.tosl.coronawarncompanion.crypto.AesCtrEncryptor.aesCtr;
 import static org.tosl.coronawarncompanion.crypto.KeyDerivation.hkdfSha256;
 
-public class crypto {
+public class Crypto {
 
     private static final int intervalLengthMinutes = 10;
     private static final int tekRollingPeriod = 144;

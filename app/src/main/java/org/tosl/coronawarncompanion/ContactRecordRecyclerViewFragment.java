@@ -26,7 +26,6 @@ public class ContactRecordRecyclerViewFragment extends Fragment {
 
     private final MatchEntryContent mMatchEntryContent;
     private final int mDaysSinceEpochLocalTZ;
-    private int mInitialHour;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -34,10 +33,9 @@ public class ContactRecordRecyclerViewFragment extends Fragment {
      * @param daysSinceEpochLocalTZ The day for which the fragment has been set up.
      * @param matchEntryContent The MarchEntryContent class that has all the MatchEntries.
      */
-    public ContactRecordRecyclerViewFragment(int daysSinceEpochLocalTZ, int hour, MatchEntryContent matchEntryContent) {
+    public ContactRecordRecyclerViewFragment(int daysSinceEpochLocalTZ, MatchEntryContent matchEntryContent) {
         this.mDaysSinceEpochLocalTZ = daysSinceEpochLocalTZ;
         this.mMatchEntryContent = matchEntryContent;
-        this.mInitialHour = hour;
     }
 
     @Override
@@ -66,7 +64,7 @@ public class ContactRecordRecyclerViewFragment extends Fragment {
             ContactRecordRecyclerViewAdapter adapter = new ContactRecordRecyclerViewAdapter(mMatchEntryContent.matchEntries.
                     getDailyMatchEntries(mDaysSinceEpochLocalTZ));
             recyclerView.setAdapter(adapter);
-            adapter.setHour(mInitialHour);
+            //adapter.setHour(mInitialHour);
         }
         return view;
     }
