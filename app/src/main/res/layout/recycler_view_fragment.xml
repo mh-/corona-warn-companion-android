@@ -6,8 +6,8 @@
     android:name="org.tosl.coronawarncompanion.ItemFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
+    android:layout_marginLeft="4dp"
+    android:layout_marginRight="4dp"
     app:layoutManager="LinearLayoutManager"
-    tools:context=".ContactRecordRecyclerViewFragment"
-    tools:listitem="@layout/match_fragment" />
+    tools:context=".matchentries.MatchesRecyclerViewFragment"
+    tools:listitem="@layout/match_card_fragment" />

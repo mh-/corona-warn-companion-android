@@ -82,11 +82,12 @@ public class Crypto {
         }
     }
 
+    private static ArrayList<RpiWithInterval> rpis = new ArrayList<>(144);
+
     public static ArrayList<RpiWithInterval> createListOfRpisForIntervalRange(byte[] rpiKey, int startIntervalNumber, int intervalCount) {
-        ArrayList<RpiWithInterval> rpis = new ArrayList<>(144);
+        rpis.clear();
         byte[] padded_data = {0x45, 0x4E, 0x2D, 0x52, 0x50, 0x49, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
         try {
-            AesEcbEncryptor encryptor = AesEcbEncryptor.create();
             encryptor.init(rpiKey);
             for (int interval=startIntervalNumber; interval < startIntervalNumber + intervalCount; interval++) {
                 padded_data[12] = (byte) (interval&0x000000ff);

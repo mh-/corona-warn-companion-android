@@ -55,8 +55,11 @@ public class RpiList {
         timeZoneOffsetSeconds = app.getTimeZoneOffsetSeconds();
     }
 
-    private Integer getIntegerFromFirstBytesOfByteArray(byte[] rpi) {
-        return (rpi[0] | (rpi[1]<<8) | (rpi[2]<<16) | (rpi[3]<<24));
+    private Integer getIntegerFromFirstBytesOfByteArray(byte[] bytes) {
+        return ((bytes[0] & 0xFF) << 24) |
+                ((bytes[1] & 0xFF) << 16) |
+                ((bytes[2] & 0xFF) << 8) |
+                ((bytes[3] & 0xFF));
     }
 
     public void addEntry(Integer daysSinceEpoch, byte[] rpiBytes, ContactRecordsProtos.ContactRecords contactRecords) {

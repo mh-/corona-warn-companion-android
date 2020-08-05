@@ -1,4 +1,4 @@
-package org.tosl.coronawarncompanion;
+package org.tosl.coronawarncompanion.matchentries;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,9 +20,10 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 
+import org.tosl.coronawarncompanion.CWCApplication;
+import org.tosl.coronawarncompanion.R;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
 import org.tosl.coronawarncompanion.gmsreadout.ContactRecordsProtos;
-import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
 import org.tosl.coronawarncompanion.matchentries.MatchEntryContent.DailyMatchEntries;
 import org.tosl.coronawarncompanion.matcher.Matcher;
 
@@ -42,7 +43,7 @@ import static org.tosl.coronawarncompanion.tools.Utils.xorTwoByteArrays;
 /**
  * {@link RecyclerView.Adapter} that can display a {@link org.tosl.coronawarncompanion.matcher.Matcher.MatchEntry}.
  */
-public class ContactRecordRecyclerViewAdapter extends RecyclerView.Adapter<ContactRecordRecyclerViewAdapter.ViewHolder> {
+public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecyclerViewAdapter.ViewHolder> {
 
     private static final String TAG = "CRRecyclerViewAdapter";
     private final int gridColor = Color.parseColor("#E0E0E0");
@@ -51,7 +52,7 @@ public class ContactRecordRecyclerViewAdapter extends RecyclerView.Adapter<Conta
     private final ArrayList<Pair<DiagnosisKeysProtos.TemporaryExposureKey, MatchEntryContent.GroupedByDkMatchEntries>> mValues;
     private CWCApplication mApp;
 
-    public ContactRecordRecyclerViewAdapter(DailyMatchEntries dailyMatchEntries) {
+    public MatchesRecyclerViewAdapter(DailyMatchEntries dailyMatchEntries) {
         this.mApp = (CWCApplication) CWCApplication.getAppContext();
         this.mValues = new ArrayList<>();
         for (Map.Entry<DiagnosisKeysProtos.TemporaryExposureKey, MatchEntryContent.GroupedByDkMatchEntries> entry :
@@ -63,7 +64,7 @@ public class ContactRecordRecyclerViewAdapter extends RecyclerView.Adapter<Conta
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.match_fragment, parent, false);
+                .inflate(R.layout.match_card_fragment, parent, false);
         return new ViewHolder(view);
     }
 
@@ -99,7 +100,20 @@ public class ContactRecordRecyclerViewAdapter extends RecyclerView.Adapter<Conta
         String startDateStr = dateFormat.format(startDate);
         String endDateStr = dateFormat.format(endDate);
 
-        @SuppressWarnings("deprecation") int transmissionRiskLevel = dk.getTransmissionRiskLevel();
+        boolean hasTransmissionRiskLevel = false;
+        int transmissionRiskLevel = 0;
+        //noinspection deprecation
+        if (dk.hasTransmissionRiskLevel()) {
+            //noinspection deprecation
+            transmissionRiskLevel = dk.getTransmissionRiskLevel();
+            hasTransmissionRiskLevel = true;
+        }
+        boolean hasReportType = false;
+        DiagnosisKeysProtos.TemporaryExposureKey.ReportType reportType = DiagnosisKeysProtos.TemporaryExposureKey.ReportType.UNKNOWN;
+        if (dk.hasReportType()) {
+            reportType = dk.getReportType();
+            hasReportType = true;
+        }
 
         List<Entry> dataPoints = new ArrayList<>();
         int minAttenuation = Integer.MAX_VALUE;
@@ -133,9 +147,15 @@ public class ContactRecordRecyclerViewAdapter extends RecyclerView.Adapter<Conta
             text += startDateStr+"-"+endDateStr;
         }
         text += ", ";
-        text += CWCApplication.getAppContext().getResources().getString(R.string.transmission_risk_level)+": "+transmissionRiskLevel+"\n";
+        if (hasTransmissionRiskLevel) {
+            text += CWCApplication.getAppContext().getResources().getString(R.string.transmission_risk_level) + ": " + transmissionRiskLevel + "\n";
+        }
+        if (hasReportType) {
+            text += CWCApplication.getAppContext().getResources().getString(R.string.report_type) + ": " + getReportTypeStr(reportType) + "\n";
+        }
         text += CWCApplication.getAppContext().getResources().getString(R.string.min_attenuation)+": "+minAttenuation+"dB\n";
-        text += "("+byteArrayToHex(dk.getKeyData().toByteArray())+")";
+        // text += "("+byteArrayToHex(dk.getKeyData().toByteArray())+")";
+        text += CWCApplication.getAppContext().getResources().getString(R.string.distance_shown_as_attenuation)+": \n";
 
         holder.mTextView.setText(text);
 
@@ -189,6 +209,25 @@ public class ContactRecordRecyclerViewAdapter extends RecyclerView.Adapter<Conta
         holder.mChartView.getDescription().setEnabled(false);
         holder.mChartView.setScaleYEnabled(false);
         holder.mChartView.invalidate(); // refresh
+    }
+
+    private String getReportTypeStr(DiagnosisKeysProtos.TemporaryExposureKey.ReportType reportType) {
+        switch (reportType) {
+            case REVOKED:
+                return(mApp.getString(R.string.report_type_revoked));
+            case UNKNOWN:
+                return(mApp.getString(R.string.report_type_unknown));
+            case RECURSIVE:
+                return(mApp.getString(R.string.report_type_recursive));
+            case SELF_REPORT:
+                return(mApp.getString(R.string.report_type_self_report));
+            case CONFIRMED_TEST:
+                return(mApp.getString(R.string.report_type_confirmed_test));
+            case CONFIRMED_CLINICAL_DIAGNOSIS:
+                return(mApp.getString(R.string.report_type_clinical_diagnosis));
+            default:
+                return mApp.getString(R.string.invalid);
+        }
     }
 
     @Override

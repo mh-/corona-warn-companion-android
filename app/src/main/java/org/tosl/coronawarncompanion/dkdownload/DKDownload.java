@@ -1,7 +1,6 @@
 package org.tosl.coronawarncompanion.dkdownload;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -11,6 +10,8 @@ import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+
+import org.tosl.coronawarncompanion.CWCApplication;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -32,17 +33,14 @@ public class DKDownload {
     @SuppressLint("SimpleDateFormat")
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 
-    private final Context context;
-
     private final RequestQueue queue;
     private final Response.ErrorListener errorResponseListener;
 
-    public DKDownload(Context appContext) {
-        context = appContext;
-        cachePathStr = Objects.requireNonNull(context.getExternalCacheDir()).getPath();
+    public DKDownload() {
+        cachePathStr = Objects.requireNonNull(CWCApplication.getAppContext().getExternalCacheDir()).getPath();
 
         // Instantiate the Volley RequestQueue.
-        queue = Volley.newRequestQueue(context);
+        queue = Volley.newRequestQueue(CWCApplication.getAppContext());
 
         errorResponseListener = new Response.ErrorListener() {
             @Override

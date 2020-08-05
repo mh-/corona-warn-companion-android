@@ -16,6 +16,7 @@ import android.os.Message;
 import android.os.Process;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.BarChart;
@@ -122,8 +123,14 @@ public class MainActivity extends AppCompatActivity {
         textView2 = findViewById(R.id.textView2);
         textView3 = findViewById(R.id.textView3);
         chart1 = findViewById(R.id.chart1);
+        chart1.setNoDataText(getResources().getString(R.string.please_wait));
+        chart1.setNoDataTextColor(Color.parseColor("black"));
         chart2 = findViewById(R.id.chart2);
+        chart2.setNoDataText(getResources().getString(R.string.please_wait));
+        chart2.setNoDataTextColor(Color.parseColor("black"));
         chart3 = findViewById(R.id.chart3);
+        chart3.setNoDataText(getResources().getString(R.string.please_wait));
+        chart3.setNoDataTextColor(Color.parseColor("black"));
         chart1.setOnChartGestureListener(new Chart1GestureListener());
         chart2.setOnChartGestureListener(new Chart2GestureListener());
         chart3.setOnChartGestureListener(new Chart3GestureListener());
@@ -359,6 +366,7 @@ public class MainActivity extends AppCompatActivity {
 
         BarData barData2 = new BarData(dataSet2);
         chart2.setData(barData2);
+        findViewById(R.id.progressBar2).setVisibility(View.GONE);
         //chart2.setFitBars(true); // make the x-axis fit exactly all bars
 
         // the labels that should be drawn on the XAxis
@@ -405,6 +413,7 @@ public class MainActivity extends AppCompatActivity {
         chart2.setScaleYEnabled(false);
         chart2.invalidate(); // refresh
 
+        textView3.setText(getString(R.string.matching_not_done_yet));
         startMatching();
     }
 
@@ -491,6 +500,7 @@ public class MainActivity extends AppCompatActivity {
 
             BarData barData3 = new BarData(dataSet3);
             chart3.setData(barData3);
+            findViewById(R.id.progressBar3).setVisibility(View.GONE);
             //chart3.setFitBars(true); // make the x-axis fit exactly all bars
 
             // the labels that should be drawn on the XAxis

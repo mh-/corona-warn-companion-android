@@ -13,8 +13,21 @@
     <string name="time">Time</string>
     <string name="transmission_risk_level">Transmission Risk</string>
     <string name="min_attenuation">Minimum Attenuation</string>
+    <string name="please_wait">Please wait…</string>
+    <string name="extracting_encounters">Extracting encounters…</string>
+    <string name="downloading_diagnosis_keys">Downloading diagnosis keys…</string>
     <plurals name="number_of_matches_found">
         <item quantity="one">%d risk encounter. Tap to see details…</item>
         <item quantity="other">%d risk encounters. Tap to see details…</item>
     </plurals>
+    <string name="matching_soon">Matching will start soon…</string>
+    <string name="report_type">Report type</string>
+    <string name="report_type_revoked">revoked</string>
+    <string name="report_type_unknown">unknown</string>
+    <string name="report_type_recursive">recursive</string>
+    <string name="report_type_self_report">self report</string>
+    <string name="report_type_confirmed_test">confirmed test</string>
+    <string name="report_type_clinical_diagnosis">clinical diagnosis</string>
+    <string name="invalid">invalid</string>
+    <string name="distance_shown_as_attenuation">Attenuation [dB]: (~distance)</string>
 </resources>

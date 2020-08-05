@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.TextView;
@@ -13,6 +12,7 @@ import android.widget.TextView;
 import com.github.mikephil.charting.charts.BarChart;
 
 import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
+import org.tosl.coronawarncompanion.matchentries.MatchesRecyclerViewFragment;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -80,9 +80,9 @@ public class DisplayDetailsActivity extends AppCompatActivity {
 
             // RecyclerView List:
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            ContactRecordRecyclerViewFragment contactRecordRecyclerViewFragment =
-                    new ContactRecordRecyclerViewFragment(selectedDaysSinceEpochLocalTZ, matchEntryContent);
-            transaction.replace(R.id.contentFragment, contactRecordRecyclerViewFragment);
+            MatchesRecyclerViewFragment matchesRecyclerViewFragment =
+                    new MatchesRecyclerViewFragment(selectedDaysSinceEpochLocalTZ, matchEntryContent);
+            transaction.replace(R.id.contentFragment, matchesRecyclerViewFragment);
             transaction.commit();
 
             // End of this path.

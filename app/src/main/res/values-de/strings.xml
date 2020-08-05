@@ -17,4 +17,17 @@
     <string name="time">Zeitraum</string>
     <string name="transmission_risk_level">Übertragungsrisiko</string>
     <string name="min_attenuation">Minimale Dämpfung</string>
+    <string name="please_wait">Bitte warten…</string>
+    <string name="extracting_encounters">Begegnungen auslesen…</string>
+    <string name="downloading_diagnosis_keys">Diagnoseschlüssel herunterladen…</string>
+    <string name="matching_soon">Hier wird gleich der Abgleich erstellt…</string>
+    <string name="report_type">Report-Typ</string>
+    <string name="report_type_revoked">widerrufen</string>
+    <string name="report_type_unknown">unbekannt</string>
+    <string name="report_type_recursive">rekursiv</string>
+    <string name="report_type_self_report">selbst gemeldet</string>
+    <string name="report_type_confirmed_test">bestätigter Test</string>
+    <string name="report_type_clinical_diagnosis">klinische Diagnose</string>
+    <string name="invalid">ungültig</string>
+    <string name="distance_shown_as_attenuation">Dämpfung [dB]: (~Abstand)</string>
 </resources>

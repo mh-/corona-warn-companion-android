@@ -1,4 +1,4 @@
-package org.tosl.coronawarncompanion;
+package org.tosl.coronawarncompanion.matchentries;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -12,12 +12,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.tosl.coronawarncompanion.R;
 import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
+import org.tosl.coronawarncompanion.matchentries.MatchesRecyclerViewAdapter;
 
 /**
  * A fragment representing a list of Items.
  */
-public class ContactRecordRecyclerViewFragment extends Fragment {
+public class MatchesRecyclerViewFragment extends Fragment {
 
     // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
@@ -33,7 +35,7 @@ public class ContactRecordRecyclerViewFragment extends Fragment {
      * @param daysSinceEpochLocalTZ The day for which the fragment has been set up.
      * @param matchEntryContent The MarchEntryContent class that has all the MatchEntries.
      */
-    public ContactRecordRecyclerViewFragment(int daysSinceEpochLocalTZ, MatchEntryContent matchEntryContent) {
+    public MatchesRecyclerViewFragment(int daysSinceEpochLocalTZ, MatchEntryContent matchEntryContent) {
         this.mDaysSinceEpochLocalTZ = daysSinceEpochLocalTZ;
         this.mMatchEntryContent = matchEntryContent;
     }
@@ -50,7 +52,7 @@ public class ContactRecordRecyclerViewFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.recycler_view_frag, container, false);
+        View view = inflater.inflate(R.layout.recycler_view_fragment, container, false);
 
         // Set the adapter
         if (view instanceof RecyclerView) {
@@ -61,7 +63,7 @@ public class ContactRecordRecyclerViewFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            ContactRecordRecyclerViewAdapter adapter = new ContactRecordRecyclerViewAdapter(mMatchEntryContent.matchEntries.
+            MatchesRecyclerViewAdapter adapter = new MatchesRecyclerViewAdapter(mMatchEntryContent.matchEntries.
                     getDailyMatchEntries(mDaysSinceEpochLocalTZ));
             recyclerView.setAdapter(adapter);
             //adapter.setHour(mInitialHour);

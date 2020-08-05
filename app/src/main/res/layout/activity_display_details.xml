@@ -13,7 +13,7 @@
         android:layout_marginTop="16dp"
         android:fontFamily="sans-serif-medium"
         android:text="Matches on [day]"
-        android:textSize="16sp"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.052"
         app:layout_constraintStart_toStartOf="parent"

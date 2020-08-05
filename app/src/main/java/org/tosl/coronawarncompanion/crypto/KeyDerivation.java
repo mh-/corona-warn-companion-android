@@ -45,15 +45,19 @@ public final class KeyDerivation {
      * Note that this function is for Exposure Notification Cryptography Specification 1.1 only, it
      * only support 16-byte length output.
      */
+    private static Mac mac;
+    static {
+        try {
+            mac = Mac.getInstance(ALGORITHM_NAME);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static byte[] hkdfSha256(
             byte[] inputKeyingMaterial, @Nullable byte[] inputSalt, byte[] info, int length)
             throws CryptoException {
-        try {
-            Mac mac = Mac.getInstance(ALGORITHM_NAME);
-            return hkdfSha256(mac, inputKeyingMaterial, inputSalt, info, length);
-        } catch (NoSuchAlgorithmException e) {
-            throw new CryptoException(e);
-        }
+        return hkdfSha256(mac, inputKeyingMaterial, inputSalt, info, length);
     }
 
     /**
