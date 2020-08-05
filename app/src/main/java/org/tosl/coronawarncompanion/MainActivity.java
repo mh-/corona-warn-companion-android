@@ -218,6 +218,7 @@ public class MainActivity extends AppCompatActivity {
             chart1.getLegend().setEnabled(false);
             chart1.getDescription().setEnabled(false);
             chart1.setScaleYEnabled(false);
+            chart1.getViewPortHandler().setMaximumScaleX(5.0f);
             chart1.invalidate(); // refresh
         }
 
@@ -411,6 +412,7 @@ public class MainActivity extends AppCompatActivity {
         chart2.getLegend().setEnabled(false);
         chart2.getDescription().setEnabled(false);
         chart2.setScaleYEnabled(false);
+        chart2.getViewPortHandler().setMaximumScaleX(5.0f);
         chart2.invalidate(); // refresh
 
         textView3.setText(getString(R.string.matching_not_done_yet));
@@ -545,6 +547,7 @@ public class MainActivity extends AppCompatActivity {
             chart3.getLegend().setEnabled(false);
             chart3.getDescription().setEnabled(false);
             chart3.setScaleYEnabled(false);
+            chart3.getViewPortHandler().setMaximumScaleX(5.0f);
             chart3.invalidate(); // refresh
 
             // End of this path.

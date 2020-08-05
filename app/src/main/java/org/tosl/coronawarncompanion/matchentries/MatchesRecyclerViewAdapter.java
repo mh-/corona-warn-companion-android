@@ -47,7 +47,11 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
 
     private static final String TAG = "CRRecyclerViewAdapter";
     private final int gridColor = Color.parseColor("#E0E0E0");
-    private final int lineColor = Color.parseColor("#FF0000");
+    private final int redColor = Color.parseColor("#FF0000");
+    private final int orangeColor = Color.parseColor("#FFA500");
+    private final int yellowColor = Color.parseColor("#FFFF00");
+    private final int greenColor = Color.parseColor("#00FF00");
+    private final int blackColor = Color.parseColor("#000000");
 
     private final ArrayList<Pair<DiagnosisKeysProtos.TemporaryExposureKey, MatchEntryContent.GroupedByDkMatchEntries>> mValues;
     private CWCApplication mApp;
@@ -75,30 +79,15 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         MatchEntryContent.GroupedByDkMatchEntries groupedByDkMatchEntries = holder.mMatchEntriesPair.second;
         int timeZoneOffset = mApp.getTimeZoneOffsetSeconds();
 
-        // Text View:
-
         ArrayList<Matcher.MatchEntry> list = groupedByDkMatchEntries.getList();
-        int minTimestampLocalTZ = Integer.MAX_VALUE;
-        int maxTimestampLocalTZ = Integer.MIN_VALUE;
 
-        for (Matcher.MatchEntry matchEntry : list) {
-            if (minTimestampLocalTZ > matchEntry.startTimestampLocalTZ) {
-                minTimestampLocalTZ = matchEntry.startTimestampLocalTZ;
-            }
-            if (maxTimestampLocalTZ < matchEntry.endTimestampLocalTZ) {
-                maxTimestampLocalTZ = matchEntry.endTimestampLocalTZ;
-            }
-        }
+        // Text View:
 
         // set date label formatter
         String deviceDateFormat = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "Hm");
         DateFormat dateFormat = new SimpleDateFormat(deviceDateFormat, Locale.getDefault());
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         // UTC because we don't want DateFormat to do additional time zone compensation
-        Date startDate = new Date(getMillisFromSeconds(minTimestampLocalTZ));
-        Date endDate = new Date(getMillisFromSeconds(maxTimestampLocalTZ));
-        String startDateStr = dateFormat.format(startDate);
-        String endDateStr = dateFormat.format(endDate);
 
         boolean hasTransmissionRiskLevel = false;
         int transmissionRiskLevel = 0;
@@ -115,7 +104,10 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
             hasReportType = true;
         }
 
+        int minTimestampLocalTZDay0 = Integer.MAX_VALUE;
+        int maxTimestampLocalTZDay0 = Integer.MIN_VALUE;
         List<Entry> dataPoints = new ArrayList<>();
+        ArrayList<Integer> dotColors = new ArrayList<Integer>();
         int minAttenuation = Integer.MAX_VALUE;
         for (Matcher.MatchEntry matchEntry : list) {
             for (ContactRecordsProtos.ScanRecord scanRecord : matchEntry.contactRecords.getRecordList()) {
@@ -131,13 +123,39 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
                 //Log.d(TAG, "Attenuation: "+attenuation+" dB");
 
                 int timestampLocalTZ = scanRecord.getTimestamp() + timeZoneOffset;
-                dataPoints.add(new Entry(timestampLocalTZ, attenuation));
+                // reduce to "day0", to improve resolution within the float x value:
+                int timestampLocalTZDay0 = timestampLocalTZ % (24*3600);
+                dataPoints.add(new Entry(timestampLocalTZDay0, attenuation));
+
+                if (attenuation < 55) {
+                    dotColors.add(redColor);
+                } else if (attenuation >= 55 && attenuation <= 63) {
+                    dotColors.add(orangeColor);
+                } else if (attenuation > 63 && attenuation <= 73) {
+                    dotColors.add(yellowColor);
+                } else if (attenuation > 73) {
+                    dotColors.add(greenColor);
+                } else {
+                    dotColors.add(blackColor);  // should be unreachable
+                }
 
                 if (minAttenuation > attenuation) {
                     minAttenuation = attenuation;
                 }
+
+                if (minTimestampLocalTZDay0 > timestampLocalTZDay0) {
+                    minTimestampLocalTZDay0 = timestampLocalTZDay0;
+                }
+                if (maxTimestampLocalTZDay0 < timestampLocalTZDay0) {
+                    maxTimestampLocalTZDay0 = timestampLocalTZDay0;
+                }
+
             }
         }
+        Date startDate = new Date(getMillisFromSeconds(minTimestampLocalTZDay0));
+        Date endDate = new Date(getMillisFromSeconds(maxTimestampLocalTZDay0));
+        String startDateStr = dateFormat.format(startDate);
+        String endDateStr = dateFormat.format(endDate);
 
         String text = CWCApplication.getAppContext().getResources().getString(R.string.time);
         text += ": ";
@@ -163,11 +181,12 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
 
         LineDataSet dataSet = new LineDataSet(dataPoints, "Attenuation"); // add entries to dataSet
         dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
-        dataSet.setColor(lineColor);
-        dataSet.setCircleColor(lineColor);
+        dataSet.setCircleColors(dotColors);
+        dataSet.setDrawValues(false);
+        dataSet.setHighlightEnabled(false);
+        dataSet.enableDashedLine(0, 1, 0);
 
         LineData lineData = new LineData(dataSet);
-        dataSet.setHighlightEnabled(false);
         holder.mChartView.setData(lineData);
 
         // the labels that should be drawn on the XAxis
@@ -189,11 +208,11 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         XAxis xAxis = holder.mChartView.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setValueFormatter(xAxisFormatter);
-        xAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
+        xAxis.setGranularity(60.0f); // minimum axis-step (interval) is 60 seconds
         xAxis.setGranularityEnabled(true);
         xAxis.setDrawGridLines(false);
-        xAxis.setAxisMinimum(minTimestampLocalTZ-50);
-        xAxis.setAxisMaximum(maxTimestampLocalTZ+100);
+        xAxis.setAxisMinimum(minTimestampLocalTZDay0-60);
+        xAxis.setAxisMaximum(maxTimestampLocalTZDay0+60);
 
         YAxis yAxis = holder.mChartView.getAxisLeft();
         yAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
@@ -208,6 +227,13 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         holder.mChartView.getLegend().setEnabled(false);
         holder.mChartView.getDescription().setEnabled(false);
         holder.mChartView.setScaleYEnabled(false);
+        int span = maxTimestampLocalTZDay0-minTimestampLocalTZDay0;
+        float maximumScaleX = span / 700.0f;
+        if (maximumScaleX < 1.0f) {
+            maximumScaleX = 1.0f;
+        }
+        Log.d(TAG, "maximumScaleX: "+maximumScaleX);
+        holder.mChartView.getViewPortHandler().setMaximumScaleX(maximumScaleX);
         holder.mChartView.invalidate(); // refresh
     }
 
@@ -244,7 +270,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mTextView = view.findViewById(R.id.textview);
+            mTextView = view.findViewById(R.id.textView);
             mChartView = view.findViewById(R.id.chart);
         }
 
