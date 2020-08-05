@@ -107,7 +107,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         int minTimestampLocalTZDay0 = Integer.MAX_VALUE;
         int maxTimestampLocalTZDay0 = Integer.MIN_VALUE;
         List<Entry> dataPoints = new ArrayList<>();
-        ArrayList<Integer> dotColors = new ArrayList<Integer>();
+        ArrayList<Integer> dotColors = new ArrayList<>();
         int minAttenuation = Integer.MAX_VALUE;
         for (Matcher.MatchEntry matchEntry : list) {
             for (ContactRecordsProtos.ScanRecord scanRecord : matchEntry.contactRecords.getRecordList()) {
@@ -129,14 +129,12 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
 
                 if (attenuation < 55) {
                     dotColors.add(redColor);
-                } else if (attenuation >= 55 && attenuation <= 63) {
+                } else if (attenuation <= 63) {
                     dotColors.add(orangeColor);
-                } else if (attenuation > 63 && attenuation <= 73) {
+                } else if (attenuation <= 73) {
                     dotColors.add(yellowColor);
-                } else if (attenuation > 73) {
-                    dotColors.add(greenColor);
                 } else {
-                    dotColors.add(blackColor);  // should be unreachable
+                    dotColors.add(greenColor);
                 }
 
                 if (minAttenuation > attenuation) {
@@ -158,24 +156,27 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         String endDateStr = dateFormat.format(endDate);
 
         String text = CWCApplication.getAppContext().getResources().getString(R.string.time);
-        text += ": ";
+        text += " ";
         if (startDateStr.equals(endDateStr)) {
             text += startDateStr;
         } else {
             text += startDateStr+"-"+endDateStr;
         }
-        text += ", ";
-        if (hasTransmissionRiskLevel) {
-            text += CWCApplication.getAppContext().getResources().getString(R.string.transmission_risk_level) + ": " + transmissionRiskLevel + "\n";
-        }
+        text += "\n";
+        text += "\n";
         if (hasReportType) {
             text += CWCApplication.getAppContext().getResources().getString(R.string.report_type) + ": " + getReportTypeStr(reportType) + "\n";
         }
-        text += CWCApplication.getAppContext().getResources().getString(R.string.min_attenuation)+": "+minAttenuation+"dB\n";
+        // text += CWCApplication.getAppContext().getResources().getString(R.string.min_attenuation)+": "+minAttenuation+"dB\n";
         // text += "("+byteArrayToHex(dk.getKeyData().toByteArray())+")";
-        text += CWCApplication.getAppContext().getResources().getString(R.string.distance_shown_as_attenuation)+": \n";
+        text += CWCApplication.getAppContext().getResources().getString(R.string.distance_shown_as_attenuation)+":";
+        holder.mTextView1.setText(text);
 
-        holder.mTextView.setText(text);
+        text = "";
+        if (hasTransmissionRiskLevel) {
+            text = CWCApplication.getAppContext().getResources().getString(R.string.transmission_risk_level) + ": " + transmissionRiskLevel;
+        }
+        holder.mTextView2.setText(text);
 
         // Graph:
 
@@ -263,20 +264,22 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
-        public final TextView mTextView;
+        public final TextView mTextView1;
+        public final TextView mTextView2;
         public final LineChart mChartView;
         public Pair<DiagnosisKeysProtos.TemporaryExposureKey, MatchEntryContent.GroupedByDkMatchEntries> mMatchEntriesPair;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mTextView = view.findViewById(R.id.textView);
+            mTextView1 = view.findViewById(R.id.textView1);
+            mTextView2 = view.findViewById(R.id.textView2);
             mChartView = view.findViewById(R.id.chart);
         }
 
         @Override
         public String toString() {
-            return super.toString() + " '" + mTextView.getText() + "'";
+            return super.toString() + " '" + mTextView1.getText() + "'";
         }
     }
 }

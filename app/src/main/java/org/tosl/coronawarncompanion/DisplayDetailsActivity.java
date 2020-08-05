@@ -75,7 +75,7 @@ public class DisplayDetailsActivity extends AppCompatActivity {
             // UTC because we don't want DateFormat to do additional time zone compensation
             String dateStr = dateFormat.format(getDateFromDaysSinceEpoch(selectedDaysSinceEpochLocalTZ));
 
-            TextView textView = findViewById(R.id.textView);
+            TextView textView = findViewById(R.id.textView1);
             textView.setText(getResources().getQuantityString(R.plurals.matches_on_day, count, dateStr));
 
             // RecyclerView List:
