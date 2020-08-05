@@ -15,6 +15,9 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
@@ -92,6 +95,29 @@ public class MainActivity extends AppCompatActivity {
     private TextView textView1;
     private TextView textView2;
     private TextView textView3;
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.demomode:
+                CWCApplication.DEMO_MODE = !CWCApplication.DEMO_MODE;
+
+                // recreate();
+
+                // TODO!
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -420,6 +446,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public Handler uiThreadHandler;
+    public HandlerThread backgroundMatcher;
 
     private void startMatching() {
         uiThreadHandler = new Handler(Looper.getMainLooper()) {
@@ -430,9 +457,9 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        HandlerThread ht = new HandlerThread("BackgroundMatcher");
-        ht.start();
-        Handler backgroundThreadHandler = new Handler(ht.getLooper());
+        backgroundMatcher = new HandlerThread("BackgroundMatcher");
+        backgroundMatcher.start();
+        Handler backgroundThreadHandler = new Handler(backgroundMatcher.getLooper());
         backgroundThreadHandler.post(new BackgroundMatching(this));
     }
 

@@ -12,7 +12,7 @@ import java.util.TimeZone;
 
 public class CWCApplication extends Application {
 
-    public static final boolean DEMO_MODE = true;  // Set this to true to enable app-wide DEMO MODE
+    public static boolean DEMO_MODE = true;  // Set this to true to enable app-wide DEMO MODE
 
     private RpiList rpiList = null;
     public RpiList getRpiList() {return rpiList;}

@@ -104,13 +104,20 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
             hasReportType = true;
         }
 
+        boolean showOnlyMinimumAttenuationInGraph = true;
+        int lastTimestampLocalTZ = 0;
+        int countAddedPoints = 0;
+        int totalCount = 0;
+
         int minTimestampLocalTZDay0 = Integer.MAX_VALUE;
         int maxTimestampLocalTZDay0 = Integer.MIN_VALUE;
         List<Entry> dataPoints = new ArrayList<>();
         ArrayList<Integer> dotColors = new ArrayList<>();
         int minAttenuation = Integer.MAX_VALUE;
+        int localMinAttenuation = Integer.MAX_VALUE;
         for (Matcher.MatchEntry matchEntry : list) {
             for (ContactRecordsProtos.ScanRecord scanRecord : matchEntry.contactRecords.getRecordList()) {
+                totalCount++;
                 byte[] aem = xorTwoByteArrays(scanRecord.getAem().toByteArray(), matchEntry.aemXorBytes);
                 if ((aem[0] != 0x40) || (aem[2] != 0x00) || (aem[3] != 0x00)) {
                     Log.w(TAG, "WARNING: Invalid AEM: " + byteArrayToHex(aem));
@@ -125,8 +132,34 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
                 int timestampLocalTZ = scanRecord.getTimestamp() + timeZoneOffset;
                 // reduce to "day0", to improve resolution within the float x value:
                 int timestampLocalTZDay0 = timestampLocalTZ % (24*3600);
-                dataPoints.add(new Entry(timestampLocalTZDay0, attenuation));
 
+                if (showOnlyMinimumAttenuationInGraph) {
+                    // TODO: Clean this up. There are also superfluous entries left at the beginning and at the end of the graph
+                    if ((timestampLocalTZ - lastTimestampLocalTZ >= 10) || (totalCount == matchEntry.contactRecords.getRecordCount())) {
+                        lastTimestampLocalTZ = timestampLocalTZ;
+                        if (dataPoints.size() > 0) {
+                            for (int i = 0; i < countAddedPoints - 1; i++) {
+                                dataPoints.remove(dataPoints.size() - 1);
+                                dotColors.remove(dotColors.size() - 1);
+                            }
+                            dataPoints.get(dataPoints.size() - 1).setY(localMinAttenuation);
+                            dotColors.remove(dotColors.size() - 1);
+                            if (localMinAttenuation < 55) {
+                                dotColors.add(redColor);
+                            } else if (localMinAttenuation <= 63) {
+                                dotColors.add(orangeColor);
+                            } else if (localMinAttenuation <= 73) {
+                                dotColors.add(yellowColor);
+                            } else {
+                                dotColors.add(greenColor);
+                            }
+                            localMinAttenuation = Integer.MAX_VALUE;
+                            countAddedPoints = 0;
+                        }
+                    }
+                }
+
+                dataPoints.add(new Entry(timestampLocalTZDay0, attenuation));
                 if (attenuation < 55) {
                     dotColors.add(redColor);
                 } else if (attenuation <= 63) {
@@ -136,9 +169,13 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
                 } else {
                     dotColors.add(greenColor);
                 }
+                countAddedPoints++;
 
                 if (minAttenuation > attenuation) {
                     minAttenuation = attenuation;
+                }
+                if (localMinAttenuation > attenuation) {
+                    localMinAttenuation = attenuation;
                 }
 
                 if (minTimestampLocalTZDay0 > timestampLocalTZDay0) {
@@ -183,9 +220,10 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         LineDataSet dataSet = new LineDataSet(dataPoints, "Attenuation"); // add entries to dataSet
         dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
         dataSet.setCircleColors(dotColors);
+        //dataSet.enableDashedLine(0, 1, 0);
+        dataSet.setColor(gridColor);
         dataSet.setDrawValues(false);
         dataSet.setHighlightEnabled(false);
-        dataSet.enableDashedLine(0, 1, 0);
 
         LineData lineData = new LineData(dataSet);
         holder.mChartView.setData(lineData);
