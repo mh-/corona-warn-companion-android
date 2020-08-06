@@ -35,7 +35,7 @@ repositories {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     //implementation 'io.github.pcmind:leveldb:1.2'  // versions > 0.9 conflict with minSdkVersion 23, e.g. because of java.lang.invoke.MethodHandle
     implementation 'com.github.mh-:leveldb:1.2.11'  // created this to work with minSdkVersion 23

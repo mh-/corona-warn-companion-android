@@ -199,12 +199,12 @@ public class RpiList {
                     }
                     if (matchingRpiEntry != null) {
                         break;
-                    } else {
+                    } // else {
                         //Log.d(TAG, "Match based on 32 bits was not confirmed based on 128 bits.");
-                    }
-                } else {
+                    //}
+                } // else {
                     //Log.d(TAG, "Match not found during this attempt.");
-                }
+                // }
             }
         }
         return matchingRpiEntry;

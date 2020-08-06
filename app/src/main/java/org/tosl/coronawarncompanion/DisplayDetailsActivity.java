@@ -41,10 +41,11 @@ public class DisplayDetailsActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
+        //noinspection SwitchStatementWithTooFewBranches
         switch (item.getItemId()) {
             case R.id.showhideallscans:
                 RecyclerView recyclerView = (RecyclerView) this.matchesRecyclerViewFragment.getView();
-                MatchesRecyclerViewAdapter matchesRecyclerViewAdapter = null;
+                MatchesRecyclerViewAdapter matchesRecyclerViewAdapter;
                 if (recyclerView != null) {
                     matchesRecyclerViewAdapter = (MatchesRecyclerViewAdapter) recyclerView.getAdapter();
                     if (matchesRecyclerViewAdapter != null) {

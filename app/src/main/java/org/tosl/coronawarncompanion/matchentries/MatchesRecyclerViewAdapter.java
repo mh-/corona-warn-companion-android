@@ -1,5 +1,6 @@
 package org.tosl.coronawarncompanion.matchentries;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
@@ -68,6 +69,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         }
     }
 
+    @NonNull
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
@@ -102,7 +104,9 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         boolean hasReportType = false;
         DiagnosisKeysProtos.TemporaryExposureKey.ReportType reportType = DiagnosisKeysProtos.TemporaryExposureKey.ReportType.UNKNOWN;
         if (dk.hasReportType()) {
+            //noinspection UnusedAssignment
             reportType = dk.getReportType();
+            //noinspection UnusedAssignment
             hasReportType = true;
         }
 
@@ -423,6 +427,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         }
 
         @Override
+        @NonNull
         public String toString() {
             return super.toString() + " '" + mTextView1.getText() + "'";
         }

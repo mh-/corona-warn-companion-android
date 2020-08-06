@@ -22,7 +22,7 @@ public class Utils {
     }
 
     public static int getDaysFromSeconds(int seconds) {
-        return (int) seconds / (24*3600);
+        return seconds / (24*3600);
     }
 
     public static int getDaysFromMillis(long millis) {
