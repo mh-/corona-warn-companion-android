@@ -29,5 +29,7 @@
     <string name="report_type_confirmed_test">bestätigter Test</string>
     <string name="report_type_clinical_diagnosis">klinische Diagnose</string>
     <string name="invalid">ungültig</string>
-    <string name="distance_shown_as_attenuation">Dämpfung [dB]: (~Abstand)</string>
+    <string name="distance_shown_as_attenuation">Abstand (Dämpfung in dB)</string>
+    <string name="show_hide_all_scans">Alle Begegnungen zeigen/verbergen</string>
+    <string name="toggle_demo_mode">Demo Modus an/aus</string>
 </resources>

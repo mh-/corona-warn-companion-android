@@ -3,15 +3,17 @@ package org.tosl.coronawarncompanion;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.TextView;
 
-import com.github.mikephil.charting.charts.BarChart;
-
 import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
+import org.tosl.coronawarncompanion.matchentries.MatchesRecyclerViewAdapter;
 import org.tosl.coronawarncompanion.matchentries.MatchesRecyclerViewFragment;
 
 import java.text.DateFormat;
@@ -27,10 +29,33 @@ public class DisplayDetailsActivity extends AppCompatActivity {
     private static boolean DEMO_MODE;
     private CWCApplication app = null;
     private MatchEntryContent matchEntryContent;
+    private MatchesRecyclerViewFragment matchesRecyclerViewFragment;
 
-    private BarChart chart1;
-    private final int gridColor = Color.parseColor("#E0E0E0");
-    private final int matchBarColor = Color.parseColor("#FF0000");
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.details_activity_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.showhideallscans:
+                RecyclerView recyclerView = (RecyclerView) this.matchesRecyclerViewFragment.getView();
+                MatchesRecyclerViewAdapter matchesRecyclerViewAdapter = null;
+                if (recyclerView != null) {
+                    matchesRecyclerViewAdapter = (MatchesRecyclerViewAdapter) recyclerView.getAdapter();
+                    if (matchesRecyclerViewAdapter != null) {
+                        matchesRecyclerViewAdapter.toggleShowAllScans();
+                    }
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,9 +105,9 @@ public class DisplayDetailsActivity extends AppCompatActivity {
 
             // RecyclerView List:
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            MatchesRecyclerViewFragment matchesRecyclerViewFragment =
+            this.matchesRecyclerViewFragment =
                     new MatchesRecyclerViewFragment(selectedDaysSinceEpochLocalTZ, matchEntryContent);
-            transaction.replace(R.id.contentFragment, matchesRecyclerViewFragment);
+            transaction.replace(R.id.contentFragment, this.matchesRecyclerViewFragment);
             transaction.commit();
 
             // End of this path.

@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_MESSAGE_DAY = "org.tosl.coronawarncompanion.DAY_MESSAGE";
     public static final String EXTRA_MESSAGE_COUNT = "org.tosl.coronawarncompanion.COUNT_MESSAGE";
     private static boolean DEMO_MODE;
+    private static boolean backgroundThreadsRunning = false;
     CWCApplication app = null;
     private int timeZoneOffsetSeconds;
     private RpiList rpiList = null;
@@ -99,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu, menu);
+        inflater.inflate(R.menu.main_activity_menu, menu);
         return true;
     }
 
@@ -108,12 +109,14 @@ public class MainActivity extends AppCompatActivity {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.demomode:
-                CWCApplication.DEMO_MODE = !CWCApplication.DEMO_MODE;
-
-                // recreate();
-
-                // TODO!
-                return true;
+                if (!backgroundThreadsRunning) {  // don't do recreate() while background threads are running
+                    CWCApplication.DEMO_MODE = !CWCApplication.DEMO_MODE;
+                    recreate();
+                    return true;
+                } else {
+                    return false;
+                }
+                // TODO - handle this differently, safely stop the background threads
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -162,12 +165,9 @@ public class MainActivity extends AppCompatActivity {
         chart3.setOnChartGestureListener(new Chart3GestureListener());
         chart3.setOnChartValueSelectedListener(new Chart3ValueSelectedListener());
 
-        rpiList = app.getRpiList();
-        if (rpiList == null) {
-            ContactDbOnDisk contactDbOnDisk = new ContactDbOnDisk();
-            rpiList = contactDbOnDisk.getRpisFromContactDB(DEMO_MODE);
-            app.setRpiList(rpiList);
-        }
+        ContactDbOnDisk contactDbOnDisk = new ContactDbOnDisk();
+        rpiList = contactDbOnDisk.getRpisFromContactDB(DEMO_MODE);
+        app.setRpiList(rpiList);
 
         if (rpiList != null) {  // check that getting the RPIs didn't fail, e.g. because we didn't get root rights
             SortedSet<Integer> rpiListDaysSinceEpochLocalTZ = rpiList.getAvailableDaysSinceEpochLocalTZ();
@@ -250,15 +250,12 @@ public class MainActivity extends AppCompatActivity {
 
         // 2nd Section: Diagnosis Keys
 
+        backgroundThreadsRunning = true;  // this temporarily disables toggling the DEMO_MODE
+
         if (!DEMO_MODE) {
-            diagnosisKeysList = app.getDiagnosisKeysList();
-            if (diagnosisKeysList == null) {
-                diagnosisKeysDownload = new DKDownload();
-                diagnosisKeysDownload.availableDatesRequest(new availableDatesResponseCallbackCommand());
-                // (the rest is done asynchronously in callback functions)
-            } else {
-                processDownloadedDiagnosisKeys();
-            }
+            diagnosisKeysDownload = new DKDownload();
+            diagnosisKeysDownload.availableDatesRequest(new availableDatesResponseCallbackCommand());
+            // (the rest is done asynchronously in callback functions)
         } else {
             try {
                 InputStream inputStream = getAssets().open("demo_dks.zip");
@@ -580,6 +577,8 @@ public class MainActivity extends AppCompatActivity {
             // End of this path.
             // From now on, the user can scroll the charts,
             // or tap on a match to reach the DisplayDetailsActivity.
+
+            backgroundThreadsRunning = false;  // this enables toggling the DEMO_MODE again
         }
     }
 

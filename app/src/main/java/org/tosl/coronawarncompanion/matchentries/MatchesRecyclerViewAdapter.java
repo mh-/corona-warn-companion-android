@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.TreeMap;
 
 import static org.tosl.coronawarncompanion.tools.Utils.byteArrayToHex;
 import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromSeconds;
@@ -55,6 +56,8 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
 
     private final ArrayList<Pair<DiagnosisKeysProtos.TemporaryExposureKey, MatchEntryContent.GroupedByDkMatchEntries>> mValues;
     private CWCApplication mApp;
+
+    private boolean showAllScans = false;
 
     public MatchesRecyclerViewAdapter(DailyMatchEntries dailyMatchEntries) {
         this.mApp = (CWCApplication) CWCApplication.getAppContext();
@@ -77,7 +80,6 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         holder.mMatchEntriesPair = mValues.get(position);
         DiagnosisKeysProtos.TemporaryExposureKey dk = holder.mMatchEntriesPair.first;
         MatchEntryContent.GroupedByDkMatchEntries groupedByDkMatchEntries = holder.mMatchEntriesPair.second;
-        int timeZoneOffset = mApp.getTimeZoneOffsetSeconds();
 
         ArrayList<Matcher.MatchEntry> list = groupedByDkMatchEntries.getList();
 
@@ -104,89 +106,10 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
             hasReportType = true;
         }
 
-        boolean showOnlyMinimumAttenuationInGraph = true;
-        int lastTimestampLocalTZ = 0;
-        int countAddedPoints = 0;
-        int totalCount = 0;
+        MatchEntryDetails matchEntryDetails = getMatchEntryDetails(list);
+        int minTimestampLocalTZDay0 = matchEntryDetails.minTimestampLocalTZDay0;
+        int maxTimestampLocalTZDay0 = matchEntryDetails.maxTimestampLocalTZDay0;
 
-        int minTimestampLocalTZDay0 = Integer.MAX_VALUE;
-        int maxTimestampLocalTZDay0 = Integer.MIN_VALUE;
-        List<Entry> dataPoints = new ArrayList<>();
-        ArrayList<Integer> dotColors = new ArrayList<>();
-        int minAttenuation = Integer.MAX_VALUE;
-        int localMinAttenuation = Integer.MAX_VALUE;
-        for (Matcher.MatchEntry matchEntry : list) {
-            for (ContactRecordsProtos.ScanRecord scanRecord : matchEntry.contactRecords.getRecordList()) {
-                totalCount++;
-                byte[] aem = xorTwoByteArrays(scanRecord.getAem().toByteArray(), matchEntry.aemXorBytes);
-                if ((aem[0] != 0x40) || (aem[2] != 0x00) || (aem[3] != 0x00)) {
-                    Log.w(TAG, "WARNING: Invalid AEM: " + byteArrayToHex(aem));
-                }
-                byte txPower = aem[1];
-                //Log.d(TAG, "TXPower: "+txPower+" dBm");
-                int rssi = (int) scanRecord.getRssi();
-                //Log.d(TAG, "RSSI: "+rssi+" dBm");
-                int attenuation = txPower - rssi;
-                //Log.d(TAG, "Attenuation: "+attenuation+" dB");
-
-                int timestampLocalTZ = scanRecord.getTimestamp() + timeZoneOffset;
-                // reduce to "day0", to improve resolution within the float x value:
-                int timestampLocalTZDay0 = timestampLocalTZ % (24*3600);
-
-                if (showOnlyMinimumAttenuationInGraph) {
-                    // TODO: Clean this up. There are also superfluous entries left at the beginning and at the end of the graph
-                    if ((timestampLocalTZ - lastTimestampLocalTZ >= 10) || (totalCount == matchEntry.contactRecords.getRecordCount())) {
-                        lastTimestampLocalTZ = timestampLocalTZ;
-                        if (dataPoints.size() > 0) {
-                            for (int i = 0; i < countAddedPoints - 1; i++) {
-                                dataPoints.remove(dataPoints.size() - 1);
-                                dotColors.remove(dotColors.size() - 1);
-                            }
-                            dataPoints.get(dataPoints.size() - 1).setY(localMinAttenuation);
-                            dotColors.remove(dotColors.size() - 1);
-                            if (localMinAttenuation < 55) {
-                                dotColors.add(redColor);
-                            } else if (localMinAttenuation <= 63) {
-                                dotColors.add(orangeColor);
-                            } else if (localMinAttenuation <= 73) {
-                                dotColors.add(yellowColor);
-                            } else {
-                                dotColors.add(greenColor);
-                            }
-                            localMinAttenuation = Integer.MAX_VALUE;
-                            countAddedPoints = 0;
-                        }
-                    }
-                }
-
-                dataPoints.add(new Entry(timestampLocalTZDay0, attenuation));
-                if (attenuation < 55) {
-                    dotColors.add(redColor);
-                } else if (attenuation <= 63) {
-                    dotColors.add(orangeColor);
-                } else if (attenuation <= 73) {
-                    dotColors.add(yellowColor);
-                } else {
-                    dotColors.add(greenColor);
-                }
-                countAddedPoints++;
-
-                if (minAttenuation > attenuation) {
-                    minAttenuation = attenuation;
-                }
-                if (localMinAttenuation > attenuation) {
-                    localMinAttenuation = attenuation;
-                }
-
-                if (minTimestampLocalTZDay0 > timestampLocalTZDay0) {
-                    minTimestampLocalTZDay0 = timestampLocalTZDay0;
-                }
-                if (maxTimestampLocalTZDay0 < timestampLocalTZDay0) {
-                    maxTimestampLocalTZDay0 = timestampLocalTZDay0;
-                }
-
-            }
-        }
         Date startDate = new Date(getMillisFromSeconds(minTimestampLocalTZDay0));
         Date endDate = new Date(getMillisFromSeconds(maxTimestampLocalTZDay0));
         String startDateStr = dateFormat.format(startDate);
@@ -200,10 +123,11 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
             text += startDateStr+"-"+endDateStr;
         }
         text += "\n";
+
         text += "\n";
-        if (hasReportType) {
-            text += CWCApplication.getAppContext().getResources().getString(R.string.report_type) + ": " + getReportTypeStr(reportType) + "\n";
-        }
+        //if (hasReportType) {
+        //    text += CWCApplication.getAppContext().getResources().getString(R.string.report_type) + ": " + getReportTypeStr(reportType) + "\n";
+        //}
         // text += CWCApplication.getAppContext().getResources().getString(R.string.min_attenuation)+": "+minAttenuation+"dB\n";
         // text += "("+byteArrayToHex(dk.getKeyData().toByteArray())+")";
         text += CWCApplication.getAppContext().getResources().getString(R.string.distance_shown_as_attenuation)+":";
@@ -216,17 +140,200 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         holder.mTextView2.setText(text);
 
         // Graph:
+        configureDetailsChart(holder.mChartView, matchEntryDetails.dataPointsMinAttenuation, matchEntryDetails.dotColorsMinAttenuation,
+                matchEntryDetails.dataPoints, matchEntryDetails.dotColors,
+                minTimestampLocalTZDay0, maxTimestampLocalTZDay0);
+        holder.mChartView.getLineData().getDataSetByIndex(1).setVisible(this.showAllScans);
+    }
 
-        LineDataSet dataSet = new LineDataSet(dataPoints, "Attenuation"); // add entries to dataSet
-        dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
-        dataSet.setCircleColors(dotColors);
-        //dataSet.enableDashedLine(0, 1, 0);
-        dataSet.setColor(gridColor);
-        dataSet.setDrawValues(false);
-        dataSet.setHighlightEnabled(false);
+    public class MatchEntryDetails {
+        public ArrayList<Entry> dataPoints;
+        public ArrayList<Integer> dotColors;
+        public ArrayList<Entry> dataPointsMinAttenuation;
+        public ArrayList<Integer> dotColorsMinAttenuation;
+        public int minAttenuation;
+        public int minTimestampLocalTZDay0;
+        public int maxTimestampLocalTZDay0;
+        public MatchEntryDetails() {
+            this.dataPoints = new ArrayList<>();
+            this.dotColors = new ArrayList<>();
+        }
+    }
 
-        LineData lineData = new LineData(dataSet);
-        holder.mChartView.setData(lineData);
+    private MatchEntryDetails getMatchEntryDetails(ArrayList<Matcher.MatchEntry> list) {
+        // Threshold value for break detection:
+        final int pauseThresholdSeconds = 10;
+
+        MatchEntryDetails result = new MatchEntryDetails();
+        result.minTimestampLocalTZDay0 = Integer.MAX_VALUE;
+        result.maxTimestampLocalTZDay0 = Integer.MIN_VALUE;
+        result.dataPoints = new ArrayList<>();
+        result.dotColors = new ArrayList<>();
+        result.dataPointsMinAttenuation = new ArrayList<>();
+        result.dotColorsMinAttenuation = new ArrayList<>();
+        result.minAttenuation = Integer.MAX_VALUE;
+
+        TreeMap<Integer, Integer> dataPointsInterimMap = new TreeMap<>();
+
+        // First step: Create a "flat" sorted list (TreeMap) from all scan records from all matchEntries
+        for (Matcher.MatchEntry matchEntry : list) {  // process each matchEntry separately
+            for (ContactRecordsProtos.ScanRecord scanRecord : matchEntry.contactRecords.getRecordList()) {
+                byte[] aem = xorTwoByteArrays(scanRecord.getAem().toByteArray(), matchEntry.aemXorBytes);
+                if ((aem[0] != 0x40) || (aem[2] != 0x00) || (aem[3] != 0x00)) {
+                    Log.w(TAG, "WARNING: Invalid AEM: " + byteArrayToHex(aem));
+                }
+                byte txPower = aem[1];
+                //Log.d(TAG, "TXPower: "+txPower+" dBm");
+                int rssi = (int) scanRecord.getRssi();
+                //Log.d(TAG, "RSSI: "+rssi+" dBm");
+                int attenuation = txPower - rssi;
+                //Log.d(TAG, "Attenuation: "+attenuation+" dB");
+                int timeZoneOffset = mApp.getTimeZoneOffsetSeconds();
+                int timestampLocalTZ = scanRecord.getTimestamp() + timeZoneOffset;
+                // reduce to "day0", to improve resolution within the float x value:
+                int timestampLocalTZDay0 = timestampLocalTZ % (24*3600);
+
+                // store to temporary buffers:
+                dataPointsInterimMap.put(timestampLocalTZDay0, attenuation);
+
+                // if found, store max/min values
+                if (result.minAttenuation > attenuation) {
+                    result.minAttenuation = attenuation;
+                }
+                if (result.minTimestampLocalTZDay0 > timestampLocalTZDay0) {
+                    result.minTimestampLocalTZDay0 = timestampLocalTZDay0;
+                }
+                if (result.maxTimestampLocalTZDay0 < timestampLocalTZDay0) {
+                    result.maxTimestampLocalTZDay0 = timestampLocalTZDay0;
+                }
+            }
+        }
+
+        // Second step: Process each scan record, group them, find the minimum attenuation in each group
+        ArrayList<Entry> dataPointsBuffer = new ArrayList<>();
+        ArrayList<Integer> dotColorsBuffer = new ArrayList<>();
+        int lastTimestampLocalTZDay0 = 0;
+        int localMinAttenuation = Integer.MAX_VALUE;
+
+        int numLastScanRecord = dataPointsInterimMap.size() - 1;
+        int i = 0;
+        for(Map.Entry<Integer, Integer> mapEntry : dataPointsInterimMap.entrySet()) {
+            // iterate over sorted TreeMap
+            int timestampLocalTZDay0 = mapEntry.getKey();
+            int attenuation = mapEntry.getValue();
+
+            // Second step: look for a break (>= pauseThresholdSeconds)
+            // suppress break detection at the very first entry
+            if ((i != 0) && (timestampLocalTZDay0 >= lastTimestampLocalTZDay0 + pauseThresholdSeconds)) {
+                /*
+                String deviceDateFormat = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "Hms");
+                DateFormat dateFormat = new SimpleDateFormat(deviceDateFormat, Locale.getDefault());
+                dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                // UTC because we don't want DateFormat to do additional time zone compensation
+                */
+                //Log.d(TAG, "lastTimestampLocalTZDay0: "+dateFormat.format(new Date(getMillisFromSeconds((int) lastTimestampLocalTZDay0)))+
+                //        ", timestampLocalTZDay0: "+dateFormat.format(new Date(getMillisFromSeconds((int) timestampLocalTZDay0))));
+
+                // break found: Now copy the block we have collected so far
+                boolean minHandled = false;
+                for (int pos = 0; pos < dataPointsBuffer.size(); pos++) {
+                    Entry entry = dataPointsBuffer.get(pos);
+                    int color = dotColorsBuffer.get(pos);
+                    //Log.d(TAG, "Entry at: "+dateFormat.format(new Date(getMillisFromSeconds((int) entry.getX()))));
+                    if (!minHandled && entry.getY() <= localMinAttenuation) {
+                        // This is the minimum, store in the "minimum" list
+                        //Log.d(TAG, "Minimum found.");
+                        result.dataPointsMinAttenuation.add(entry);
+                        result.dotColorsMinAttenuation.add(color);
+                        minHandled = true;
+                    } else {
+                        // This is one of the other entries, store in the "normal" list
+                        result.dataPoints.add(entry);
+                        result.dotColors.add(color);
+                    }
+                }
+                // clear the temporary buffer
+                dataPointsBuffer.clear();
+                dotColorsBuffer.clear();
+                // reset search for local minimum:
+                localMinAttenuation = Integer.MAX_VALUE;
+            }
+
+            // store to temporary buffers:
+            dataPointsBuffer.add(new Entry(timestampLocalTZDay0, attenuation));
+            dotColorsBuffer.add(getDotColorForAttenuation(attenuation));
+            // if found, store local min value
+            if (localMinAttenuation > attenuation) {
+                localMinAttenuation = attenuation;
+            }
+
+            // if this is the last entry, handle the situation separately
+            if (i == numLastScanRecord) {
+                // Now copy the block we have collected so far
+                boolean minHandled = false;
+                for (int pos = 0; pos < dataPointsBuffer.size(); pos++) {
+                    Entry entry = dataPointsBuffer.get(pos);
+                    int color = dotColorsBuffer.get(pos);
+                    //Log.d(TAG, "Entry at: "+dateFormat.format(new Date(getMillisFromSeconds((int) entry.getX()))));
+                    if (!minHandled && entry.getY() <= localMinAttenuation) {
+                        // This is the minimum, store in the "minimum" list
+                        //Log.d(TAG, "Minimum found.");
+                        result.dataPointsMinAttenuation.add(entry);
+                        result.dotColorsMinAttenuation.add(color);
+                        minHandled = true;
+                    } else {
+                        // This is one of the other entries, store in the "normal" list
+                        result.dataPoints.add(entry);
+                        result.dotColors.add(color);
+                    }
+                }
+            }
+
+            // prepare break detection
+            lastTimestampLocalTZDay0 = timestampLocalTZDay0;
+            i++;
+        }
+        return result;
+    }
+
+    private int getDotColorForAttenuation(int attenuation) {
+        if (attenuation < 55) {
+            return redColor;
+        } else if (attenuation <= 63) {
+            return orangeColor;
+        } else if (attenuation <= 73) {
+            return yellowColor;
+        } else {
+            return greenColor;
+        }
+    }
+
+    private void configureDetailsChart(LineChart chartView, List<Entry> dataPointsMinAttenuation, ArrayList<Integer> dotColorsMinAttenuation,
+                                       List<Entry> dataPoints, ArrayList<Integer> dotColors,
+                                       int minTimestampLocalTZDay0, int maxTimestampLocalTZDay0) {
+        LineDataSet dataSetMin = new LineDataSet(dataPointsMinAttenuation, "Minimum Attenuation"); // add entries to dataSetMin
+        dataSetMin.setAxisDependency(YAxis.AxisDependency.LEFT);
+        dataSetMin.setCircleColors(dotColorsMinAttenuation);
+        //dataSetMin.enableDashedLine(0, 1, 0);
+        dataSetMin.setColor(gridColor);
+        dataSetMin.setDrawValues(false);
+        dataSetMin.setHighlightEnabled(false);
+
+        LineDataSet dataSetRest = new LineDataSet(dataPoints, "Attenuation"); // add entries to dataSetRest
+        dataSetRest.setAxisDependency(YAxis.AxisDependency.LEFT);
+        dataSetRest.setCircleColors(dotColors);
+        dataSetRest.enableDashedLine(0, 1, 0);  // these parameters mean: do not show line
+        dataSetRest.setDrawValues(false);
+        dataSetRest.setHighlightEnabled(false);
+
+        LineData lineData = new LineData(dataSetMin);
+        lineData.addDataSet(dataSetRest);
+        chartView.setData(lineData);
+
+        String deviceDateFormat = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "Hm");
+        DateFormat dateFormat = new SimpleDateFormat(deviceDateFormat, Locale.getDefault());
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        // UTC because we don't want DateFormat to do additional time zone compensation
 
         // the labels that should be drawn on the XAxis
         ValueFormatter xAxisFormatter = new ValueFormatter() {
@@ -244,7 +351,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
             }
         };
 
-        XAxis xAxis = holder.mChartView.getXAxis();
+        XAxis xAxis = chartView.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setValueFormatter(xAxisFormatter);
         xAxis.setGranularity(60.0f); // minimum axis-step (interval) is 60 seconds
@@ -253,7 +360,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         xAxis.setAxisMinimum(minTimestampLocalTZDay0-60);
         xAxis.setAxisMaximum(maxTimestampLocalTZDay0+60);
 
-        YAxis yAxis = holder.mChartView.getAxisLeft();
+        YAxis yAxis = chartView.getAxisLeft();
         yAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
         yAxis.setGranularityEnabled(true);
         yAxis.setAxisMinimum(0.0f);
@@ -261,19 +368,19 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         yAxis.setValueFormatter(yAxisFormatter);
         yAxis.setInverted(true);
 
-        holder.mChartView.getAxisRight().setAxisMinimum(0.0f);
-        holder.mChartView.getAxisRight().setDrawLabels(false);
-        holder.mChartView.getLegend().setEnabled(false);
-        holder.mChartView.getDescription().setEnabled(false);
-        holder.mChartView.setScaleYEnabled(false);
+        chartView.getAxisRight().setAxisMinimum(0.0f);
+        chartView.getAxisRight().setDrawLabels(false);
+        chartView.getLegend().setEnabled(false);
+        chartView.getDescription().setEnabled(false);
+        chartView.setScaleYEnabled(false);
         int span = maxTimestampLocalTZDay0-minTimestampLocalTZDay0;
         float maximumScaleX = span / 700.0f;
         if (maximumScaleX < 1.0f) {
             maximumScaleX = 1.0f;
         }
-        Log.d(TAG, "maximumScaleX: "+maximumScaleX);
-        holder.mChartView.getViewPortHandler().setMaximumScaleX(maximumScaleX);
-        holder.mChartView.invalidate(); // refresh
+        //Log.d(TAG, "maximumScaleX: "+maximumScaleX);
+        chartView.getViewPortHandler().setMaximumScaleX(maximumScaleX);
+        chartView.invalidate(); // refresh
     }
 
     private String getReportTypeStr(DiagnosisKeysProtos.TemporaryExposureKey.ReportType reportType) {
@@ -319,5 +426,10 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         public String toString() {
             return super.toString() + " '" + mTextView1.getText() + "'";
         }
+    }
+
+    public void toggleShowAllScans() {
+        this.showAllScans = !this.showAllScans;
+        this.notifyDataSetChanged();
     }
 }

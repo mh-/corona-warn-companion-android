@@ -29,5 +29,7 @@
     <string name="report_type_confirmed_test">confirmed test</string>
     <string name="report_type_clinical_diagnosis">clinical diagnosis</string>
     <string name="invalid">invalid</string>
-    <string name="distance_shown_as_attenuation">Attenuation [dB]: (~distance)</string>
+    <string name="distance_shown_as_attenuation">Distance (attenuation in dB)</string>
+    <string name="show_hide_all_scans">Show/Hide All Scans</string>
+    <string name="toggle_demo_mode">Toggle Demo Mode</string>
 </resources>
