@@ -105,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView textView1;
     private TextView textView2;
     private TextView textView3;
+    private TextView textViewErrorNoRpis;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -165,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
         textView1 = findViewById(R.id.textView1);
         textView2 = findViewById(R.id.textView2);
         textView3 = findViewById(R.id.textView3);
+        textViewErrorNoRpis = findViewById(R.id.textViewErrorNoRpis);
         barChartSync = new BarChartSync();
         chart1 = new CwcBarChart(findViewById(R.id.chart1), findViewById(R.id.progressBar1), barChartSync, app);
         chart2 = new CwcBarChart(findViewById(R.id.chart2), findViewById(R.id.progressBar2), barChartSync, app);
@@ -204,33 +206,48 @@ public class MainActivity extends AppCompatActivity {
 
             chart1.setData(dataPoints1, normalBarColor, "RPIs", false);
             chart1.setFormatAndRefresh();
-        }
 
-        // 2nd Section: Diagnosis Keys
 
-        backgroundThreadsRunning = true;  // this temporarily disables toggling the DEMO_MODE
+            // 2nd Section: Diagnosis Keys
 
-        if (!DEMO_MODE) {
-            diagnosisKeysDownload = new DKDownload();
-            diagnosisKeysDownload.availableDatesRequest(new availableDatesResponseCallbackCommand());
-            // (the rest is done asynchronously in callback functions)
-        } else {
-            try {
-                InputStream inputStream = getAssets().open("demo_dks.zip");
-                byte[] buffer = new byte[100000];
-                int bytesRead;
-                ByteArrayOutputStream output = new ByteArrayOutputStream();
-                while ((bytesRead = inputStream.read(buffer)) != -1) {
-                    output.write(buffer, 0, bytesRead);
+            backgroundThreadsRunning = true;  // this temporarily disables toggling the DEMO_MODE
+
+            if (!DEMO_MODE) {
+                diagnosisKeysDownload = new DKDownload();
+                diagnosisKeysDownload.availableDatesRequest(new availableDatesResponseCallbackCommand());
+                // (the rest is done asynchronously in callback functions)
+            } else {
+                try {
+                    InputStream inputStream = getAssets().open("demo_dks.zip");
+                    byte[] buffer = new byte[100000];
+                    int bytesRead;
+                    ByteArrayOutputStream output = new ByteArrayOutputStream();
+                    while ((bytesRead = inputStream.read(buffer)) != -1) {
+                        output.write(buffer, 0, bytesRead);
+                    }
+                    DKDownload.FileResponse response = new DKDownload.FileResponse();
+                    response.url = new URL("https://tosl.org/demo_dks.zip");
+                    response.fileBytes = output.toByteArray();
+
+                    new processUrlListCallbackCommand().execute(response);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                DKDownload.FileResponse response = new DKDownload.FileResponse();
-                response.url = new URL("https://tosl.org/demo_dks.zip");
-                response.fileBytes = output.toByteArray();
-
-                new processUrlListCallbackCommand().execute(response);
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+        } else {  // getting the RPIs failed, e.g. because we didn't get root rights
+            List<BarEntry> dataPoints1 = new ArrayList<>();
+            long currentTimeMillis = System.currentTimeMillis();
+            int currentTimestampLocalTZ = (int) (currentTimeMillis / 1000) + timeZoneOffsetSeconds;
+            int daysSinceEpochLocalTZ = currentTimestampLocalTZ / (3600*24);
+            for (int day = daysSinceEpochLocalTZ-13; day <= daysSinceEpochLocalTZ; day++) {
+                dataPoints1.add(new BarEntry(day, 0));
+            }
+            chart1.setData(dataPoints1, normalBarColor, "RPIs", false);
+            chart1.setFormatAndRefresh();
+            chart2.switchProgressBarOff();
+            chart3.switchProgressBarOff();
+            textViewErrorNoRpis.setText(R.string.error_no_rpis);
+            textViewErrorNoRpis.setBackgroundColor(Color.parseColor("white"));
         }
     }
 
@@ -243,7 +260,6 @@ public class MainActivity extends AppCompatActivity {
                     diagnosisKeysUrls.add(diagnosisKeysDownload.getDailyDKsURLForDate(date));
                 }
             }
-
             // get Hourly Diagnosis Keys URLs for the current day
             Calendar c = Calendar.getInstance();
             c.setTime(availableDates.getLast());
@@ -260,7 +276,6 @@ public class MainActivity extends AppCompatActivity {
             for (String hour : availableHours) {
                 diagnosisKeysUrls.add(diagnosisKeysDownload.getHourlyDKsURLForDateAndHour(currentDate, hour));
             }
-
             // Now we have all Diagnosis Keys URLs, let's process them
             processUrlList();
         }

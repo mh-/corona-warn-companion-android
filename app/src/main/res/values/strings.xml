@@ -41,4 +41,5 @@
     <string name="view_further_oss_licenses">Further Open Source Software Licenses</string>
     <string name="title_activity_further_licenses">Further OSS Licenses</string>
     <string name="demo_mode_switching_not_possible">Sorry, at the moment we cannot switch modes.\nPlease wait until all operations have finished.</string>
+    <string name="error_no_rpis">ERROR!\n\nNo encounters could be extracted.\nAre Exposure Notifications enabled?\nDid you grant ROOT rights to Corona Warn Companion?</string>
 </resources>

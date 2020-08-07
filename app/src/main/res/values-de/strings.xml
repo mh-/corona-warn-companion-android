@@ -41,4 +41,5 @@
     <string name="view_further_oss_licenses">Weitere Open Source Software Lizenzen</string>
     <string name="title_activity_further_licenses">Weitere OSS Lizenzen</string>
     <string name="demo_mode_switching_not_possible">Im Moment kann der Modus leider nicht gewechselt werden.\nBitte warte, bis alle Berechnungen abgeschlossen sind.</string>
+    <string name="error_no_rpis">FEHLER!\n\Begegnungen konnten nicht ausgelesen werden.\nSind Exposure Notifications eingeschaltet?\nHast Du der Corona Warn Companion App ROOT-Rechte gegeben?</string>
 </resources>
