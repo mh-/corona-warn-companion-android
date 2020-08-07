@@ -33,12 +33,14 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.AxisBase;
@@ -132,6 +134,10 @@ public class MainActivity extends AppCompatActivity {
                     recreate();
                     return true;
                 } else {
+                    CharSequence text = getString(R.string.demo_mode_switching_not_possible);
+                    Toast toast = Toast.makeText(this, text, Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
                     return false;
                 }
                 // TODO - handle this differently, safely stop the background threads

@@ -194,8 +194,7 @@ This program also uses libraries from other sources, e.g.
         limitations under the License.
   
   * Further information about other included libraries can be found within the app
-    (menu "Open Source Software Licenses" -> "Further Open Source Licenses"),
-    or the files `third_party_license_metadata` and `third_party_licenses`.
+    (menu "Open Source Software Licenses" -> "Further Open Source Licenses").
 
 Many of these libraries are licensed under the Apache License, Version 2.0 [link](http://www.apache.org/licenses/LICENSE-2.0):
 
