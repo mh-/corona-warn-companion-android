@@ -21,11 +21,9 @@ package org.tosl.coronawarncompanion;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -37,25 +35,16 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.github.mikephil.charting.charts.BarChart;
-import com.github.mikephil.charting.components.AxisBase;
-import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
-import com.github.mikephil.charting.listener.ChartTouchListener;
-import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
+import org.tosl.coronawarncompanion.barcharts.BarChartSync;
+import org.tosl.coronawarncompanion.barcharts.CwcBarChart;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysImport;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
 import org.tosl.coronawarncompanion.dkdownload.DKDownload;
@@ -81,7 +70,6 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 
 import static org.tosl.coronawarncompanion.dkdownload.Unzip.getUnzippedBytesFromZipFileBytes;
-import static org.tosl.coronawarncompanion.tools.Utils.getDateFromDaysSinceEpoch;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysSinceEpochFromENIN;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromMillis;
 import static org.tosl.coronawarncompanion.tools.Utils.getENINFromDate;
@@ -107,12 +95,13 @@ public class MainActivity extends AppCompatActivity {
     private final LinkedList<URL> diagnosisKeysUrls = new LinkedList<>();
     private ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList = null;
 
-    private final int gridColor = Color.parseColor("#E0E0E0");
-    private final int matchBarColor = Color.parseColor("#FF0000");
+    private final int normalBarColor = Color.parseColor("#8CEAFF");
+    private final int matchBarColor = Color.parseColor("red");
 
-    private BarChart chart1;
-    private BarChart chart2;
-    private BarChart chart3;
+    private BarChartSync barChartSync;
+    private CwcBarChart chart1;
+    private CwcBarChart chart2;
+    private CwcBarChart chart3;
     private TextView textView1;
     private TextView textView2;
     private TextView textView3;
@@ -173,24 +162,16 @@ public class MainActivity extends AppCompatActivity {
         timeZoneOffsetSeconds = app.getTimeZoneOffsetSeconds();
         Log.d(TAG, "Local TimeZone Offset in seconds: "+ timeZoneOffsetSeconds);
 
-        // 1st Section: Get RPIs from database (requires root)
-
         textView1 = findViewById(R.id.textView1);
         textView2 = findViewById(R.id.textView2);
         textView3 = findViewById(R.id.textView3);
-        chart1 = findViewById(R.id.chart1);
-        chart1.setNoDataText(getResources().getString(R.string.please_wait));
-        chart1.setNoDataTextColor(Color.parseColor("black"));
-        chart2 = findViewById(R.id.chart2);
-        chart2.setNoDataText(getResources().getString(R.string.please_wait));
-        chart2.setNoDataTextColor(Color.parseColor("black"));
-        chart3 = findViewById(R.id.chart3);
-        chart3.setNoDataText(getResources().getString(R.string.please_wait));
-        chart3.setNoDataTextColor(Color.parseColor("black"));
-        chart1.setOnChartGestureListener(new Chart1GestureListener());
-        chart2.setOnChartGestureListener(new Chart2GestureListener());
-        chart3.setOnChartGestureListener(new Chart3GestureListener());
-        chart3.setOnChartValueSelectedListener(new Chart3ValueSelectedListener());
+        barChartSync = new BarChartSync();
+        chart1 = new CwcBarChart(findViewById(R.id.chart1), findViewById(R.id.progressBar1), barChartSync, app);
+        chart2 = new CwcBarChart(findViewById(R.id.chart2), findViewById(R.id.progressBar2), barChartSync, app);
+        chart3 = new CwcBarChart(findViewById(R.id.chart3), findViewById(R.id.progressBar3), barChartSync, app);
+        chart3.getBarChart().setOnChartValueSelectedListener(new Chart3ValueSelectedListener());
+
+        // 1st Section: Get RPIs from database (requires root)
 
         ContactDbOnDisk contactDbOnDisk = new ContactDbOnDisk();
         rpiList = contactDbOnDisk.getRpisFromContactDB(DEMO_MODE);
@@ -221,58 +202,8 @@ public class MainActivity extends AppCompatActivity {
 
             textView1.setText(getString(R.string.rpis_extracted, count, minDateStr, maxDateStr));
 
-            BarDataSet dataSet1 = new BarDataSet(dataPoints1, "RPIs"); // add entries to dataSet1
-            dataSet1.setAxisDependency(YAxis.AxisDependency.LEFT);
-
-            BarData barData1 = new BarData(dataSet1);
-            dataSet1.setHighlightEnabled(false);
-            chart1.setData(barData1);
-            //chart1.setFitBars(true); // make the x-axis fit exactly all bars
-
-            // the labels that should be drawn on the XAxis
-            ValueFormatter xAxisFormatter1 = new ValueFormatter() {
-                @Override
-                public String getAxisLabel(float value, AxisBase axis) {
-                    return dateFormat.format(getDateFromDaysSinceEpoch((int) value));
-                }
-            };
-            // the labels that should be drawn on the YAxis
-            ValueFormatter yAxisFormatter1 = new ValueFormatter() {
-                @SuppressLint("DefaultLocale")
-                @Override
-                public String getAxisLabel(float value, AxisBase axis) {
-                    return String.format("%5d", (int) value);
-                }
-            };
-            // the bar labels
-            ValueFormatter BarFormatter1 = new ValueFormatter() {
-                @Override
-                public String getBarLabel(BarEntry barEntry) {
-                    return String.valueOf((int) barEntry.getY());
-                }
-            };
-            barData1.setValueFormatter(BarFormatter1);
-            XAxis xAxis = chart1.getXAxis();
-            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-            xAxis.setValueFormatter(xAxisFormatter1);
-            xAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
-            xAxis.setGranularityEnabled(true);
-            xAxis.setDrawGridLines(false);
-
-            YAxis yAxis = chart1.getAxisLeft();
-            yAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
-            yAxis.setGranularityEnabled(true);
-            yAxis.setAxisMinimum(0.0f);
-            yAxis.setGridColor(gridColor);
-            yAxis.setValueFormatter(yAxisFormatter1);
-
-            chart1.getAxisRight().setAxisMinimum(0.0f);
-            chart1.getAxisRight().setDrawLabels(false);
-            chart1.getLegend().setEnabled(false);
-            chart1.getDescription().setEnabled(false);
-            chart1.setScaleYEnabled(false);
-            chart1.getViewPortHandler().setMaximumScaleX(5.0f);
-            chart1.invalidate(); // refresh
+            chart1.setData(dataPoints1, normalBarColor, "RPIs", false);
+            chart1.setFormatAndRefresh();
         }
 
         // 2nd Section: Diagnosis Keys
@@ -405,65 +336,8 @@ public class MainActivity extends AppCompatActivity {
             dataPoints2.add(new BarEntry(getDaysSinceEpochFromENIN(ENIN), numEntries));
         }
 
-        // set date label formatter
-        String deviceDateFormat = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "dM");
-        DateFormat dateFormat = new SimpleDateFormat(deviceDateFormat, Locale.getDefault());
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        // UTC because we don't want DateFormat to do additional time zone compensation
-
-        BarDataSet dataSet2 = new BarDataSet(dataPoints2, "DKs"); // add entries to dataSet2
-        dataSet2.setHighlightEnabled(false);
-        dataSet2.setAxisDependency(YAxis.AxisDependency.LEFT);
-
-        BarData barData2 = new BarData(dataSet2);
-        chart2.setData(barData2);
-        findViewById(R.id.progressBar2).setVisibility(View.GONE);
-        //chart2.setFitBars(true); // make the x-axis fit exactly all bars
-
-        // the labels that should be drawn on the XAxis
-        ValueFormatter xAxisFormatter2 = new ValueFormatter() {
-            @Override
-            public String getAxisLabel(float value, AxisBase axis) {
-                return dateFormat.format(getDateFromDaysSinceEpoch((int) value));
-            }
-        };
-        // the labels that should be drawn on the YAxis
-        ValueFormatter yAxisFormatter2 = new ValueFormatter() {
-            @SuppressLint("DefaultLocale")
-            @Override
-            public String getAxisLabel(float value, AxisBase axis) {
-                return String.format("%5d", (int) value);
-            }
-        };
-        // the bar labels
-        ValueFormatter BarFormatter2 = new ValueFormatter() {
-            @Override
-            public String getBarLabel(BarEntry barEntry) {
-                return String.valueOf((int) barEntry.getY());
-            }
-        };
-        barData2.setValueFormatter(BarFormatter2);
-        XAxis xAxis = chart2.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setValueFormatter(xAxisFormatter2);
-        xAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
-        xAxis.setGranularityEnabled(true);
-        xAxis.setDrawGridLines(false);
-
-        YAxis yAxis = chart2.getAxisLeft();
-        yAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
-        yAxis.setGranularityEnabled(true);
-        yAxis.setAxisMinimum(0.0f);
-        yAxis.setGridColor(gridColor);
-        yAxis.setValueFormatter(yAxisFormatter2);
-
-        chart2.getAxisRight().setAxisMinimum(0.0f);
-        chart2.getAxisRight().setDrawLabels(false);
-        chart2.getLegend().setEnabled(false);
-        chart2.getDescription().setEnabled(false);
-        chart2.setScaleYEnabled(false);
-        chart2.getViewPortHandler().setMaximumScaleX(5.0f);
-        chart2.invalidate(); // refresh
+        chart2.setData(dataPoints2, normalBarColor,"DKs", false);
+        chart2.setFormatAndRefresh();
 
         textView3.setText(getString(R.string.matching_not_done_yet));
         startMatching();
@@ -541,160 +415,14 @@ public class MainActivity extends AppCompatActivity {
             }
             Log.d(TAG, "Number of matches displayed: " + total);
 
-            // set date label formatter
-            String deviceDateFormat = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "dM");
-            DateFormat dateFormat = new SimpleDateFormat(deviceDateFormat, Locale.getDefault());
-            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-            // UTC because we don't want DateFormat to do additional time zone compensation
-
-            BarDataSet dataSet3 = new BarDataSet(dataPoints3, "Matches"); // add entries to dataSet3
-            dataSet3.setAxisDependency(YAxis.AxisDependency.LEFT);
-            dataSet3.setColor(matchBarColor);
-
-            BarData barData3 = new BarData(dataSet3);
-            chart3.setData(barData3);
-            findViewById(R.id.progressBar3).setVisibility(View.GONE);
-            //chart3.setFitBars(true); // make the x-axis fit exactly all bars
-
-            // the labels that should be drawn on the XAxis
-            ValueFormatter xAxisFormatter3 = new ValueFormatter() {
-                @Override
-                public String getAxisLabel(float value, AxisBase axis) {
-                    return dateFormat.format(getDateFromDaysSinceEpoch((int) value));
-                }
-            };
-            // the labels that should be drawn on the YAxis
-            ValueFormatter yAxisFormatter3 = new ValueFormatter() {
-                @SuppressLint("DefaultLocale")
-                @Override
-                public String getAxisLabel(float value, AxisBase axis) {
-                    return String.format("%5d", (int) value);
-                }
-            };
-            // the bar labels
-            ValueFormatter BarFormatter3 = new ValueFormatter() {
-                @Override
-                public String getBarLabel(BarEntry barEntry) {
-                    return String.valueOf((int) barEntry.getY());
-                }
-            };
-            barData3.setValueFormatter(BarFormatter3);
-            XAxis xAxis = chart3.getXAxis();
-            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-            xAxis.setValueFormatter(xAxisFormatter3);
-            xAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
-            xAxis.setGranularityEnabled(true);
-            xAxis.setDrawGridLines(false);
-
-            YAxis yAxis = chart3.getAxisLeft();
-            yAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
-            yAxis.setGranularityEnabled(true);
-            yAxis.setAxisMinimum(0.0f);
-            yAxis.setGridColor(gridColor);
-            yAxis.setValueFormatter(yAxisFormatter3);
-
-            chart3.getAxisRight().setAxisMinimum(0.0f);
-            chart3.getAxisRight().setDrawLabels(false);
-            chart3.getLegend().setEnabled(false);
-            chart3.getDescription().setEnabled(false);
-            chart3.setScaleYEnabled(false);
-            chart3.getViewPortHandler().setMaximumScaleX(5.0f);
-            chart3.invalidate(); // refresh
+            chart3.setData(dataPoints3, matchBarColor, "Matches", true);
+            chart3.setFormatAndRefresh();
 
             // End of this path.
             // From now on, the user can scroll the charts,
             // or tap on a match to reach the DisplayDetailsActivity.
 
             backgroundThreadsRunning = false;  // this enables toggling the DEMO_MODE again
-        }
-    }
-
-
-    private void syncCharts (BarChart mainChart, BarChart[]otherCharts){
-        Matrix mainMatrix;
-        float[] mainVals = new float[9];
-        Matrix otherMatrix;
-        float[] otherValues = new float[9];
-        mainMatrix = mainChart.getViewPortHandler().getMatrixTouch();
-        mainMatrix.getValues(mainVals);
-
-        for (BarChart tempChart : otherCharts) {
-            otherMatrix = tempChart.getViewPortHandler().getMatrixTouch();
-            otherMatrix.getValues(otherValues);
-            otherValues[Matrix.MSCALE_X] = mainVals[Matrix.MSCALE_X];
-            otherValues[Matrix.MTRANS_X] = mainVals[Matrix.MTRANS_X];
-            otherValues[Matrix.MSKEW_X] = mainVals[Matrix.MSKEW_X];
-            otherMatrix.setValues(otherValues);
-            tempChart.getViewPortHandler().refresh(otherMatrix, tempChart, true);
-        }
-    }
-
-    class Chart1GestureListener implements OnChartGestureListener {
-        public void onChartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) { }
-        public void onChartGestureEnd(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) { }
-        public void onChartLongPressed(MotionEvent me) { }
-        public void onChartDoubleTapped(MotionEvent me) {
-            BarChart[] otherCharts = {chart2, chart3};
-            syncCharts(chart1, otherCharts);
-        }
-        public void onChartSingleTapped(MotionEvent me) { }
-        public void onChartFling(MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) {
-            BarChart[] otherCharts = {chart2, chart3};
-            syncCharts(chart1, otherCharts);
-        }
-        public void onChartScale(MotionEvent me, float scaleX, float scaleY) {
-            BarChart[] otherCharts = {chart2, chart3};
-            syncCharts(chart1, otherCharts);
-        }
-        public void onChartTranslate(MotionEvent me, float dX, float dY) {
-            BarChart[] otherCharts = {chart2, chart3};
-            syncCharts(chart1, otherCharts);
-        }
-    }
-
-    class Chart2GestureListener implements OnChartGestureListener {
-        public void onChartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) { }
-        public void onChartGestureEnd(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) { }
-        public void onChartLongPressed(MotionEvent me) { }
-        public void onChartDoubleTapped(MotionEvent me) {
-            BarChart[] otherCharts = {chart1, chart3};
-            syncCharts(chart2, otherCharts);
-        }
-        public void onChartSingleTapped(MotionEvent me) { }
-        public void onChartFling(MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) {
-            BarChart[] otherCharts = {chart1, chart3};
-            syncCharts(chart2, otherCharts);
-        }
-        public void onChartScale(MotionEvent me, float scaleX, float scaleY) {
-            BarChart[] otherCharts = {chart1, chart3};
-            syncCharts(chart2, otherCharts);
-        }
-        public void onChartTranslate(MotionEvent me, float dX, float dY) {
-            BarChart[] otherCharts = {chart1, chart3};
-            syncCharts(chart2, otherCharts);
-        }
-    }
-
-    class Chart3GestureListener implements OnChartGestureListener {
-        public void onChartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) { }
-        public void onChartGestureEnd(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) { }
-        public void onChartLongPressed(MotionEvent me) { }
-        public void onChartDoubleTapped(MotionEvent me) {
-            BarChart[] otherCharts = {chart1, chart2};
-            syncCharts(chart3, otherCharts);
-        }
-        public void onChartSingleTapped(MotionEvent me) { }
-        public void onChartFling(MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) {
-            BarChart[] otherCharts = {chart1, chart2};
-            syncCharts(chart3, otherCharts);
-        }
-        public void onChartScale(MotionEvent me, float scaleX, float scaleY) {
-            BarChart[] otherCharts = {chart1, chart2};
-            syncCharts(chart3, otherCharts);
-        }
-        public void onChartTranslate(MotionEvent me, float dX, float dY) {
-            BarChart[] otherCharts = {chart1, chart2};
-            syncCharts(chart3, otherCharts);
         }
     }
 
@@ -719,7 +447,7 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra(EXTRA_MESSAGE_DAY, String.valueOf(x));
                 intent.putExtra(EXTRA_MESSAGE_COUNT, String.valueOf(y));
                 startActivity(intent);
-                chart3.highlightValues(null);
+                chart3.getBarChart().highlightValues(null);
             }
         }
 
