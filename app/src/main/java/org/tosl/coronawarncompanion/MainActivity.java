@@ -214,7 +214,8 @@ public class MainActivity extends AppCompatActivity {
 
             if (!DEMO_MODE) {
                 diagnosisKeysDownload = new DKDownload();
-                diagnosisKeysDownload.availableDatesRequest(new availableDatesResponseCallbackCommand());
+                diagnosisKeysDownload.availableDatesRequest(new availableDatesResponseCallbackCommand(),
+                        new errorResponseCallbackCommand());
                 // (the rest is done asynchronously in callback functions)
             } else {
                 try {
@@ -251,6 +252,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public class errorResponseCallbackCommand implements DKDownload.CallbackCommand {
+        public void execute(Object data) {
+            textViewErrorNoRpis.setText(R.string.error_download);
+            textViewErrorNoRpis.setBackgroundColor(Color.parseColor("white"));
+            backgroundThreadsRunning = false;
+        }
+    }
+
     public class availableDatesResponseCallbackCommand implements DKDownload.CallbackCommand {
         public void execute(Object data) {
             // get Daily Diagnosis Keys URLs for the previous days
@@ -284,7 +293,8 @@ public class MainActivity extends AppCompatActivity {
     private void processUrlList() {
         for (URL url : diagnosisKeysUrls) {
             Log.d(TAG, "Going to download: " + url);
-            diagnosisKeysDownload.dkFileRequest(url, new processUrlListCallbackCommand());
+            diagnosisKeysDownload.dkFileRequest(url, new processUrlListCallbackCommand(),
+                    new errorResponseCallbackCommand());
         }
     }
 

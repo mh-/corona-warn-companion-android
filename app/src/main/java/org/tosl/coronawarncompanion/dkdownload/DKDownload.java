@@ -30,6 +30,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.tosl.coronawarncompanion.CWCApplication;
+import org.tosl.coronawarncompanion.MainActivity;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -53,6 +54,7 @@ public class DKDownload {
 
     private final RequestQueue queue;
     private final Response.ErrorListener errorResponseListener;
+    private CallbackCommand errorResponseCallbackCommand;
 
     public DKDownload() {
         cachePathStr = Objects.requireNonNull(CWCApplication.getAppContext().getExternalCacheDir()).getPath();
@@ -63,8 +65,10 @@ public class DKDownload {
         errorResponseListener = new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                //TODO
                 Log.e(TAG, "VolleyError "+error);
+                if (errorResponseCallbackCommand != null) {
+                    doCallback(errorResponseCallbackCommand, null);
+                }
             }
         };
     }
@@ -98,7 +102,8 @@ public class DKDownload {
         return reducedStr.split(",");
     }
 
-    public void availableDatesRequest(CallbackCommand callbackCommand) {
+    public void availableDatesRequest(CallbackCommand callbackCommand,
+                                      MainActivity.errorResponseCallbackCommand errorResponseCallbackCommand) {
 
         Listener<String> responseListener = new Listener<String>() {
             @Override
@@ -120,6 +125,7 @@ public class DKDownload {
                 doCallback(callbackCommand, result);
             }
         };
+        this.errorResponseCallbackCommand = errorResponseCallbackCommand;
         startHttpRequestForStringResponse(CWA_URL+"", responseListener, errorResponseListener);
     }
 
@@ -158,7 +164,8 @@ public class DKDownload {
         queue.add(byteArrayRequest);
     }
 
-    public void dkFileRequest(URL url, CallbackCommand callbackCommand) {
+    public void dkFileRequest(URL url, MainActivity.processUrlListCallbackCommand callbackCommand,
+                              CallbackCommand errorResponseCallbackCommand) {
         FileResponse fileResponse = new FileResponse();
         fileResponse.url = url;
 
@@ -170,6 +177,7 @@ public class DKDownload {
                 doCallback(callbackCommand, fileResponse);
             }
         };
+        this.errorResponseCallbackCommand = errorResponseCallbackCommand;
         startHttpRequestForByteArrayResponse(url.toString(), responseListener, errorResponseListener);
     }
 
