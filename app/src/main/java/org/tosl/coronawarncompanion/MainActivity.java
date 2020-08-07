@@ -1,3 +1,21 @@
+/*
+ * Corona-Warn-Companion. An app that shows COVID-19 Exposure Notifications details.
+ * Copyright (C) 2020  Michael Huebler <corona-warn-companion@tosl.org> and other contributors.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package org.tosl.coronawarncompanion;
 
 import androidx.appcompat.app.ActionBar;
@@ -117,6 +135,9 @@ public class MainActivity extends AppCompatActivity {
                     return false;
                 }
                 // TODO - handle this differently, safely stop the background threads
+            case R.id.osslicenses:
+                startActivity(new Intent(this, DisplayLicensesActivity.class));
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -132,9 +153,9 @@ public class MainActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             if (!DEMO_MODE) {
-                actionBar.setTitle("Corona Warn Companion");
+                actionBar.setTitle(R.string.title_activity_main);
             } else {
-                actionBar.setTitle("Corona Warn Companion DEMO");
+                actionBar.setTitle(R.string.title_activity_main_demo);
             }
         }
 
@@ -259,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             try {
                 InputStream inputStream = getAssets().open("demo_dks.zip");
-                byte[] buffer = new byte[150000];
+                byte[] buffer = new byte[100000];
                 int bytesRead;
                 ByteArrayOutputStream output = new ByteArrayOutputStream();
                 while ((bytesRead = inputStream.read(buffer)) != -1) {

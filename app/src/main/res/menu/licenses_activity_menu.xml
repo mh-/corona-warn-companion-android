@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/demomode"
-        android:title="@string/toggle_demo_mode" />
     <item android:id="@+id/osslicenses"
-        android:title="@string/view_oss_licenses" />
+        android:title="@string/view_further_oss_licenses" />
 </menu>

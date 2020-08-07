@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name">Corona-Warn-Companion</string>
     <plurals name="matches_on_day">
         <item quantity="one">Risk encounter on %s:</item>
         <item quantity="other">Risk encounters on %s:</item>
     </plurals>
+    <plurals name="number_of_matches_found">
+        <item quantity="one">%d risk encounter. Tap to see details…</item>
+        <item quantity="other">%d risk encounters. Tap to see details…</item>
+    </plurals>
+    <string name="app_name">Corona-Warn-Companion</string>
     <string name="no_matches_found">No risk encounters found.</string>
     <string name="rpis_extracted" tools:ignore="PluralsCandidate">%d encounters scanned (%s-%s).</string>
     <string name="diagnosis_keys_downloaded" tools:ignore="PluralsCandidate">%d diagnosis keys downloaded."</string>
@@ -16,10 +20,6 @@
     <string name="please_wait">Please wait…</string>
     <string name="extracting_encounters">Extracting encounters…</string>
     <string name="downloading_diagnosis_keys">Downloading diagnosis keys…</string>
-    <plurals name="number_of_matches_found">
-        <item quantity="one">%d risk encounter. Tap to see details…</item>
-        <item quantity="other">%d risk encounters. Tap to see details…</item>
-    </plurals>
     <string name="matching_soon">Matching will start soon…</string>
     <string name="report_type">Report type</string>
     <string name="report_type_revoked">revoked</string>
@@ -32,4 +32,12 @@
     <string name="distance_shown_as_attenuation">Distance (attenuation in dB)</string>
     <string name="show_hide_all_scans">Show/Hide All Scans</string>
     <string name="toggle_demo_mode">Toggle Demo Mode</string>
+    <string name="view_oss_licenses">Open Source Software Licenses</string>
+    <string name="title_activity_licenses">OSS Licenses</string>
+    <string name="title_activity_main">Corona Warn Companion</string>
+    <string name="title_activity_main_demo">Corona Warn Companion DEMO</string>
+    <string name="title_activity_details">Corona Warn Companion</string>
+    <string name="title_activity_details_demo">DEMO sample details</string>
+    <string name="view_further_oss_licenses">Further Open Source Software Licenses</string>
+    <string name="title_activity_further_licenses">Further OSS Licenses</string>
 </resources>

@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/*
+ * Michael Huebler, 2020-08: As required by the license
+ * ("You must cause any modified files to carry prominent notices stating that You changed the files")
+ * I hereby state that I changed this file: I modified the "package" line.
+*/
 
 package org.tosl.coronawarncompanion.crypto;
 

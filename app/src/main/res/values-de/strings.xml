@@ -32,4 +32,12 @@
     <string name="distance_shown_as_attenuation">Abstand (Dämpfung in dB)</string>
     <string name="show_hide_all_scans">Alle Begegnungen zeigen/verbergen</string>
     <string name="toggle_demo_mode">Demo Modus an/aus</string>
+    <string name="view_oss_licenses">Open Source Software Lizenzen</string>
+    <string name="title_activity_licenses">OSS Lizenzen</string>
+    <string name="title_activity_main">Corona Warn Companion</string>
+    <string name="title_activity_main_demo">Corona Warn Companion DEMO</string>
+    <string name="title_activity_details">Corona Warn Companion</string>
+    <string name="title_activity_details_demo">DEMO Beispiel-Details</string>
+    <string name="view_further_oss_licenses">Weitere Open Source Software Lizenzen</string>
+    <string name="title_activity_further_licenses">Weitere OSS Lizenzen</string>
 </resources>
