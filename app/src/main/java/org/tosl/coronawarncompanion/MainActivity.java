@@ -118,6 +118,9 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
+            case R.id.about:
+                startActivity(new Intent(this, AboutActivity.class));
+                return true;
             case R.id.demomode:
                 if (!backgroundThreadsRunning) {  // don't do recreate() while background threads are running
                     CWCApplication.DEMO_MODE = !CWCApplication.DEMO_MODE;
