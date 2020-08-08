@@ -45,4 +45,6 @@
     <string name="error_download">Error!\n\nDownload of Diagnosis Keys failed.\nIs your internet connection working?</string>
     <string name="menu_entry_about">About this app</string>
     <string name="title_activity_about">About Corona Warn Companion</string>
+    <string name="about_name">Corona-\nWarn-\nCompanion</string>
+    <string name="about_version">Version\n%s (%d, %s)</string>
 </resources>

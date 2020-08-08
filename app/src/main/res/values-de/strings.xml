@@ -45,4 +45,6 @@
     <string name="error_download">Fehler!\n\nEs gab ein Problem beim Herunterladen der Diagnoseschlüssel.\nFunktioniert Deine Internetverbindung?</string>
     <string name="menu_entry_about">Über diese App</string>
     <string name="title_activity_about">Über Corona Warn Companion</string>
+    <string name="about_name">Corona-\nWarn-\nCompanion</string>
+    <string name="about_version">Version\n%s (%d, %s)</string>
 </resources>

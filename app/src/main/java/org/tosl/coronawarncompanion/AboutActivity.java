@@ -27,7 +27,9 @@ import android.widget.TextView;
 
 public class AboutActivity extends AppCompatActivity {
 
-    private TextView textView;
+    private TextView headingTextView;
+    private TextView versionTextView;
+    private TextView mainTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +42,12 @@ public class AboutActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setTitle(R.string.title_activity_about);
         }
-        textView = findViewById(R.id.textView);
+        headingTextView = findViewById(R.id.headingTextView);
+        versionTextView = findViewById(R.id.versionTextView);
+        mainTextView = findViewById(R.id.mainTextView);
 
+        headingTextView.setText(R.string.about_name);
+        versionTextView.setText(getString(R.string.about_version,
+                BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, BuildConfig.BUILD_TYPE));
     }
 }
