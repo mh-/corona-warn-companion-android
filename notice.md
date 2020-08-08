@@ -94,7 +94,7 @@ This program also uses libraries from other sources, e.g.
         (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
         OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  * Markwon - io.noties.markwon:core:4.5.0 - [link](https://github.com/noties/Markwon)
+  * Markwon - io.noties.markwon:core:4.5.0, io.noties.markwon:image:4.5.0 - [link](https://github.com/noties/Markwon)
 
         Copyright 2019 Dimitry Ivanov (legal@noties.io)
 

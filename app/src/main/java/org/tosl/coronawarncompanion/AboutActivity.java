@@ -18,11 +18,23 @@
 
 package org.tosl.coronawarncompanion;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.widget.TextView;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Locale;
+
+import io.noties.markwon.Markwon;
+import io.noties.markwon.image.ImagesPlugin;
+import io.noties.markwon.image.file.FileSchemeHandler;
 
 
 public class AboutActivity extends AppCompatActivity {
@@ -46,8 +58,34 @@ public class AboutActivity extends AppCompatActivity {
         versionTextView = findViewById(R.id.versionTextView);
         mainTextView = findViewById(R.id.mainTextView);
 
-        headingTextView.setText(R.string.about_name);
         versionTextView.setText(getString(R.string.about_version,
                 BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, BuildConfig.BUILD_TYPE));
+
+        String filename = "about_en.md";
+        if (Locale.getDefault().getLanguage().equals("de")) {
+            filename = "about_de.md";
+        }
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        try {
+            InputStream inputStream = getAssets().open(filename);
+            byte[] buffer = new byte[100000];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                output.write(buffer, 0, bytesRead);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Context context = this;
+        final Markwon markwon = Markwon.builder(context)
+                .usePlugin(ImagesPlugin.create(new ImagesPlugin.ImagesConfigure() {
+                    @Override
+                    public void configureImages(@NonNull ImagesPlugin plugin) {
+                        plugin.addSchemeHandler(FileSchemeHandler.createWithAssets(context));
+                    }
+                }))
+                .build();
+        markwon.setMarkdown(mainTextView, new String(output.toByteArray(), StandardCharsets.UTF_8));
     }
 }

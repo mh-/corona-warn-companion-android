@@ -66,6 +66,7 @@ dependencies {
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     implementation 'com.android.volley:volley:1.1.1'
     implementation "io.noties.markwon:core:4.5.0"
+    implementation "io.noties.markwon:image:4.5.0"
     implementation 'com.google.protobuf:protobuf-java:3.12.2'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
