@@ -31,4 +31,4 @@ Der Source Code der App ist unter https://github.com/mh-/corona-warn-companion-a
 
 # Weiteres
 - Die App dient rein privaten Zwecken, mit ihr wird kein geschäftlicher Zweck verfolgt.
-- Die App ist kein "Hacker-Tool". Sie liest lediglich Daten aus dem Speicher Deines eigenen Geräts aus, die dort unverschlüsselt abgelegt sind.
+- Die App ist kein "Hacker-Tool". Sie liest lediglich Daten aus dem Speicher Deines eigenen Geräts aus, die dort ohne zusätzliche Verschlüsselung abgelegt sind.
