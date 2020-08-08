@@ -1,20 +1,23 @@
 © 2020  Michael Huebler and other contributors.
 Die Veröffentlichung dieses Programms erfolgt in der Hoffnung, dass es Dir von Nutzen sein wird, aber OHNE IRGENDEINE GARANTIE, sogar ohne die implizite Garantie ALLGEMEINER GEBRAUCHSTAUGLICHKEIT oder der VERWENDBARKEIT FÜR EINEN BESTIMMTEN ZWECK. Details findest Du in der GNU General Public License.
 
-![alternative text](file:///android_asset/icon_large.png)
-
 # Funktionen
 Diese App hilft Dir, Warnungen der offiziellen Corona-Warn-App besser zu verstehen und einzuordnen.
 
 **ACHTUNG:** DIE APP BENÖTIGT ROOT RECHTE. Ohne Root Rechte ist nur ein Demo-Modus möglich, der nicht auf Deine Risiko-Begegnungen zugreifen kann.
 
 ### Was die App macht:
-1. Die App liest die von Deinem Gerät aufgezeichneten Rolling Proximity IDs aus der Exposure Notifications Datenbank aus (das geht nur mit Root Rechten, weshalb die offizielle Corona-Warn-App diese Details nicht anzeigen kann).
-2. Die App lädt die Positiv-Schlüssel (Diagnose-Schlüssel, Diagnosis Keys) vom offiziellen Corona-Warn-Server. Dabei lädt sie die täglich veröffentlichen Schlüssel der letzten Tage und die stündlich veröffentlichten Schlüssel des heutigen Tages. Daher werden möglicherweise andere Informationen als in der offiziellen Corona-Warn-App angezeigt. 
-3. Die App gleicht beides ab, um Übereinstimmungen (Risiko-Begegnungen) zu finden.
+1. Die App liest die von Deinem Gerät aufgezeichneten Rolling Proximity IDs aus der Exposure Notifications Datenbank aus (das geht nur mit Root Rechten, weshalb die offizielle Corona-Warn-App diese Details nicht anzeigen kann).  
+   ![-Beispiel Erfasste Begegnungen-](file:///android_asset/rpis_de.png)
+2. Die App lädt die Positiv-Schlüssel (Diagnose-Schlüssel, Diagnosis Keys) vom offiziellen Corona-Warn-Server. Dabei lädt sie die täglich veröffentlichen Schlüssel der letzten Tage und die stündlich veröffentlichten Schlüssel des heutigen Tages. Daher werden möglicherweise andere Informationen als in der offiziellen Corona-Warn-App angezeigt.  
+   ![-Beispiel Positiv-Schlüssel-](file:///android_asset/dks_de.png)
+3. Die App gleicht beides ab, um Übereinstimmungen (Risiko-Begegnungen) zu finden.  
+   ![-Beispiel Treffer-](file:///android_asset/matches_de.png)
 
 Wenn Risiko-Begegnungen gefunden wurden, zeigt sie die Details dazu an: 
 Zu welchen Uhrzeiten und mit welcher Funk-Dämpfung (entspricht grob dem Abstand) haben die Begegnungen stattgefunden, und welche Übertragungsrisiko-Stufe hatte die Begegnung.
+![-Beispiel Details-](file:///android_asset/details_de.png)
+Dabei entspricht 1 einem niedrigen und 8 einem hohen Übertragungsrisiko.
 
 ### Was die App nicht macht:
 - Die App verarbeitet keine personenbezogenen Daten.

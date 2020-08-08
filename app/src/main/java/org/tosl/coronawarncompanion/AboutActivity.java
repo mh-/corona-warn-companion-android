@@ -39,7 +39,6 @@ import io.noties.markwon.image.file.FileSchemeHandler;
 
 public class AboutActivity extends AppCompatActivity {
 
-    private TextView headingTextView;
     private TextView versionTextView;
     private TextView mainTextView;
 
@@ -54,7 +53,6 @@ public class AboutActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setTitle(R.string.title_activity_about);
         }
-        headingTextView = findViewById(R.id.headingTextView);
         versionTextView = findViewById(R.id.versionTextView);
         mainTextView = findViewById(R.id.mainTextView);
 
