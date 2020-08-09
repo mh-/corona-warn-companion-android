@@ -66,12 +66,12 @@ import static org.tosl.coronawarncompanion.tools.Utils.xorTwoByteArrays;
 public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecyclerViewAdapter.ViewHolder> {
 
     private static final String TAG = "CRRecyclerViewAdapter";
-    private final int gridColor = Color.parseColor("#E0E0E0");
-    private final int redColor = Color.parseColor("#FF0000");
-    private final int orangeColor = Color.parseColor("#FFA500");
-    private final int yellowColor = Color.parseColor("#FFFF00");
-    private final int greenColor = Color.parseColor("#00FF00");
-    private final int blackColor = Color.parseColor("#000000");
+    private static final int gridColor = Color.parseColor("#E0E0E0");
+    private static final int redColor = Color.parseColor("#FF0000");
+    private static final int orangeColor = Color.parseColor("#FFA500");
+    private static final int yellowColor = Color.parseColor("#FFFF00");
+    private static final int greenColor = Color.parseColor("#00FF00");
+    private static final int blackColor = Color.parseColor("#000000");
 
     private final ArrayList<Pair<DiagnosisKeysProtos.TemporaryExposureKey, MatchEntryContent.GroupedByDkMatchEntries>> mValues;
     private CWCApplication mApp;
@@ -128,7 +128,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
             hasReportType = true;
         }
 
-        MatchEntryDetails matchEntryDetails = getMatchEntryDetails(list);
+        MatchEntryDetails matchEntryDetails = getMatchEntryDetails(list, mApp.getTimeZoneOffsetSeconds());
         int minTimestampLocalTZDay0 = matchEntryDetails.minTimestampLocalTZDay0;
         int maxTimestampLocalTZDay0 = matchEntryDetails.maxTimestampLocalTZDay0;
 
@@ -168,7 +168,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         holder.mChartView.getLineData().getDataSetByIndex(1).setVisible(this.showAllScans);
     }
 
-    public class MatchEntryDetails {
+    public static class MatchEntryDetails {
         public ArrayList<Entry> dataPoints;
         public ArrayList<Integer> dotColors;
         public ArrayList<Entry> dataPointsMinAttenuation;
@@ -182,7 +182,8 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         }
     }
 
-    private MatchEntryDetails getMatchEntryDetails(ArrayList<Matcher.MatchEntry> list) {
+    public static MatchEntryDetails getMatchEntryDetails(ArrayList<Matcher.MatchEntry> list,
+                                                         int timeZoneOffset) {
         // Threshold value for break detection:
         final int pauseThresholdSeconds = 10;
 
@@ -210,7 +211,6 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
                 //Log.d(TAG, "RSSI: "+rssi+" dBm");
                 int attenuation = txPower - rssi;
                 //Log.d(TAG, "Attenuation: "+attenuation+" dB");
-                int timeZoneOffset = mApp.getTimeZoneOffsetSeconds();
                 int timestampLocalTZ = scanRecord.getTimestamp() + timeZoneOffset;
                 // reduce to "day0", to improve resolution within the float x value:
                 int timestampLocalTZDay0 = timestampLocalTZ % (24*3600);
@@ -318,7 +318,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         return result;
     }
 
-    private int getDotColorForAttenuation(int attenuation) {
+    private static int getDotColorForAttenuation(int attenuation) {
         if (attenuation < 55) {
             return redColor;
         } else if (attenuation <= 63) {
