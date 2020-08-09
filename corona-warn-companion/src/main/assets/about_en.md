@@ -9,7 +9,7 @@ This app helps you to better understand warnings of the official Corona-Warn-App
 ### What the app does:
 1. The app reads the Rolling Proximity IDs recorded by your device from the Exposure Notifications database (this is only possible with root permissions, which is why the official Corona-Warn-App cannot display these details).  
    ![-Example Recorded Encounters-](file:///android_asset/rpis_en.png)
-2. The app downloads the Diagnosis Keys from the official Corona-Warn-Server. It downloads the keys published daily for the last few days and the keys published every hour for today. Therefore, different information than in the official Corona-Warn-App might be displayed.  
+2. The app downloads the Diagnosis Keys from the official Corona-Warn-Server. It downloads the keys published daily for the last few days, and the keys published every hour for today. Therefore, different information than in the official Corona-Warn-App might be displayed.  
    ![-Example Diagnosis Keys-](file:///android_asset/dks_en.png)
 3. The app compares both in order to find matches (risk encounters).  
    ![-Example Matches-](file:///android_asset/matches_en.png)
@@ -17,6 +17,7 @@ This app helps you to better understand warnings of the official Corona-Warn-App
 If risk encounters are found, it shows the details:
 At which times and with which radio attenuation (roughly corresponds to the distance) did the encounters take place, and what level of transmission risk did the encounter have.
 ![-Example Details-](file:///android_asset/details_en.png)
+
 Note that 1 means a low and 8 means a high transmission risk.
 
 ### What the app does not do:

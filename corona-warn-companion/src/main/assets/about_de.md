@@ -17,6 +17,7 @@ Diese App hilft Dir, Warnungen der offiziellen Corona-Warn-App besser zu versteh
 Wenn Risiko-Begegnungen gefunden wurden, zeigt sie die Details dazu an: 
 Zu welchen Uhrzeiten und mit welcher Funk-Dämpfung (entspricht grob dem Abstand) haben die Begegnungen stattgefunden, und welche Übertragungsrisiko-Stufe hatte die Begegnung.
 ![-Beispiel Details-](file:///android_asset/details_de.png)
+
 Dabei entspricht 1 einem niedrigen und 8 einem hohen Übertragungsrisiko.
 
 ### Was die App nicht macht:
