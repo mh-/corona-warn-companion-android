@@ -15,7 +15,7 @@ This app helps you to better understand warnings of the official Corona-Warn-App
    ![-Example Matches-](file:///android_asset/matches_en.png)
 
 If risk encounters are found, it shows the details:
-At which times and with which radio attenuation (roughly corresponds to the distance) did the encounters take place, and what level of transmission risk did the encounter have.
+At which times and with which radio attenuation (roughly corresponds to the distance) did the encounters take place, and what level of transmission risk did the encounters have.
 ![-Example Details-](file:///android_asset/details_en.png)
 
 Note that 1 means a low and 8 means a high transmission risk.
