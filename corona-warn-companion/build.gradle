@@ -22,7 +22,28 @@ plugins {
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.android.gms.oss-licenses-plugin'
 
+/* Get password from macOS Keychain */
+def getPassword(String keyChain) {
+    def stdout = new ByteArrayOutputStream()
+    def stderr = new ByteArrayOutputStream()
+    exec {
+        commandLine 'security', '-q', 'find-generic-password', '-gl', keyChain
+        standardOutput = stdout
+        errorOutput = stderr
+        ignoreExitValue true
+    }
+    (stderr.toString().trim() =~ /password: "(.*)"/)[0][1]
+}
+
 android {
+    signingConfigs {
+        release {
+            storeFile file(System.getProperty("user.home") + "/AndroidSigningKeystores/" + project.name)
+            keyAlias 'upload'
+            storePassword getPassword("ANDROID_STORE_PASSWORD")
+            keyPassword getPassword("ANDROID_KEY_PASSWORD")
+        }
+    }
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
 
@@ -40,6 +61,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            signingConfig signingConfigs.debug
         }
     }
 
@@ -48,6 +73,10 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
         // Flag to enable support for the new language APIs
         coreLibraryDesugaringEnabled true
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
     }
 }
 

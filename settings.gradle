@@ -1,2 +1,2 @@
-include ':app'
+include ':corona-warn-companion'
 rootProject.name = "Corona-Warn-Companion"
