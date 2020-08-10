@@ -398,7 +398,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void run() {
-            android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
+            android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_DISPLAY);
 
             if ((rpiList != null) && (diagnosisKeysList != null)) {
                 MatchEntryContent matchEntryContent = new MatchEntryContent();
