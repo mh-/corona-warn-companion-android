@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Corona-Warn-Companion</string>
     <plurals name="matches_on_day">
         <item quantity="one">Risiko-Begegnung am %s:</item>
         <item quantity="other">Risiko-Begegnungen am %s:</item>
@@ -34,17 +33,16 @@
     <string name="menu_entry_toggle_demo_mode">Demo Modus an/aus</string>
     <string name="menu_entry_oss_licenses">Open Source Software Lizenzen</string>
     <string name="title_activity_licenses">OSS Lizenzen</string>
-    <string name="title_activity_main">Corona Warn Companion</string>
-    <string name="title_activity_main_demo">Corona Warn Companion DEMO</string>
-    <string name="title_activity_details">Corona Warn Companion</string>
+    <string name="title_activity_main">@string/app_name</string>
+    <string name="title_activity_main_demo_suffix">" DEMO"</string>
+    <string name="title_activity_details">@string/app_name</string>
     <string name="title_activity_details_demo">DEMO Beispiel-Details</string>
     <string name="menu_entry_view_further_oss_licenses">Weitere Open Source Software Lizenzen</string>
     <string name="title_activity_further_licenses">Weitere OSS Lizenzen</string>
     <string name="demo_mode_switching_not_possible">Im Moment kann der Modus leider nicht gewechselt werden.\nBitte warte, bis alle Berechnungen abgeschlossen sind.</string>
-    <string name="error_no_rpis">FEHLER!\n\Begegnungen konnten nicht ausgelesen werden.\nSind Exposure Notifications eingeschaltet?\nHast Du der Corona Warn Companion App ROOT-Rechte gegeben?</string>
+    <string name="error_no_rpis">FEHLER!\n\Begegnungen konnten nicht ausgelesen werden.\nSind Exposure Notifications eingeschaltet?\nHast Du dieser App ROOT-Rechte gegeben?</string>
     <string name="error_download">Fehler!\n\nEs gab ein Problem beim Herunterladen der Diagnoseschlüssel.\nFunktioniert Deine Internetverbindung?</string>
     <string name="menu_entry_about">Über diese App</string>
-    <string name="title_activity_about">Über Corona Warn Companion</string>
-    <string name="about_name">Corona-\nWarn-\nCompanion</string>
+    <string name="title_activity_about">Über diese App</string>
     <string name="about_version">Version\n%s (%d, %s)</string>
 </resources>

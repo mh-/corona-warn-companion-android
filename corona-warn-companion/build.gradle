@@ -48,7 +48,6 @@ android {
     buildToolsVersion "29.0.3"
 
     defaultConfig {
-        applicationId 'org.tosl.coronawarncompanion'
         minSdkVersion 23
         targetSdkVersion 29
         versionName androidGitVersion.name()
@@ -77,6 +76,21 @@ android {
 
     testOptions {
         unitTests.returnDefaultValues = true
+    }
+    flavorDimensions 'publication_version'
+    productFlavors {
+        github {
+            dimension 'publication_version'
+            applicationId 'org.tosl.coronawarncompanion'
+            resValue "string", "app_name", "Corona-Warn-Companion"
+            resValue "string", "about_name", "Corona-\\nWarn-\\nCompanion"
+        }
+        playstore {
+            dimension 'publication_version'
+            applicationId 'org.tosl.warnappcompanion'
+            resValue "string", "app_name", "Warn-App-Companion"
+            resValue "string", "about_name", "Warn-\\nApp-\\nCompanion"
+        }
     }
 }
 

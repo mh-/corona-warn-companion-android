@@ -7,17 +7,17 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name=".CWCApplication"
+        android:name="org.tosl.coronawarncompanion.CWCApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup">
 
         <activity
-            android:name=".MainActivity"
+            android:name="org.tosl.coronawarncompanion.MainActivity"
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,20 +26,20 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".DisplayDetailsActivity">
+        <activity android:name="org.tosl.coronawarncompanion.DisplayDetailsActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value="org.tosl.coronawarncompanion.MainActivity" />
         </activity>
-        <activity android:name=".DisplayLicensesActivity">
+        <activity android:name="org.tosl.coronawarncompanion.DisplayLicensesActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value="org.tosl.coronawarncompanion.MainActivity" />
         </activity>
-        <activity android:name=".AboutActivity">
+        <activity android:name="org.tosl.coronawarncompanion.AboutActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value="org.tosl.coronawarncompanion.MainActivity" />
         </activity>
     </application>
 </manifest>

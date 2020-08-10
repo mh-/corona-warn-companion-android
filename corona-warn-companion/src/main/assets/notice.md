@@ -1,5 +1,5 @@
-Notices for Corona-Warn-Companion
-=================================
+Notices for this App
+====================
 
     Corona-Warn-Companion. An app that shows COVID-19 Exposure Notifications details.
     Copyright (C) 2020  Michael Huebler <corona-warn-companion@tosl.org> and other contributors.

@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
             if (!DEMO_MODE) {
                 actionBar.setTitle(R.string.title_activity_main);
             } else {
-                actionBar.setTitle(R.string.title_activity_main_demo);
+                actionBar.setTitle(getString(R.string.title_activity_main)+getString(R.string.title_activity_main_demo_suffix));
             }
         }
 
