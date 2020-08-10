@@ -81,10 +81,13 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
     public MatchesRecyclerViewAdapter(DailyMatchEntries dailyMatchEntries) {
         this.mApp = (CWCApplication) CWCApplication.getAppContext();
         this.mValues = new ArrayList<>();
+        TreeMap<Integer, Pair<DiagnosisKeysProtos.TemporaryExposureKey,
+                MatchEntryContent.GroupedByDkMatchEntries>> treeMap = new TreeMap<>();
         for (Map.Entry<DiagnosisKeysProtos.TemporaryExposureKey, MatchEntryContent.GroupedByDkMatchEntries> entry :
                 dailyMatchEntries.getMap().entrySet()) {
-            mValues.add(new Pair<>(entry.getKey(), entry.getValue()));
+            treeMap.put(entry.getValue().getList().get(0).startTimestampLocalTZ, new Pair<>(entry.getKey(), entry.getValue()));
         }
+        mValues.addAll(treeMap.values());
     }
 
     @NonNull
