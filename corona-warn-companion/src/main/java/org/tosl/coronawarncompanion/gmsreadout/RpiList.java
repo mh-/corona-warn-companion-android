@@ -31,8 +31,8 @@ import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromSeconds;
 public class RpiList {
     private static final String TAG = "RpiList";
 
-    private final TreeMap<Integer, ListsPerDayUTC> mapOfDaysUTCAndListsOfRPIs;  // daysSinceEpoch, ListsPerDayUTC
-    private final TreeMap<Integer, Integer> mapOfDailyCountsLocalTZ;  // daysSinceEpoch, numberOfEntries
+    private final Map<Integer, ListsPerDayUTC> mapOfDaysUTCAndListsOfRPIs;  // daysSinceEpoch, ListsPerDayUTC
+    private final Map<Integer, Integer> mapOfDailyCountsLocalTZ;  // daysSinceEpoch, numberOfEntries
 
     private final CWCApplication app;
     final int timeZoneOffsetSeconds;
@@ -120,7 +120,7 @@ public class RpiList {
     }
 
     public RpiList() {
-        mapOfDaysUTCAndListsOfRPIs = new TreeMap<>();
+        mapOfDaysUTCAndListsOfRPIs = new HashMap<>();
         mapOfDailyCountsLocalTZ = new TreeMap<>();
         app = (CWCApplication) CWCApplication.getAppContext();
         timeZoneOffsetSeconds = app.getTimeZoneOffsetSeconds();
