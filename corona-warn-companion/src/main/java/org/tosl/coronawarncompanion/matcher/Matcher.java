@@ -106,7 +106,7 @@ public class Matcher {
 
                     byte[] aemKey = deriveAemKey(dk.getKeyData().toByteArray());
                     byte[] zeroAem = {0x00, 0x00, 0x00, 0x00};
-                    byte[] aemXorBytes = decryptAem(aemKey, zeroAem, rpiEntry.rpi);
+                    byte[] aemXorBytes = decryptAem(aemKey, zeroAem, rpiEntry.rpiBytes.getBytes());
 
                     this.matchEntryContent.matchEntries.add(new MatchEntry(dk, dkRpiWithInterval.rpiBytes, rpiEntry.contactRecords,
                             rpiEntry.startTimeStampLocalTZ, rpiEntry.endTimeStampLocalTZ, aemXorBytes),

@@ -18,15 +18,12 @@
 
 package org.tosl.coronawarncompanion.gmsreadout;
 
-import android.util.Log;
-
 import org.tosl.coronawarncompanion.CWCApplication;
 import org.tosl.coronawarncompanion.matcher.Crypto;
 
 import java.util.*;
 
 import static java.lang.Math.abs;
-import static org.tosl.coronawarncompanion.tools.Utils.getDateFromENIN;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromSeconds;
 import static org.tosl.coronawarncompanion.tools.Utils.getENINFromSeconds;
 import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromSeconds;
@@ -41,16 +38,72 @@ public class RpiList {
     final int timeZoneOffsetSeconds;
 
     public static class ListsPerDayUTC {
-        public final TreeSet<Integer> rpi32Bits = new TreeSet<>();              // Some of the RPI bytes, used for fast search - all day
-        public final TreeSet<Integer> rpi32BitsEarly = new TreeSet<>();         // (same) - first 2 hours of the day only
-        public final TreeSet<Integer> rpi32BitsLate = new TreeSet<>();          // (same) - last 2 hours of the day only
-        public final ArrayList<RpiEntry> rpiEntries = new ArrayList<>();        // Full RpiEntries
-        public final ArrayList<RpiEntry> rpiEntriesEarly = new ArrayList<>();   // (same) - first 2 hours of the day only
-        public final ArrayList<RpiEntry> rpiEntriesLate = new ArrayList<>();    // (same) - last 2 hours of the day only
+        public final HashMap<RpiBytes, RpiEntry> rpiEntries = new HashMap<>(2048);     // RpiEntries
+        public final HashMap<RpiBytes, RpiEntry> rpiEntriesEarly = new HashMap<>(512); // (same) - first 2 hours of the day only
+        public final HashMap<RpiBytes, RpiEntry> rpiEntriesLate = new HashMap<>(512);  // (same) - last 2 hours of the day only
+    }
+
+    public static class RpiBytes {
+        private int[] values = {0, 0, 0, 0};
+
+        public RpiBytes(byte[] bytes) {
+            values[0] = ((bytes[0] & 0xFF) << 24) |
+                    ((bytes[1] & 0xFF) << 16) |
+                    ((bytes[2] & 0xFF) << 8) |
+                    ((bytes[3] & 0xFF));
+            values[1] = ((bytes[4] & 0xFF) << 24) |
+                    ((bytes[5] & 0xFF) << 16) |
+                    ((bytes[6] & 0xFF) << 8) |
+                    ((bytes[7] & 0xFF));
+            values[2] = ((bytes[8] & 0xFF) << 24) |
+                    ((bytes[9] & 0xFF) << 16) |
+                    ((bytes[10] & 0xFF) << 8) |
+                    ((bytes[11] & 0xFF));
+            values[3] = ((bytes[12] & 0xFF) << 24) |
+                    ((bytes[13] & 0xFF) << 16) |
+                    ((bytes[14] & 0xFF) << 8) |
+                    ((bytes[15] & 0xFF));
+        }
+
+        public byte[] getBytes() {
+            byte[] bytes = new byte[16];
+            bytes[0] =  (byte) ((values[0] & 0xFF000000) >> 24);
+            bytes[1] =  (byte) ((values[0] & 0x00FF0000) >> 16);
+            bytes[2] =  (byte) ((values[0] & 0x0000FF00) >> 8);
+            bytes[3] =  (byte) ((values[0] & 0x000000FF));
+            bytes[4] =  (byte) ((values[1] & 0xFF000000) >> 24);
+            bytes[5] =  (byte) ((values[1] & 0x00FF0000) >> 16);
+            bytes[6] =  (byte) ((values[1] & 0x0000FF00) >> 8);
+            bytes[7] =  (byte) ((values[1] & 0x000000FF));
+            bytes[8] =  (byte) ((values[2] & 0xFF000000) >> 24);
+            bytes[9] =  (byte) ((values[2] & 0x00FF0000) >> 16);
+            bytes[10] = (byte) ((values[2] & 0x0000FF00) >> 8);
+            bytes[11] = (byte) ((values[2] & 0x000000FF));
+            bytes[12] = (byte) ((values[3] & 0xFF000000) >> 24);
+            bytes[13] = (byte) ((values[3] & 0x00FF0000) >> 16);
+            bytes[14] = (byte) ((values[3] & 0x0000FF00) >> 8);
+            bytes[15] = (byte) ((values[3] & 0x000000FF));
+            return bytes;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            // Check if o is an instance of RpiBytes or not
+            // "null instanceof [type]" also returns false
+            if (!(o instanceof RpiBytes)) {
+                return false;
+            }
+            return Arrays.equals(this.values, ((RpiBytes)o).values);
+        }
+
+        @Override
+        public int hashCode() {
+            return values[0];
+        }
     }
 
     public static class RpiEntry {
-        public final byte[] rpi;  // RPI bytes
+        public final RpiBytes rpiBytes;  // RPI bytes
         public final ContactRecordsProtos.ContactRecords contactRecords;  // list of all ScanRecords
         public final int startTimeStampUTC;  // the timestamp of the first ScanRecord in seconds (UTC)
         public final int startTimeStampLocalTZ;  // the timestamp of the first ScanRecord in seconds (local time zone)
@@ -58,7 +111,7 @@ public class RpiList {
 
         public RpiEntry(byte[] rpiBytes, ContactRecordsProtos.ContactRecords contactRecords, int startTimeStampUTC,
                         int startTimeStampLocalTZ, int endTimeStampLocalTZ) {
-            this.rpi = rpiBytes;
+            this.rpiBytes = new RpiBytes(rpiBytes);
             this.contactRecords = contactRecords;
             this.startTimeStampUTC = startTimeStampUTC;
             this.startTimeStampLocalTZ = startTimeStampLocalTZ;
@@ -71,13 +124,6 @@ public class RpiList {
         mapOfDailyCountsLocalTZ = new TreeMap<>();
         app = (CWCApplication) CWCApplication.getAppContext();
         timeZoneOffsetSeconds = app.getTimeZoneOffsetSeconds();
-    }
-
-    private Integer getIntegerFromFirstBytesOfByteArray(byte[] bytes) {
-        return ((bytes[0] & 0xFF) << 24) |
-                ((bytes[1] & 0xFF) << 16) |
-                ((bytes[2] & 0xFF) << 8) |
-                ((bytes[3] & 0xFF));
     }
 
     public void addEntry(Integer daysSinceEpoch, byte[] rpiBytes, ContactRecordsProtos.ContactRecords contactRecords) {
@@ -129,27 +175,15 @@ public class RpiList {
             RpiList.RpiEntry rpiEntry = new RpiList.RpiEntry(rpiBytes, contactRecords,
                     startTimeStampUTC, startTimeStampInLocalTZ, endTimeStampInLocalTZ);
             if (listsPerDayUTC != null) {
-                listsPerDayUTC.rpi32Bits.add(getIntegerFromFirstBytesOfByteArray(rpiBytes));
-                listsPerDayUTC.rpiEntries.add(rpiEntry);
+                listsPerDayUTC.rpiEntries.put(rpiEntry.rpiBytes, rpiEntry);
                 if (early) {
-                    listsPerDayUTC.rpi32BitsEarly.add(getIntegerFromFirstBytesOfByteArray(rpiBytes));
-                    listsPerDayUTC.rpiEntriesEarly.add(rpiEntry);
+                    listsPerDayUTC.rpiEntriesEarly.put(rpiEntry.rpiBytes, rpiEntry);
                 }
                 if (late) {
-                    listsPerDayUTC.rpi32BitsLate.add(getIntegerFromFirstBytesOfByteArray(rpiBytes));
-                    listsPerDayUTC.rpiEntriesLate.add(rpiEntry);
+                    listsPerDayUTC.rpiEntriesLate.put(rpiEntry.rpiBytes, rpiEntry);
                 }
                 mapOfDaysUTCAndListsOfRPIs.put(daysSinceEpoch, listsPerDayUTC);
             }
-        }
-    }
-
-    public ArrayList<RpiEntry> getRpiEntriesForDaysSinceEpoch(Integer daysSinceEpoch) {
-        ListsPerDayUTC listsPerDayUTC = mapOfDaysUTCAndListsOfRPIs.get(daysSinceEpoch);
-        if (listsPerDayUTC != null) {
-            return listsPerDayUTC.rpiEntries;
-        } else {
-            return null;
         }
     }
 
@@ -165,6 +199,7 @@ public class RpiList {
     public RpiEntry searchForRpiOnDaySinceEpochUTCWith2HoursTolerance(Crypto.RpiWithInterval searchRpiWithInterval,
                                                                       Integer daysSinceEpochUTC) {
         RpiEntry matchingRpiEntry = null;
+        RpiBytes rpiBytes = new RpiBytes(searchRpiWithInterval.rpiBytes);
 
         for (int i=1; i<=3; i++) {  // search in (1) yesterday's "late" list, (2) today's full list, and (3) tomorrow's "early" list
             ListsPerDayUTC listsPerDayUTC = null;
@@ -174,62 +209,37 @@ public class RpiList {
                 case 3: listsPerDayUTC = mapOfDaysUTCAndListsOfRPIs.get(daysSinceEpochUTC+1); break;
             }
             if (listsPerDayUTC != null) {
-                // Do a preliminary search on the first 32 bits of the RPI
-                boolean preliminaryResultPositive = false;
+                RpiEntry rpiEntry = null;
                 switch (i) {
-                    case 1: preliminaryResultPositive = listsPerDayUTC.rpi32BitsLate.
-                            contains(getIntegerFromFirstBytesOfByteArray(searchRpiWithInterval.rpiBytes)); break;
-                    case 2: preliminaryResultPositive = listsPerDayUTC.rpi32Bits.
-                            contains(getIntegerFromFirstBytesOfByteArray(searchRpiWithInterval.rpiBytes)); break;
-                    case 3: preliminaryResultPositive = listsPerDayUTC.rpi32BitsEarly.
-                            contains(getIntegerFromFirstBytesOfByteArray(searchRpiWithInterval.rpiBytes)); break;
-                }
-                if (preliminaryResultPositive) {
-                    //Log.d(TAG, "Potential match found, based on 32 bits comparison!");
-
-                    // Do a full search
-                    ArrayList<RpiEntry> searchList = null;
-                    switch (i) {
-                        case 1: searchList = listsPerDayUTC.rpiEntriesLate; break;
-                        case 2: searchList = listsPerDayUTC.rpiEntries; break;
-                        case 3: searchList = listsPerDayUTC.rpiEntriesEarly; break;
-                    }
-                    for (RpiEntry rpiEntry : searchList) {
-                        if (Arrays.equals(rpiEntry.rpi, searchRpiWithInterval.rpiBytes)) {
-                            //Log.d(TAG, "RPI match confirmed! "+byteArrayToHex(rpiEntry.rpi));
-                            if (abs(searchRpiWithInterval.intervalNumber -
-                                    getENINFromSeconds(rpiEntry.startTimeStampUTC)) <= 6*2) {  // max diff: 2 hours
-                                //Log.d(TAG, "Match fully confirmed!");
-                                //Log.d(TAG, "ENIN used for RPI generation: "+searchRpiWithInterval.intervalNumber+
-                                //        " ("+getDateFromENIN(searchRpiWithInterval.intervalNumber)+")");
-                                //Log.d(TAG, "ENIN when scan was recorded:  "+getENINFromSeconds(rpiEntry.startTimeStampUTC)+
-                                //        " ("+getDateFromENIN(getENINFromSeconds(rpiEntry.startTimeStampUTC))+")");
-                                matchingRpiEntry = rpiEntry;
-                                break;
-                            } else {
-                                Log.i(TAG, "Match could not be confirmed because time offset was too large!");
-                                Log.i(TAG, "ENIN used for RPI generation: "+searchRpiWithInterval.intervalNumber+
-                                        " ("+getDateFromENIN(searchRpiWithInterval.intervalNumber)+")");
-                                Log.i(TAG, "ENIN when scan was recorded:  "+getENINFromSeconds(rpiEntry.startTimeStampUTC)+
-                                        " ("+getDateFromENIN(getENINFromSeconds(rpiEntry.startTimeStampUTC))+")");
-                            }
+                    case 1:
+                        if (listsPerDayUTC.rpiEntriesLate.containsKey(rpiBytes)) {
+                            rpiEntry = listsPerDayUTC.rpiEntriesLate.get(rpiBytes);
                         }
-                    }
-                    if (matchingRpiEntry != null) {
                         break;
-                    } // else {
-                        //Log.d(TAG, "Match based on 32 bits was not confirmed based on 128 bits.");
-                    //}
-                } // else {
-                    //Log.d(TAG, "Match not found during this attempt.");
-                // }
+                    case 2:
+                        if (listsPerDayUTC.rpiEntries.containsKey(rpiBytes)) {
+                            rpiEntry = listsPerDayUTC.rpiEntries.get(rpiBytes);
+                        }
+                        break;
+                    case 3:
+                        if (listsPerDayUTC.rpiEntriesEarly.containsKey(rpiBytes)) {
+                            rpiEntry = listsPerDayUTC.rpiEntriesEarly.get(rpiBytes);
+                        }
+                        break;
+                }
+                if (rpiEntry != null && abs(searchRpiWithInterval.intervalNumber -
+                        getENINFromSeconds(rpiEntry.startTimeStampUTC)) <= 6*2) {  // max diff: 2 hours
+                    //Log.d(TAG, "Match confirmed!");
+                    //Log.d(TAG, "ENIN used for RPI generation: "+searchRpiWithInterval.intervalNumber+
+                    //        " ("+getDateFromENIN(searchRpiWithInterval.intervalNumber)+")");
+                    //Log.d(TAG, "ENIN when scan was recorded:  "+getENINFromSeconds(rpiEntry.startTimeStampUTC)+
+                    //        " ("+getDateFromENIN(getENINFromSeconds(rpiEntry.startTimeStampUTC))+")");
+                    matchingRpiEntry = rpiEntry;
+                    break;
+                }
             }
         }
         return matchingRpiEntry;
-    }
-
-    public SortedSet<Integer> getAvailableDaysSinceEpoch() {
-        return (SortedSet<Integer>) mapOfDaysUTCAndListsOfRPIs.keySet();
     }
 
     public SortedSet<Integer> getAvailableDaysSinceEpochLocalTZ() {
