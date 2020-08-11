@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.graphics.Color;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -72,6 +73,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
     private static final int yellowColor = Color.parseColor("#FFFF00");
     private static final int greenColor = Color.parseColor("#00FF00");
     private static final int blackColor = Color.parseColor("#000000");
+    private final float textScalingFactor;
 
     private final ArrayList<Pair<DiagnosisKeysProtos.TemporaryExposureKey, MatchEntryContent.GroupedByDkMatchEntries>> mValues;
     private CWCApplication mApp;
@@ -88,6 +90,8 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
             treeMap.put(entry.getValue().getList().get(0).startTimestampLocalTZ, new Pair<>(entry.getKey(), entry.getValue()));
         }
         mValues.addAll(treeMap.values());
+        DisplayMetrics metrics = this.mApp.getResources().getDisplayMetrics();
+        this.textScalingFactor = metrics.scaledDensity/metrics.density;
     }
 
     @NonNull
@@ -388,6 +392,8 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         xAxis.setDrawGridLines(false);
         xAxis.setAxisMinimum(minTimestampLocalTZDay0-60);
         xAxis.setAxisMaximum(maxTimestampLocalTZDay0+60);
+        xAxis.setTextSize(11.0f*this.textScalingFactor);
+        chartView.setExtraBottomOffset(3.0f);
 
         YAxis yAxis = chartView.getAxisLeft();
         yAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
