@@ -87,7 +87,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
                 MatchEntryContent.GroupedByDkMatchEntries>> treeMap = new TreeMap<>();
         for (Map.Entry<DiagnosisKeysProtos.TemporaryExposureKey, MatchEntryContent.GroupedByDkMatchEntries> entry :
                 dailyMatchEntries.getMap().entrySet()) {
-            treeMap.put(entry.getValue().getList().get(0).startTimestampLocalTZ, new Pair<>(entry.getKey(), entry.getValue()));
+            treeMap.put(entry.getValue().getList().get(0).startTimestampUTC, new Pair<>(entry.getKey(), entry.getValue()));
         }
         mValues.addAll(treeMap.values());
         DisplayMetrics metrics = this.mApp.getResources().getDisplayMetrics();
@@ -218,6 +218,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
                 //Log.d(TAG, "RSSI: "+rssi+" dBm");
                 int attenuation = txPower - rssi;
                 //Log.d(TAG, "Attenuation: "+attenuation+" dB");
+
                 int timestampLocalTZ = scanRecord.getTimestamp() + timeZoneOffset;
                 // reduce to "day0", to improve resolution within the float x value:
                 int timestampLocalTZDay0 = timestampLocalTZ % (24*3600);

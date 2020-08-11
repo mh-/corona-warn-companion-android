@@ -31,10 +31,9 @@ import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromSeconds;
 public class RpiList {
     private static final String TAG = "RpiList";
 
-    private final Map<Integer, ListsPerDayUTC> mapOfDaysUTCAndListsOfRPIs;  // daysSinceEpoch, ListsPerDayUTC
-    private final Map<Integer, Integer> mapOfDailyCountsLocalTZ;  // daysSinceEpoch, numberOfEntries
+    private final Map<Integer, ListsPerDayUTC> mapOfDaysUTCAndListsOfRPIs;  // daysSinceEpochUTC, ListsPerDayUTC
+    private final Map<Integer, Integer> mapOfDailyCountsLocalTZ;  // daysSinceEpochLocalTZ, numberOfEntries
 
-    private final CWCApplication app;
     final int timeZoneOffsetSeconds;
 
     public static class ListsPerDayUTC {
@@ -106,52 +105,37 @@ public class RpiList {
         public final RpiBytes rpiBytes;  // RPI bytes
         public final ContactRecordsProtos.ContactRecords contactRecords;  // list of all ScanRecords
         public final int startTimeStampUTC;  // the timestamp of the first ScanRecord in seconds (UTC)
-        public final int startTimeStampLocalTZ;  // the timestamp of the first ScanRecord in seconds (local time zone)
-        public final int endTimeStampLocalTZ;  // the timestamp of the last ScanRecord in seconds (local time zone)
+        public final int endTimeStampUTC;  // the timestamp of the last ScanRecord in seconds (local time zone)
 
-        public RpiEntry(byte[] rpiBytes, ContactRecordsProtos.ContactRecords contactRecords, int startTimeStampUTC,
-                        int startTimeStampLocalTZ, int endTimeStampLocalTZ) {
+        public RpiEntry(byte[] rpiBytes, ContactRecordsProtos.ContactRecords contactRecords,
+                        int startTimeStampUTC, int endTimeStampUTC) {
             this.rpiBytes = new RpiBytes(rpiBytes);
             this.contactRecords = contactRecords;
             this.startTimeStampUTC = startTimeStampUTC;
-            this.startTimeStampLocalTZ = startTimeStampLocalTZ;
-            this.endTimeStampLocalTZ = endTimeStampLocalTZ;
+            this.endTimeStampUTC = endTimeStampUTC;
         }
     }
 
     public RpiList() {
         mapOfDaysUTCAndListsOfRPIs = new HashMap<>();
         mapOfDailyCountsLocalTZ = new TreeMap<>();
-        app = (CWCApplication) CWCApplication.getAppContext();
-        timeZoneOffsetSeconds = app.getTimeZoneOffsetSeconds();
+        timeZoneOffsetSeconds = ((CWCApplication) CWCApplication.getAppContext()).getTimeZoneOffsetSeconds();
     }
 
-    public void addEntry(Integer daysSinceEpoch, byte[] rpiBytes, ContactRecordsProtos.ContactRecords contactRecords) {
+    public void addEntry(Integer daysSinceEpochUTC, byte[] rpiBytes, ContactRecordsProtos.ContactRecords contactRecords) {
         if (contactRecords.getRecordCount() > 0) {  // this check should be required only for DEMO mode --> ignore entries with empty contactRecords
-            boolean early = true;
-            boolean late = true;
-
             // get start and end timestamps of the scan records (UTC)
             int startTimeStampUTC = contactRecords.getRecord(0).getTimestamp();
             int endTimeStampUTC = contactRecords.getRecord(contactRecords.getRecordCount() - 1).getTimestamp();
 
-            Calendar startTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            startTime.setTimeInMillis(getMillisFromSeconds(startTimeStampUTC));
-            int startHour = startTime.get(Calendar.HOUR_OF_DAY);
-            Calendar endTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            endTime.setTimeInMillis(getMillisFromSeconds(endTimeStampUTC));
-            int endHour = endTime.get(Calendar.HOUR_OF_DAY);
+            Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            calendar.setTimeInMillis(getMillisFromSeconds(startTimeStampUTC));
+            boolean early = (calendar.get(Calendar.HOUR_OF_DAY) <= 1);
+            calendar.setTimeInMillis(getMillisFromSeconds(endTimeStampUTC));
+            boolean late = (calendar.get(Calendar.HOUR_OF_DAY) >= 22);
 
-            if (startHour >= 2) {
-                early = false;
-            }
-            if (endHour <= 21) {
-                late = false;
-            }
-
-            // also get them in local time zone
+            // also get the start timestamp in local time zone
             int startTimeStampInLocalTZ = startTimeStampUTC + timeZoneOffsetSeconds;
-            int endTimeStampInLocalTZ = endTimeStampUTC + timeZoneOffsetSeconds;
 
             // add to RPI counter per day (local time zone)
             int daysSinceEpochLocalTZ = getDaysFromSeconds(startTimeStampInLocalTZ);
@@ -166,14 +150,14 @@ public class RpiList {
 
             // add to the main map (mapOfDaysUTCAndListsOfRPIs)
             ListsPerDayUTC listsPerDayUTC;
-            if (!mapOfDaysUTCAndListsOfRPIs.containsKey(daysSinceEpoch)) {  // day not yet in list, create new entry
+            if (!mapOfDaysUTCAndListsOfRPIs.containsKey(daysSinceEpochUTC)) {  // day not yet in list, create new entry
                 listsPerDayUTC = new ListsPerDayUTC();
-                mapOfDaysUTCAndListsOfRPIs.put(daysSinceEpoch, listsPerDayUTC);
+                mapOfDaysUTCAndListsOfRPIs.put(daysSinceEpochUTC, listsPerDayUTC);
             }
-            listsPerDayUTC = mapOfDaysUTCAndListsOfRPIs.get(daysSinceEpoch);
+            listsPerDayUTC = mapOfDaysUTCAndListsOfRPIs.get(daysSinceEpochUTC);
 
             RpiList.RpiEntry rpiEntry = new RpiList.RpiEntry(rpiBytes, contactRecords,
-                    startTimeStampUTC, startTimeStampInLocalTZ, endTimeStampInLocalTZ);
+                    startTimeStampUTC, endTimeStampUTC);
             if (listsPerDayUTC != null) {
                 listsPerDayUTC.rpiEntries.put(rpiEntry.rpiBytes, rpiEntry);
                 if (early) {
@@ -182,13 +166,13 @@ public class RpiList {
                 if (late) {
                     listsPerDayUTC.rpiEntriesLate.put(rpiEntry.rpiBytes, rpiEntry);
                 }
-                mapOfDaysUTCAndListsOfRPIs.put(daysSinceEpoch, listsPerDayUTC);
+                mapOfDaysUTCAndListsOfRPIs.put(daysSinceEpochUTC, listsPerDayUTC);
             }
         }
     }
 
-    public Integer getRpiCountForDaysSinceEpochLocalTZ(Integer daysSinceEpoch) {
-        return mapOfDailyCountsLocalTZ.get(daysSinceEpoch);
+    public Integer getRpiCountForDaysSinceEpochLocalTZ(Integer daysSinceEpochLocalTZ) {
+        return mapOfDailyCountsLocalTZ.get(daysSinceEpochLocalTZ);
     }
 
     /*

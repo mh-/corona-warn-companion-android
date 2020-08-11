@@ -31,6 +31,8 @@ public class MatchEntryContent {
     // which contains HashMaps indexed by Diagnosis Keys,
     // which contain ArrayLists of MatchEntries.
 
+    public final MatchEntries matchEntries = new MatchEntries();
+
     public class MatchEntries {
         private final TreeMap<Integer, DailyMatchEntries> map = new TreeMap<>();  // <DaysSinceEpoch, DailyMatchEntries>
         private int totalRpiCount = 0;
@@ -49,14 +51,14 @@ public class MatchEntryContent {
         }
 
         public void add(Matcher.MatchEntry entry, DiagnosisKeysProtos.TemporaryExposureKey dk,
-                        Integer daysSinceEpochLocalTZ, Integer hourLocalTZ) {
+                        Integer daysSinceEpochLocalTZ) {
             if (!map.containsKey(daysSinceEpochLocalTZ)) {
                 map.put(daysSinceEpochLocalTZ, new DailyMatchEntries());
             }
             DailyMatchEntries dailyMatchEntries = map.get(daysSinceEpochLocalTZ);
             if (dailyMatchEntries != null) {
                 int previousMatchingDkCount = dailyMatchEntries.getDailyMatchingDkCount();
-                dailyMatchEntries.add(entry, dk, hourLocalTZ);
+                dailyMatchEntries.add(entry, dk);
                 totalRpiCount++;
                 totalMatchingDkCount += (dailyMatchEntries.getDailyMatchingDkCount() - previousMatchingDkCount);
             }
@@ -81,12 +83,12 @@ public class MatchEntryContent {
             return map;
         }
 
-        public void add(Matcher.MatchEntry entry, DiagnosisKeysProtos.TemporaryExposureKey dk, Integer hourLocalTZ) {
+        public void add(Matcher.MatchEntry entry, DiagnosisKeysProtos.TemporaryExposureKey dk) {
             if (!map.containsKey(dk)) {
                 map.put(dk, new GroupedByDkMatchEntries());
                 dailyMatchingDkCount++;
             }
-            Objects.requireNonNull(map.get(dk)).add(entry, hourLocalTZ);
+            Objects.requireNonNull(map.get(dk)).add(entry);
             dailyRpiCount++;
         }
     }
@@ -103,11 +105,9 @@ public class MatchEntryContent {
             return list;
         }
 
-        public void add(Matcher.MatchEntry entry, Integer hourLocalTZ) {
+        public void add(Matcher.MatchEntry entry) {
             list.add(entry);
             groupedByDkRpiCount++;
         }
     }
-
-    public final MatchEntries matchEntries = new MatchEntries();
 }
