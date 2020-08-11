@@ -23,6 +23,7 @@ import android.util.Pair;
 
 import androidx.core.util.Consumer;
 
+import org.tosl.coronawarncompanion.CWCApplication;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
 import org.tosl.coronawarncompanion.gmsreadout.ContactRecordsProtos;
 import org.tosl.coronawarncompanion.gmsreadout.RpiList;
@@ -30,7 +31,6 @@ import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.TimeZone;
 
 import static org.tosl.coronawarncompanion.matcher.Crypto.createListOfRpisForIntervalRange;
 import static org.tosl.coronawarncompanion.matcher.Crypto.decryptAem;
@@ -50,18 +50,18 @@ public class Matcher {
         public final DiagnosisKeysProtos.TemporaryExposureKey diagnosisKey;
         public final byte[] rpi;
         public final ContactRecordsProtos.ContactRecords contactRecords;
-        public final int startTimestampLocalTZ;
-        public final int endTimestampLocalTZ;
+        public final int startTimestampUTC;
+        public final int endTimestampUTC;
         public final byte[] aemXorBytes;
 
         public MatchEntry(DiagnosisKeysProtos.TemporaryExposureKey dk, byte[] rpiBytes,
                           ContactRecordsProtos.ContactRecords contactRecords,
-                          int startTimestampLocalTZ, int endTimestampLocalTZ, byte[] aemXorBytes) {
+                          int startTimestampUTC, int endTimestampUTC, byte[] aemXorBytes) {
             this.diagnosisKey = dk;
             this.rpi = rpiBytes;
             this.contactRecords = contactRecords;
-            this.startTimestampLocalTZ = startTimestampLocalTZ;
-            this.endTimestampLocalTZ = endTimestampLocalTZ;
+            this.startTimestampUTC = startTimestampUTC;
+            this.endTimestampUTC = endTimestampUTC;
             this.aemXorBytes = aemXorBytes;
         }
     }
@@ -69,10 +69,13 @@ public class Matcher {
     private final RpiList rpiList;
     private final ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList;
 
+    final int timeZoneOffsetSeconds;
+
     public Matcher(RpiList rpis, ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeys, MatchEntryContent matchEntryContent) {
         this.rpiList = rpis;
         this.diagnosisKeysList = diagnosisKeys;
         this.matchEntryContent = matchEntryContent;
+        timeZoneOffsetSeconds = ((CWCApplication) CWCApplication.getAppContext()).getTimeZoneOffsetSeconds();
     }
 
     public void findMatches(Consumer<Pair<Integer, Integer>> progressCallback) {
@@ -99,20 +102,14 @@ public class Matcher {
                         rpiList.searchForRpiOnDaySinceEpochUTCWith2HoursTolerance(dkRpiWithInterval, getDaysSinceEpochFromENIN(dkIntervalNumber));
                 if (rpiEntry != null) {
                     Log.i(TAG, "Match found!");
-                    Calendar startDateTimeLocalTZ = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-                    // UTC because we don't want Calendar to do additional time zone compensation
-                    startDateTimeLocalTZ.setTimeInMillis(getMillisFromSeconds(rpiEntry.startTimeStampLocalTZ));
-                    int startHourLocalTZ = startDateTimeLocalTZ.get(Calendar.HOUR_OF_DAY);
-
                     byte[] aemKey = deriveAemKey(dk.getKeyData().toByteArray());
                     byte[] zeroAem = {0x00, 0x00, 0x00, 0x00};
                     byte[] aemXorBytes = decryptAem(aemKey, zeroAem, rpiEntry.rpiBytes.getBytes());
 
                     this.matchEntryContent.matchEntries.add(new MatchEntry(dk, dkRpiWithInterval.rpiBytes, rpiEntry.contactRecords,
-                            rpiEntry.startTimeStampLocalTZ, rpiEntry.endTimeStampLocalTZ, aemXorBytes),
+                            rpiEntry.startTimeStampUTC, rpiEntry.endTimeStampUTC, aemXorBytes),
                             dk,
-                            getDaysFromSeconds(rpiEntry.startTimeStampLocalTZ),
-                            startHourLocalTZ);
+                            getDaysFromSeconds(rpiEntry.startTimeStampUTC + timeZoneOffsetSeconds));
                     numMatches = this.matchEntryContent.matchEntries.getTotalMatchingDkCount();
                 }
             }

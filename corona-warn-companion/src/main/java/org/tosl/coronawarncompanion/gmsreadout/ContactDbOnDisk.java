@@ -184,7 +184,7 @@ public class ContactDbOnDisk {
 
             byte[] rpiBytes = new byte[16];
             ByteBuffer keyBuf = ByteBuffer.wrap(key);
-            int daysSinceEpoch = keyBuf.getShort();  // get first 2 bytes: date
+            int daysSinceEpochUTC = keyBuf.getShort();  // get first 2 bytes: date
             keyBuf.get(rpiBytes); // get the next 16 bytes: RPI
 
             ContactRecordsProtos.ContactRecords contactRecords = null;
@@ -194,7 +194,7 @@ public class ContactDbOnDisk {
                 e.printStackTrace();
             }
             if (contactRecords != null) {
-                rpiList.addEntry(daysSinceEpoch, rpiBytes, contactRecords);
+                rpiList.addEntry(daysSinceEpochUTC, rpiBytes, contactRecords);
             }
         }
         return rpiList;

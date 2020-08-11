@@ -56,7 +56,6 @@ public class CWCApplication extends Application {
     public void onCreate() {
         super.onCreate();
         timeZoneOffsetSeconds = TimeZone.getDefault().getOffset(System.currentTimeMillis()) / 1000;
-        //TODO: refactor this, time zones can be handled by DateFormat, Calendar, etc., instead of manually adding Offset
         CWCApplication.context = getApplicationContext();
     }
 }

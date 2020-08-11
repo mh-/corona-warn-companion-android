@@ -3,6 +3,7 @@ package org.tosl.coronawarncompanion.barcharts;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -27,12 +28,15 @@ import static org.tosl.coronawarncompanion.tools.Utils.getDateFromDaysSinceEpoch
 
 public class CwcBarChart  {
 
+    private static final String TAG = "CwcBarChart";
+
     private final BarChart barChart;
     private final ProgressBar progressBar;
     private BarData barData;
 
     private final int gridColor = Color.parseColor("#E0E0E0");
     private final int matchBarColor = Color.parseColor("#FF0000");
+    private final float textScalingFactor;
 
     public CwcBarChart(BarChart barChart, ProgressBar progressBar, BarChartSync barChartSync, Context context) {
         this.barChart = barChart;
@@ -41,6 +45,8 @@ public class CwcBarChart  {
         this.barChart.setNoDataTextColor(Color.parseColor("black"));
         barChartSync.add(barChart);
         barChart.setOnChartGestureListener(new ChartGestureListener(barChartSync, barChart));
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        this.textScalingFactor = metrics.scaledDensity/metrics.density;
     }
 
     public BarChart getBarChart() {
@@ -53,6 +59,7 @@ public class CwcBarChart  {
         dataSet.setColor(color);
         BarData barData = new BarData(dataSet);
         dataSet.setHighlightEnabled(itemsSelectable);
+        dataSet.setValueTextSize(8.0f*this.textScalingFactor);
         this.barData = barData;
         this.barChart.setData(barData);
     }
@@ -95,6 +102,8 @@ public class CwcBarChart  {
         xAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
         xAxis.setGranularityEnabled(true);
         xAxis.setDrawGridLines(false);
+        xAxis.setTextSize(11.0f*this.textScalingFactor);
+        barChart.setExtraBottomOffset(3.0f);
 
         YAxis yAxis = barChart.getAxisLeft();
         yAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
@@ -109,9 +118,7 @@ public class CwcBarChart  {
         barChart.getDescription().setEnabled(false);
         barChart.setScaleYEnabled(false);
         barChart.getViewPortHandler().setMaximumScaleX(5.0f);
-
         //barChart.setFitBars(true); // make the x-axis fit exactly all bars
-
         barChart.invalidate(); // refresh
     }
 
