@@ -25,20 +25,11 @@ import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
 import org.tosl.coronawarncompanion.gmsreadout.RpiList;
 import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
 
-import java.util.ArrayList;
 import java.util.TimeZone;
 
 public class CWCApplication extends Application {
 
-    public static boolean DEMO_MODE = false;  // Set this to true to enable app-wide DEMO MODE
-
-    private RpiList rpiList = null;
-    public RpiList getRpiList() {return rpiList;}
-    public void setRpiList(RpiList rpiList) {this.rpiList = rpiList;}
-
-    private ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList = null;
-    public ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> getDiagnosisKeysList() {return diagnosisKeysList;}
-    public void setDiagnosisKeysList(ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList) {this.diagnosisKeysList = diagnosisKeysList;}
+    public static boolean DEMO_MODE = false;
 
     private MatchEntryContent matchEntryContent = null;
     public MatchEntryContent getMatchEntryContent() {return matchEntryContent;}

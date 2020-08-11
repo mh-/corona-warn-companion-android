@@ -101,7 +101,7 @@ public class Matcher {
                 RpiList.RpiEntry rpiEntry =
                         rpiList.searchForRpiOnDaySinceEpochUTCWith2HoursTolerance(dkRpiWithInterval, getDaysSinceEpochFromENIN(dkIntervalNumber));
                 if (rpiEntry != null) {
-                    Log.i(TAG, "Match found!");
+                    Log.d(TAG, "Match found!");
                     byte[] aemKey = deriveAemKey(dk.getKeyData().toByteArray());
                     byte[] zeroAem = {0x00, 0x00, 0x00, 0x00};
                     byte[] aemXorBytes = decryptAem(aemKey, zeroAem, rpiEntry.rpiBytes.getBytes());

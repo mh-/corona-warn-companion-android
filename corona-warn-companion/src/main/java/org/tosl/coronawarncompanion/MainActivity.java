@@ -180,7 +180,6 @@ public class MainActivity extends AppCompatActivity {
 
         ContactDbOnDisk contactDbOnDisk = new ContactDbOnDisk();
         rpiList = contactDbOnDisk.getRpisFromContactDB(DEMO_MODE);
-        app.setRpiList(rpiList);
 
         if (rpiList != null) {  // check that getting the RPIs didn't fail, e.g. because we didn't get root rights
             SortedSet<Integer> rpiListDaysSinceEpochLocalTZ = rpiList.getAvailableDaysSinceEpochLocalTZ();
@@ -328,8 +327,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void processDownloadedDiagnosisKeys() {
-
-        app.setDiagnosisKeysList(diagnosisKeysList);
         // Count the downloaded Diagnosis Keys
         Log.d(TAG, "Number of keys that have been downloaded: " + diagnosisKeysList.size());
 
