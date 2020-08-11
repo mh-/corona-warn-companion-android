@@ -343,6 +343,8 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         dataSetMin.setColor(gridColor);
         dataSetMin.setDrawValues(false);
         dataSetMin.setHighlightEnabled(false);
+        dataSetMin.setCircleRadius(5.0f);
+        dataSetMin.setCircleHoleRadius(2.5f);
 
         LineDataSet dataSetRest = new LineDataSet(dataPoints, "Attenuation"); // add entries to dataSetRest
         dataSetRest.setAxisDependency(YAxis.AxisDependency.LEFT);
@@ -350,6 +352,8 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         dataSetRest.enableDashedLine(0, 1, 0);  // these parameters mean: do not show line
         dataSetRest.setDrawValues(false);
         dataSetRest.setHighlightEnabled(false);
+        dataSetRest.setCircleRadius(3.0f);
+        dataSetRest.setCircleHoleRadius(1.5f);
 
         LineData lineData = new LineData(dataSetMin);
         lineData.addDataSet(dataSetRest);
