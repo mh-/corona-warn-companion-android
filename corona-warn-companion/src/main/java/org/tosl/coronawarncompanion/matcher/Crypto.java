@@ -100,7 +100,7 @@ public class Crypto {
         }
     }
 
-    private static ArrayList<RpiWithInterval> rpis = new ArrayList<>(144);
+    private static final ArrayList<RpiWithInterval> rpis = new ArrayList<>(144);
 
     public static ArrayList<RpiWithInterval> createListOfRpisForIntervalRange(byte[] rpiKey, int startIntervalNumber, int intervalCount) {
         rpis.clear();

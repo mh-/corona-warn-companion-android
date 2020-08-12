@@ -21,6 +21,7 @@
 
 package org.tosl.coronawarncompanion.gmsreadout;
 
+@SuppressWarnings("ALL")
 public final class ContactRecordsProtos {
   private ContactRecordsProtos() {}
   public static void registerAllExtensions(

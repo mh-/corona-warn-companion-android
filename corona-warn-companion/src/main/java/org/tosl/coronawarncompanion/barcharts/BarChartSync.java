@@ -5,7 +5,7 @@ import com.github.mikephil.charting.charts.BarChart;
 import java.util.ArrayList;
 
 public class BarChartSync {
-    ArrayList<BarChart> barChartList;
+    public final ArrayList<BarChart> barChartList;
 
     public BarChartSync() {
         this.barChartList = new ArrayList<>();

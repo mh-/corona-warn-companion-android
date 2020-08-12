@@ -12,7 +12,7 @@ import java.util.ArrayList;
 public class ChartGestureListener implements OnChartGestureListener {
 
     private final BarChartSync barChartSync;
-    private BarChart barChart;
+    private final BarChart barChart;
 
     public ChartGestureListener(BarChartSync barChartSync, BarChart barChart) {
         this.barChartSync = barChartSync;

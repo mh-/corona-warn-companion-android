@@ -76,7 +76,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
     private final float textScalingFactor;
 
     private final ArrayList<Pair<DiagnosisKeysProtos.TemporaryExposureKey, MatchEntryContent.GroupedByDkMatchEntries>> mValues;
-    private CWCApplication mApp;
+    private final CWCApplication mApp;
 
     private boolean showAllScans = false;
 

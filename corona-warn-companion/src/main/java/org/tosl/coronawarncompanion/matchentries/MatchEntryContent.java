@@ -33,7 +33,7 @@ public class MatchEntryContent {
 
     public final MatchEntries matchEntries = new MatchEntries();
 
-    public class MatchEntries {
+    public static class MatchEntries {
         private final TreeMap<Integer, DailyMatchEntries> map = new TreeMap<>();  // <DaysSinceEpoch, DailyMatchEntries>
         private int totalRpiCount = 0;
         private int totalMatchingDkCount = 0;
@@ -65,7 +65,7 @@ public class MatchEntryContent {
         }
     }
 
-    public class DailyMatchEntries {
+    public static class DailyMatchEntries {
         private final HashMap<DiagnosisKeysProtos.TemporaryExposureKey, GroupedByDkMatchEntries> map =
                 new HashMap<>();
         private int dailyRpiCount = 0;
@@ -93,7 +93,7 @@ public class MatchEntryContent {
         }
     }
 
-    public class GroupedByDkMatchEntries {
+    public static class GroupedByDkMatchEntries {
         private final ArrayList<Matcher.MatchEntry> list = new ArrayList<>();
         private int groupedByDkRpiCount = 0;
 

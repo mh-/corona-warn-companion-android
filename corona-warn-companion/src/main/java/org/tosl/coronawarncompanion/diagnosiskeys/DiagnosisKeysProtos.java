@@ -21,6 +21,7 @@
 
 package org.tosl.coronawarncompanion.diagnosiskeys;
 
+@SuppressWarnings("ALL")
 public final class DiagnosisKeysProtos {
   private DiagnosisKeysProtos() {}
   public static void registerAllExtensions(

@@ -25,7 +25,6 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.Response.Listener;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -62,13 +61,10 @@ public class DKDownload {
         // Instantiate the Volley RequestQueue.
         queue = Volley.newRequestQueue(CWCApplication.getAppContext());
 
-        errorResponseListener = new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e(TAG, "VolleyError "+error);
-                if (errorResponseCallbackCommand != null) {
-                    doCallback(errorResponseCallbackCommand, null);
-                }
+        errorResponseListener = error -> {
+            Log.e(TAG, "VolleyError "+error);
+            if (errorResponseCallbackCommand != null) {
+                doCallback(errorResponseCallbackCommand, null);
             }
         };
     }
@@ -105,25 +101,22 @@ public class DKDownload {
     public void availableDatesRequest(CallbackCommand callbackCommand,
                                       MainActivity.errorResponseCallbackCommand errorResponseCallbackCommand) {
 
-        Listener<String> responseListener = new Listener<String>() {
-            @Override
-            public void onResponse(String availableDatesStr) {
-                //Log.d(TAG, "Available Dates: "+availableDatesStr);
-                String[] dateStringArray = parseCwaListResponse(availableDatesStr);
-                LinkedList<Date> result = new LinkedList<>();
-                for (String str : dateStringArray) {
-                    //Log.d(TAG, "Date: "+str);
-                    Date date = null;
-                    try {
-                        date = dateFormatter.parse(str);
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                    //Log.d(TAG, "Date: "+date);
-                    result.add(date);
+        Listener<String> responseListener = availableDatesStr -> {
+            //Log.d(TAG, "Available Dates: "+availableDatesStr);
+            String[] dateStringArray = parseCwaListResponse(availableDatesStr);
+            LinkedList<Date> result = new LinkedList<>();
+            for (String str : dateStringArray) {
+                //Log.d(TAG, "Date: "+str);
+                Date date = null;
+                try {
+                    date = dateFormatter.parse(str);
+                } catch (ParseException e) {
+                    e.printStackTrace();
                 }
-                doCallback(callbackCommand, result);
+                //Log.d(TAG, "Date: "+date);
+                result.add(date);
             }
+            doCallback(callbackCommand, result);
         };
         this.errorResponseCallbackCommand = errorResponseCallbackCommand;
         startHttpRequestForStringResponse(CWA_URL+"", responseListener, errorResponseListener);
@@ -131,25 +124,19 @@ public class DKDownload {
 
     public void availableHoursForDateRequest(Date date, CallbackCommand callbackCommand) {
 
-        Listener<String> responseListener = new Listener<String>() {
-            @Override
-            public void onResponse(String availableHoursStr) {
-                //Log.d(TAG, "Available Hours: "+availableHoursStr);
-                String[] hourStringArray = parseCwaListResponse(availableHoursStr);
-                LinkedList<String> result = new LinkedList<>();
-                Collections.addAll(result, hourStringArray);
-                doCallback(callbackCommand, result);
-            }
+        Listener<String> responseListener = availableHoursStr -> {
+            //Log.d(TAG, "Available Hours: "+availableHoursStr);
+            String[] hourStringArray = parseCwaListResponse(availableHoursStr);
+            LinkedList<String> result = new LinkedList<>();
+            Collections.addAll(result, hourStringArray);
+            doCallback(callbackCommand, result);
         };
-        Response.ErrorListener localErrorResponseListener = new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                //TODO
-                Log.i(TAG, "VolleyError "+error);
-                Log.i(TAG, "No hourly downloads available yet.");
-                LinkedList<String> result = new LinkedList<>();
-                doCallback(callbackCommand, result);
-            }
+        Response.ErrorListener localErrorResponseListener = error -> {
+            //TODO
+            Log.i(TAG, "VolleyError "+error);
+            Log.i(TAG, "No hourly downloads available yet.");
+            LinkedList<String> result = new LinkedList<>();
+            doCallback(callbackCommand, result);
         };
 
         startHttpRequestForStringResponse(CWA_URL+"/"+getStringFromDate(date)+"/"+"hour", responseListener, localErrorResponseListener);
@@ -169,13 +156,10 @@ public class DKDownload {
         FileResponse fileResponse = new FileResponse();
         fileResponse.url = url;
 
-        Listener<byte[]> responseListener = new Listener<byte[]>() {
-            @Override
-            public void onResponse(byte[] fileBytes) {
-                //Log.d(TAG, "File received, Length: "+fileBytes.length);
-                fileResponse.fileBytes = fileBytes;
-                doCallback(callbackCommand, fileResponse);
-            }
+        Listener<byte[]> responseListener = fileBytes -> {
+            //Log.d(TAG, "File received, Length: "+fileBytes.length);
+            fileResponse.fileBytes = fileBytes;
+            doCallback(callbackCommand, fileResponse);
         };
         this.errorResponseCallbackCommand = errorResponseCallbackCommand;
         startHttpRequestForByteArrayResponse(url.toString(), responseListener, errorResponseListener);

@@ -18,7 +18,6 @@
 
 package org.tosl.coronawarncompanion;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -77,12 +76,7 @@ public class AboutActivity extends AppCompatActivity {
 
         Context context = this;
         final Markwon markwon = Markwon.builder(context)
-                .usePlugin(ImagesPlugin.create(new ImagesPlugin.ImagesConfigure() {
-                    @Override
-                    public void configureImages(@NonNull ImagesPlugin plugin) {
-                        plugin.addSchemeHandler(FileSchemeHandler.createWithAssets(context));
-                    }
-                }))
+                .usePlugin(ImagesPlugin.create(plugin -> plugin.addSchemeHandler(FileSchemeHandler.createWithAssets(context))))
                 .build();
         markwon.setMarkdown(mainTextView, new String(output.toByteArray(), StandardCharsets.UTF_8));
     }

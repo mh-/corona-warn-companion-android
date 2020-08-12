@@ -30,7 +30,6 @@ import org.tosl.coronawarncompanion.gmsreadout.RpiList;
 import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 
 import static org.tosl.coronawarncompanion.matcher.Crypto.createListOfRpisForIntervalRange;
 import static org.tosl.coronawarncompanion.matcher.Crypto.decryptAem;
@@ -38,7 +37,6 @@ import static org.tosl.coronawarncompanion.matcher.Crypto.deriveAemKey;
 import static org.tosl.coronawarncompanion.matcher.Crypto.deriveRpiKey;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromSeconds;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysSinceEpochFromENIN;
-import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromSeconds;
 
 public class Matcher {
 

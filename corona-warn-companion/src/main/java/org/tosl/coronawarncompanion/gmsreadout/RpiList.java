@@ -43,7 +43,7 @@ public class RpiList {
     }
 
     public static class RpiBytes {
-        private int[] values = {0, 0, 0, 0};
+        private final int[] values = {0, 0, 0, 0};
 
         public RpiBytes(byte[] bytes) {
             values[0] = ((bytes[0] & 0xFF) << 24) |

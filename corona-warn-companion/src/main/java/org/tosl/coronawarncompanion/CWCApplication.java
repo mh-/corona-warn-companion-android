@@ -21,8 +21,6 @@ package org.tosl.coronawarncompanion;
 import android.app.Application;
 import android.content.Context;
 
-import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
-import org.tosl.coronawarncompanion.gmsreadout.RpiList;
 import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
 
 import java.util.TimeZone;
