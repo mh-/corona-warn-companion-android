@@ -34,7 +34,7 @@
     <string name="menu_entry_oss_licenses">Open Source Software Licenses</string>
     <string name="title_activity_licenses">OSS Licenses</string>
     <string name="title_activity_main">@string/app_name</string>
-    <string name="title_activity_main_demo_suffix"> DEMO</string>
+    <string name="title_activity_main_demo_prefix">"DEMO "</string>
     <string name="title_activity_details">@string/app_name</string>
     <string name="title_activity_details_demo">DEMO sample details</string>
     <string name="menu_entry_view_further_oss_licenses">Further Open Source Software Licenses</string>
