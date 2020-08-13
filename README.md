@@ -12,7 +12,7 @@ There are 3 options:
 1. Download from https://play.google.com/store/apps/details?id=org.tosl.warnappcompanion
 2. Write a short review
 ### 2. Install a release from GitHub
-1. Download the latest released APK from https://github.com/mh-/corona-warn-companion-android/releases
+1. Download the latest released APK from the Assets at https://github.com/mh-/corona-warn-companion-android/releases
 2. Install via `adb` tool and USB cable: `adb install corona-warn-companion-github-release.apk`
 ### 3. Build the app from source code, using Android Studio
 1. `git clode https://github.com/mh-/corona-warn-companion-android.git`
