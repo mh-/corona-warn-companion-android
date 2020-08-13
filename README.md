@@ -1,7 +1,7 @@
 # corona-warn-companion-android
 Android App Which Shows Details about CWA Exposures (Requires Root)
 
-<img src="https://github.com/mh-/corona-warn-companion-android/raw/master/screenshots/screenshot_main_en.png" width="300"/> <img src="https://github.com/mh-/corona-warn-companion-android/raw/master/screenshots/screenshot_details_en.png" width="300"/>
+<img src="https://github.com/mh-/corona-warn-companion-android/raw/master/screenshots/screenshot_main_en.png" width="300"/> <img src="https://github.com/mh-/corona-warn-companion-android/raw/master/screenshots/screenshot_details_en.png" width="300"/> <img src="https://github.com/mh-/corona-warn-companion-android/raw/master/screenshots/screenshot_details_all_en.png" width="300"/>
 
 © 2020  Michael Huebler and other contributors.
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
