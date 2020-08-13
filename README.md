@@ -6,6 +6,23 @@ Android App Which Shows Details about CWA Exposures (Requires Root)
 © 2020  Michael Huebler and other contributors.
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
+# How to install the app
+There are 3 options:
+### 1. Get the app from the Play Store
+1. Download from https://play.google.com/store/apps/details?id=org.tosl.warnappcompanion
+2. Write a short review
+### 2. Install a release from GitHub
+1. Download the latest released APK from https://github.com/mh-/corona-warn-companion-android/releases
+2. Install via `adb` tool and USB cable: `adb install corona-warn-companion-github-release.apk`
+### 3. Build the app from source code, using Android Studio
+1. `git clode https://github.com/mh-/corona-warn-companion-android.git`
+2. In Android Studio, select a 'flavor': 
+`github` is the normal version, called "Corona-Warn-Companion". 
+`playstore` is a version that was renamed to "Warn-App-Companion" because of the Play Store requirements for COVID-19 apps;
+this is not a _category 1 or 2_ app and must therefore not use COVID-19 related terms in its Play Store listing.
+3. Build the `debug` build variant, and install it on your device. 
+The `release` build variant will probably build out-of-the box only on macOS because of the way how the keystore for app signing is accessed.
+
 # Features
 This app helps you to better understand warnings of the official Corona-Warn-App.
 
