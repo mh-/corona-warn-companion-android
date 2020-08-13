@@ -21,13 +21,14 @@ package org.tosl.coronawarncompanion;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import com.mikepenz.aboutlibraries.LibsBuilder;
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -53,7 +54,8 @@ public class DisplayLicensesActivity extends AppCompatActivity {
         //noinspection SwitchStatementWithTooFewBranches
         switch (item.getItemId()) {
             case R.id.osslicenses:
-                new LibsBuilder().start(this); // start the activity
+                OssLicensesMenuActivity.setActivityTitle(getString(R.string.title_activity_further_licenses));  // start the activity
+                startActivity(new Intent(this, OssLicensesMenuActivity.class));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

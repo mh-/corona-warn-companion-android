@@ -20,7 +20,7 @@ plugins {
     id 'com.gladed.androidgitversion' version '0.4.13'
 }
 apply plugin: 'com.android.application'
-apply plugin: 'com.mikepenz.aboutlibraries.plugin'
+apply plugin: 'com.google.android.gms.oss-licenses-plugin'
 
 /* Get password from macOS Keychain */
 def getPassword(String keyChain) {
@@ -114,8 +114,7 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'com.mikepenz:aboutlibraries-core:8.3.0'
-    implementation 'com.mikepenz:aboutlibraries:8.3.0'
+    implementation 'com.google.android.gms:play-services-oss-licenses:17.0.0'
     implementation 'com.google.android.material:material:1.2.0'
     implementation 'androidx.navigation:navigation-fragment:2.3.0'
     implementation 'androidx.navigation:navigation-ui:2.3.0'

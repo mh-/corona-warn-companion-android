@@ -41,8 +41,5 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.tosl.coronawarncompanion.MainActivity" />
         </activity>
-        <activity android:name="com.mikepenz.aboutlibraries.ui.LibsActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
     </application>
 </manifest>
