@@ -32,6 +32,7 @@ This app helps you to better understand warnings of the official Corona-Warn-App
 1. The app reads the Rolling Proximity IDs recorded by your device from the Exposure Notifications database (this is only possible with root permissions, which is why the official Corona-Warn-App cannot display these details).  
    ![-Example Recorded Encounters-](screenshots/rpis_en.png)
 2. The app downloads the Diagnosis Keys from the official Corona-Warn-Server. It downloads the keys published daily for the last few days, and the keys published every hour for today. Therefore, different information than in the official Corona-Warn-App might be displayed.  
+   Only keys for the days found in step 1 are shown and counted.  
    ![-Example Diagnosis Keys-](screenshots/dks_en.png)
 3. The app compares both in order to find matches (risk encounters).  
    ![-Example Matches-](screenshots/matches_en.png)
