@@ -315,6 +315,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             DiagnosisKeysImport diagnosisKeysImport = new DiagnosisKeysImport(exportDotBinBytes);
+            Log.d(TAG, "Number of keys in this file: " + diagnosisKeysImport.getDiagnosisKeys().size());
 
             if (diagnosisKeysList == null) diagnosisKeysList = new ArrayList<>();
             diagnosisKeysList.addAll(diagnosisKeysImport.getDiagnosisKeys());
