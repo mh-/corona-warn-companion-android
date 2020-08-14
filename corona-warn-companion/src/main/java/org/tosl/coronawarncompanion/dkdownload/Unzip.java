@@ -21,6 +21,7 @@ package org.tosl.coronawarncompanion.dkdownload;
 import android.util.Log;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.zip.ZipEntry;
@@ -33,27 +34,29 @@ public class Unzip {
         //Log.d(TAG, "Zipped Data: "+zipFileBytes);
         byte[] tmpBuffer;
         byte[] result = null;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ByteArrayInputStream byteStream = new ByteArrayInputStream(zipFileBytes);
         ZipInputStream zis = new ZipInputStream(byteStream);
         ZipEntry zipEntry;
         zipEntry = zis.getNextEntry();
         while (zipEntry != null) {
             if (zipEntry.getName().equals(filename)) {
-                int bufferLen = 10*zipFileBytes.length;  //TODO: find a nicer way to do this. Unfortunately, zipEntry.getSize() returns -1.
+                int bufferLen = 16*1024;
                 //Log.d(TAG, "Unzipping... Buffer Length: "+bufferLen);
                 tmpBuffer = new byte[bufferLen];
-                int pos = 0;
                 int bytesRead = 0;
-                while (pos < bufferLen && bytesRead != -1) {
-                    bytesRead = zis.read(tmpBuffer, pos, bufferLen-pos);
+                while (bytesRead != -1) {
+                    bytesRead = zis.read(tmpBuffer, 0, bufferLen);
                     if (bytesRead>0) {
-                        pos += bytesRead;
+                        baos.write(tmpBuffer, 0, bytesRead);
                     }
                 }
-                result = Arrays.copyOf(tmpBuffer, pos);
-                Log.d(TAG, "Unzipped file. Length: "+result.length);
+                result = baos.toByteArray();
                 //noinspection UnusedAssignment
                 tmpBuffer = null;
+                //noinspection UnusedAssignment
+                baos = null;
+                Log.d(TAG, "Unzipped file. Length: "+result.length);
                 break;
             }
             zipEntry = zis.getNextEntry();
