@@ -29,7 +29,6 @@ import com.android.volley.Response.Listener;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
-import org.tosl.coronawarncompanion.CWCApplication;
 import org.tosl.coronawarncompanion.MainActivity;
 
 import java.net.MalformedURLException;
@@ -40,7 +39,6 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
-import java.util.Objects;
 
 public class DKDownload {
     private static final String TAG = "DKDownload";
@@ -55,8 +53,6 @@ public class DKDownload {
     private CallbackCommand errorResponseCallbackCommand;
 
     public DKDownload(Context context) {
-        String cachePathStr = Objects.requireNonNull(context.getExternalCacheDir()).getPath();
-
         // Instantiate the Volley RequestQueue.
         queue = Volley.newRequestQueue(context);
 

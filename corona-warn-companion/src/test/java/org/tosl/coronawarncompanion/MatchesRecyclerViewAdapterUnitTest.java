@@ -42,7 +42,6 @@ public class MatchesRecyclerViewAdapterUnitTest {
                 .setRollingPeriod(144)
                 .setReportType(DiagnosisKeysProtos.TemporaryExposureKey.ReportType.CONFIRMED_TEST);
         dkImportBuilder.addKeys(dkBuilder.build());
-        DiagnosisKeysProtos.TemporaryExposureKeyExport dkImport = dkImportBuilder.build();
 
         byte[] aemBytes = new byte[] {(byte) 0, (byte) 1, (byte) 2, (byte) 3};
         byte[] aemXorBytes = new byte[] {(byte) 0, (byte) 1, (byte) 2, (byte) 3};
@@ -54,13 +53,7 @@ public class MatchesRecyclerViewAdapterUnitTest {
             for (int entryPos = 0; entryPos < numEntriesPerGroup; entryPos++) {
                 int startTimestampLocalTZ = TimestampLocalTZ;
                 TimestampLocalTZ += 3;
-                int endTimestampLocalTZ = TimestampLocalTZ;
                 TimestampLocalTZ += 3;
-
-                DiagnosisKeysProtos.TemporaryExposureKey dk = dkImport.getKeys(0);
-                byte[] rpiBytes = {(byte) 0, (byte) 1, (byte) 2, (byte) 3,
-                        (byte) 4, (byte) 5, (byte) 6, (byte) 7, (byte) 8, (byte) 9,
-                        (byte) 10, (byte) 11, (byte) 12, (byte) 13, (byte) 14, (byte) 15};
 
                 ContactRecordsProtos.ContactRecords.Builder contactRecordsBuilder1 =
                         ContactRecordsProtos.ContactRecords.newBuilder()
@@ -70,8 +63,8 @@ public class MatchesRecyclerViewAdapterUnitTest {
                                         .setAem(ByteString.copyFrom(aemBytes))
                                 );
                 ContactRecordsProtos.ContactRecords contactRecords1 = contactRecordsBuilder1.build();
-                Matcher.MatchEntry entry1 = new Matcher.MatchEntry(dk, rpiBytes, contactRecords1,
-                        startTimestampLocalTZ, endTimestampLocalTZ, aemXorBytes);
+                Matcher.MatchEntry entry1 = new Matcher.MatchEntry(contactRecords1,
+                        startTimestampLocalTZ, aemXorBytes);
                 list.add(entry1);
 
                 ContactRecordsProtos.ContactRecords.Builder contactRecordsBuilder2 =
@@ -82,8 +75,8 @@ public class MatchesRecyclerViewAdapterUnitTest {
                                         .setAem(ByteString.copyFrom(aemBytes))
                                 );
                 ContactRecordsProtos.ContactRecords contactRecords2 = contactRecordsBuilder2.build();
-                Matcher.MatchEntry entry2 = new Matcher.MatchEntry(dk, rpiBytes, contactRecords2,
-                        startTimestampLocalTZ, endTimestampLocalTZ, aemXorBytes);
+                Matcher.MatchEntry entry2 = new Matcher.MatchEntry(contactRecords2,
+                        startTimestampLocalTZ, aemXorBytes);
                 list.add(entry2);
             }
             TimestampLocalTZ += 4*60;

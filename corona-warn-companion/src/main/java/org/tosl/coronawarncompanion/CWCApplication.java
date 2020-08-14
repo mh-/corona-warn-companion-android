@@ -19,7 +19,6 @@
 package org.tosl.coronawarncompanion;
 
 import android.app.Application;
-import android.content.Context;
 
 import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
 

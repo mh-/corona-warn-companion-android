@@ -45,21 +45,14 @@ public class Matcher {
     private final MatchEntryContent matchEntryContent;
 
     public static class MatchEntry {
-        public final DiagnosisKeysProtos.TemporaryExposureKey diagnosisKey;
-        public final byte[] rpi;
         public final ContactRecordsProtos.ContactRecords contactRecords;
         public final int startTimestampUTC;
-        public final int endTimestampUTC;
         public final byte[] aemXorBytes;
 
-        public MatchEntry(DiagnosisKeysProtos.TemporaryExposureKey dk, byte[] rpiBytes,
-                          ContactRecordsProtos.ContactRecords contactRecords,
-                          int startTimestampUTC, int endTimestampUTC, byte[] aemXorBytes) {
-            this.diagnosisKey = dk;
-            this.rpi = rpiBytes;
+        public MatchEntry(ContactRecordsProtos.ContactRecords contactRecords,
+                          int startTimestampUTC, byte[] aemXorBytes) {
             this.contactRecords = contactRecords;
             this.startTimestampUTC = startTimestampUTC;
-            this.endTimestampUTC = endTimestampUTC;
             this.aemXorBytes = aemXorBytes;
         }
     }
@@ -105,8 +98,8 @@ public class Matcher {
                     byte[] zeroAem = {0x00, 0x00, 0x00, 0x00};
                     byte[] aemXorBytes = decryptAem(aemKey, zeroAem, rpiEntry.rpiBytes.getBytes());
 
-                    this.matchEntryContent.matchEntries.add(new MatchEntry(dk, dkRpiWithInterval.rpiBytes, rpiEntry.contactRecords,
-                            rpiEntry.startTimeStampUTC, rpiEntry.endTimeStampUTC, aemXorBytes),
+                    this.matchEntryContent.matchEntries.add(new MatchEntry(rpiEntry.contactRecords,
+                            rpiEntry.startTimeStampUTC, aemXorBytes),
                             dk,
                             getDaysFromSeconds(rpiEntry.startTimeStampUTC + timeZoneOffsetSeconds));
                     numMatches = this.matchEntryContent.matchEntries.getTotalMatchingDkCount();

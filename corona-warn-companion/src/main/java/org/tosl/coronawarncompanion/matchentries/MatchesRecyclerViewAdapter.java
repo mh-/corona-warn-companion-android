@@ -445,7 +445,6 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
         public final TextView mTextView1;
         public final TextView mTextView2;
         public final LineChart mChartView;
@@ -453,7 +452,6 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
 
         public ViewHolder(View view) {
             super(view);
-            mView = view;
             mTextView1 = view.findViewById(R.id.textView1);
             mTextView2 = view.findViewById(R.id.textView2);
             mChartView = view.findViewById(R.id.chart);

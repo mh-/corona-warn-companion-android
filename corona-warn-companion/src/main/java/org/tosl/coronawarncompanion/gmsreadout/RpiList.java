@@ -105,14 +105,12 @@ public class RpiList {
         public final RpiBytes rpiBytes;  // RPI bytes
         public final ContactRecordsProtos.ContactRecords contactRecords;  // list of all ScanRecords
         public final int startTimeStampUTC;  // the timestamp of the first ScanRecord in seconds (UTC)
-        public final int endTimeStampUTC;  // the timestamp of the last ScanRecord in seconds (local time zone)
 
         public RpiEntry(byte[] rpiBytes, ContactRecordsProtos.ContactRecords contactRecords,
-                        int startTimeStampUTC, int endTimeStampUTC) {
+                        int startTimeStampUTC) {
             this.rpiBytes = new RpiBytes(rpiBytes);
             this.contactRecords = contactRecords;
             this.startTimeStampUTC = startTimeStampUTC;
-            this.endTimeStampUTC = endTimeStampUTC;
         }
     }
 
@@ -157,7 +155,7 @@ public class RpiList {
             listsPerDayUTC = mapOfDaysUTCAndListsOfRPIs.get(daysSinceEpochUTC);
 
             RpiList.RpiEntry rpiEntry = new RpiList.RpiEntry(rpiBytes, contactRecords,
-                    startTimeStampUTC, endTimeStampUTC);
+                    startTimeStampUTC);
             if (listsPerDayUTC != null) {
                 listsPerDayUTC.rpiEntries.put(rpiEntry.rpiBytes, rpiEntry);
                 if (early) {
