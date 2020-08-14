@@ -31,8 +31,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.tosl.coronawarncompanion.R;
-import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
-import org.tosl.coronawarncompanion.matchentries.MatchesRecyclerViewAdapter;
 
 /**
  * A fragment representing a list of Items.
@@ -80,7 +78,7 @@ public class MatchesRecyclerViewFragment extends Fragment {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
             MatchesRecyclerViewAdapter adapter = new MatchesRecyclerViewAdapter(mMatchEntryContent.matchEntries.
-                    getDailyMatchEntries(mDaysSinceEpochLocalTZ));
+                    getDailyMatchEntries(mDaysSinceEpochLocalTZ), context);
             recyclerView.setAdapter(adapter);
             //adapter.setHour(mInitialHour);
         }

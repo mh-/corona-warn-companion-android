@@ -39,8 +39,6 @@ import io.noties.markwon.Markwon;
 
 public class DisplayLicensesActivity extends AppCompatActivity {
 
-    private TextView textView;
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -73,7 +71,7 @@ public class DisplayLicensesActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setTitle(R.string.title_activity_licenses);
         }
-        textView = findViewById(R.id.mainTextView);
+        TextView textView = findViewById(R.id.mainTextView);
 
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         try {

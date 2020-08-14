@@ -15,7 +15,6 @@
     <string name="title_matching_not_done_yet_with_progress">Abgleich wird erstellt… %1$d%% (%2$d gefunden)</string>
     <string name="time">🕐</string>
     <string name="transmission_risk_level">Übertragungsrisiko</string>
-    <string name="min_attenuation">Minimale Dämpfung</string>
     <string name="please_wait">Bitte warten…</string>
     <string name="extracting_encounters">Begegnungen auslesen…</string>
     <string name="downloading_diagnosis_keys">Diagnoseschlüssel herunterladen…</string>

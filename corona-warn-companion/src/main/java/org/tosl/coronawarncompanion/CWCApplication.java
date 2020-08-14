@@ -29,22 +29,18 @@ public class CWCApplication extends Application {
 
     public static boolean DEMO_MODE = false;
 
-    private MatchEntryContent matchEntryContent = null;
-    public MatchEntryContent getMatchEntryContent() {return matchEntryContent;}
-    public void setMatchEntryContent(MatchEntryContent matchEntryContent) {this.matchEntryContent = matchEntryContent;}
-
-    private int timeZoneOffsetSeconds;
-    public int getTimeZoneOffsetSeconds() {return timeZoneOffsetSeconds;}
-
-    private static Context context;
-    public static Context getAppContext() {
-        return CWCApplication.context;
+    private static MatchEntryContent matchEntryContent = null;
+    public static MatchEntryContent getMatchEntryContent() {return matchEntryContent;}
+    public static void setMatchEntryContent(
+            MatchEntryContent myMatchEntryContent) {matchEntryContent = myMatchEntryContent;
     }
+
+    private static int timeZoneOffsetSeconds;
+    public static int getTimeZoneOffsetSeconds() {return timeZoneOffsetSeconds;}
 
     @Override
     public void onCreate() {
         super.onCreate();
         timeZoneOffsetSeconds = TimeZone.getDefault().getOffset(System.currentTimeMillis()) / 1000;
-        CWCApplication.context = getApplicationContext();
     }
 }

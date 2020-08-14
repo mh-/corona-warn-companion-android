@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.graphics.Color;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -76,12 +77,12 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
     private final float textScalingFactor;
 
     private final ArrayList<Pair<DiagnosisKeysProtos.TemporaryExposureKey, MatchEntryContent.GroupedByDkMatchEntries>> mValues;
-    private final CWCApplication mApp;
+    private final Context mContext;
 
     private boolean showAllScans = false;
 
-    public MatchesRecyclerViewAdapter(DailyMatchEntries dailyMatchEntries) {
-        this.mApp = (CWCApplication) CWCApplication.getAppContext();
+    public MatchesRecyclerViewAdapter(DailyMatchEntries dailyMatchEntries, Context context) {
+        this.mContext = context;
         this.mValues = new ArrayList<>();
         TreeMap<Integer, Pair<DiagnosisKeysProtos.TemporaryExposureKey,
                 MatchEntryContent.GroupedByDkMatchEntries>> treeMap = new TreeMap<>();
@@ -90,7 +91,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
             treeMap.put(entry.getValue().getList().get(0).startTimestampUTC, new Pair<>(entry.getKey(), entry.getValue()));
         }
         mValues.addAll(treeMap.values());
-        DisplayMetrics metrics = this.mApp.getResources().getDisplayMetrics();
+        DisplayMetrics metrics = this.mContext.getResources().getDisplayMetrics();
         this.textScalingFactor = metrics.scaledDensity/metrics.density;
     }
 
@@ -135,7 +136,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
             hasReportType = true;
         }
 
-        MatchEntryDetails matchEntryDetails = getMatchEntryDetails(list, mApp.getTimeZoneOffsetSeconds());
+        MatchEntryDetails matchEntryDetails = getMatchEntryDetails(list, CWCApplication.getTimeZoneOffsetSeconds());
         int minTimestampLocalTZDay0 = matchEntryDetails.minTimestampLocalTZDay0;
         int maxTimestampLocalTZDay0 = matchEntryDetails.maxTimestampLocalTZDay0;
 
@@ -144,7 +145,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         String startDateStr = dateFormat.format(startDate);
         String endDateStr = dateFormat.format(endDate);
 
-        String text = CWCApplication.getAppContext().getResources().getString(R.string.time);
+        String text = this.mContext.getResources().getString(R.string.time);
         text += " ";
         if (startDateStr.equals(endDateStr)) {
             text += startDateStr;
@@ -159,12 +160,12 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         //}
         // text += CWCApplication.getAppContext().getResources().getString(R.string.min_attenuation)+": "+minAttenuation+"dB\n";
         // text += "("+byteArrayToHex(dk.getKeyData().toByteArray())+")";
-        text += CWCApplication.getAppContext().getResources().getString(R.string.distance_shown_as_attenuation)+":";
+        text += this.mContext.getResources().getString(R.string.distance_shown_as_attenuation)+":";
         holder.mTextView1.setText(text);
 
         text = "";
         if (hasTransmissionRiskLevel) {
-            text = CWCApplication.getAppContext().getResources().getString(R.string.transmission_risk_level) + ": " + transmissionRiskLevel;
+            text = this.mContext.getResources().getString(R.string.transmission_risk_level) + ": " + transmissionRiskLevel;
         }
         holder.mTextView2.setText(text);
 
@@ -422,19 +423,19 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
     private String getReportTypeStr(DiagnosisKeysProtos.TemporaryExposureKey.ReportType reportType) {
         switch (reportType) {
             case REVOKED:
-                return(mApp.getString(R.string.report_type_revoked));
+                return(mContext.getString(R.string.report_type_revoked));
             case UNKNOWN:
-                return(mApp.getString(R.string.report_type_unknown));
+                return(mContext.getString(R.string.report_type_unknown));
             case RECURSIVE:
-                return(mApp.getString(R.string.report_type_recursive));
+                return(mContext.getString(R.string.report_type_recursive));
             case SELF_REPORT:
-                return(mApp.getString(R.string.report_type_self_report));
+                return(mContext.getString(R.string.report_type_self_report));
             case CONFIRMED_TEST:
-                return(mApp.getString(R.string.report_type_confirmed_test));
+                return(mContext.getString(R.string.report_type_confirmed_test));
             case CONFIRMED_CLINICAL_DIAGNOSIS:
-                return(mApp.getString(R.string.report_type_clinical_diagnosis));
+                return(mContext.getString(R.string.report_type_clinical_diagnosis));
             default:
-                return mApp.getString(R.string.invalid);
+                return mContext.getString(R.string.invalid);
         }
     }
 

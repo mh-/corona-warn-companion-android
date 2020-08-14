@@ -44,9 +44,6 @@ import static org.tosl.coronawarncompanion.tools.Utils.getDateFromDaysSinceEpoch
 public class DisplayDetailsActivity extends AppCompatActivity {
 
     private static final String TAG = "DisplayDetailsActivity";
-    private static boolean DEMO_MODE;
-    private CWCApplication app = null;
-    private MatchEntryContent matchEntryContent;
     private MatchesRecyclerViewFragment matchesRecyclerViewFragment;
 
     @Override
@@ -94,9 +91,7 @@ public class DisplayDetailsActivity extends AppCompatActivity {
             count = Integer.parseInt(countMessage);
         }
 
-        DEMO_MODE = CWCApplication.DEMO_MODE;
-        app = (CWCApplication) getApplicationContext();
-        matchEntryContent = app.getMatchEntryContent();
+        MatchEntryContent matchEntryContent = CWCApplication.getMatchEntryContent();
 
         if (savedInstanceState == null) {
 
@@ -104,7 +99,7 @@ public class DisplayDetailsActivity extends AppCompatActivity {
             ActionBar actionBar = getSupportActionBar();
             if (actionBar != null) {
                 actionBar.setDisplayHomeAsUpEnabled(true);
-                if (!DEMO_MODE) {
+                if (!CWCApplication.DEMO_MODE) {
                     actionBar.setTitle(R.string.title_activity_details);
                 } else {
                     actionBar.setTitle(R.string.title_activity_details_demo);

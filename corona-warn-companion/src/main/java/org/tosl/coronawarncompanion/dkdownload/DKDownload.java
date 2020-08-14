@@ -19,6 +19,7 @@
 package org.tosl.coronawarncompanion.dkdownload;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -46,8 +47,6 @@ public class DKDownload {
 
     private static final String CWA_URL = "https://svc90.main.px.t-online.de/version/v1/diagnosis-keys/country/DE/date";
 
-    private static String cachePathStr;
-
     @SuppressLint("SimpleDateFormat")
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -55,11 +54,11 @@ public class DKDownload {
     private final Response.ErrorListener errorResponseListener;
     private CallbackCommand errorResponseCallbackCommand;
 
-    public DKDownload() {
-        cachePathStr = Objects.requireNonNull(CWCApplication.getAppContext().getExternalCacheDir()).getPath();
+    public DKDownload(Context context) {
+        String cachePathStr = Objects.requireNonNull(context.getExternalCacheDir()).getPath();
 
         // Instantiate the Volley RequestQueue.
-        queue = Volley.newRequestQueue(CWCApplication.getAppContext());
+        queue = Volley.newRequestQueue(context);
 
         errorResponseListener = error -> {
             Log.e(TAG, "VolleyError "+error);

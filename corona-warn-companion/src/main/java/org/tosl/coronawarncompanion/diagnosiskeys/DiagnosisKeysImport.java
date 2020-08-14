@@ -26,7 +26,6 @@ import android.widget.Toast;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import org.tosl.coronawarncompanion.BuildConfig;
-import org.tosl.coronawarncompanion.CWCApplication;
 import org.tosl.coronawarncompanion.R;
 
 import java.nio.charset.StandardCharsets;
@@ -39,7 +38,7 @@ public class DiagnosisKeysImport {
 
     private DiagnosisKeysProtos.TemporaryExposureKeyExport dkImport = null;
 
-    public DiagnosisKeysImport(byte[] exportDotBin) {
+    public DiagnosisKeysImport(byte[] exportDotBin, Context context) {
         String header = "EK Export v1    ";
         byte[] headerBytes = header.getBytes(StandardCharsets.UTF_8);
         if (BuildConfig.DEBUG && headerBytes.length != 16) {
@@ -53,7 +52,6 @@ public class DiagnosisKeysImport {
             }
         } else {
             Log.e(TAG, "Invalid Header: export.bin does not start with 'EK Export v1'");
-            Context context = CWCApplication.getAppContext();
             CharSequence text = context.getResources().getString(R.string.error_download_invalid_key_file_header);
             Toast toast = Toast.makeText(context, text, Toast.LENGTH_LONG);
             toast.setGravity(Gravity.CENTER, 0, 0);

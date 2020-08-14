@@ -38,9 +38,6 @@ import io.noties.markwon.image.file.FileSchemeHandler;
 
 public class AboutActivity extends AppCompatActivity {
 
-    private TextView versionTextView;
-    private TextView mainTextView;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,8 +49,8 @@ public class AboutActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setTitle(R.string.title_activity_about);
         }
-        versionTextView = findViewById(R.id.versionTextView);
-        mainTextView = findViewById(R.id.mainTextView);
+        TextView versionTextView = findViewById(R.id.versionTextView);
+        TextView mainTextView = findViewById(R.id.mainTextView);
 
         versionTextView.setText(getString(R.string.about_version,
                 BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, BuildConfig.BUILD_TYPE));

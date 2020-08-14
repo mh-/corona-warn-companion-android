@@ -81,10 +81,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     public static final String EXTRA_MESSAGE_DAY = "org.tosl.coronawarncompanion.DAY_MESSAGE";
     public static final String EXTRA_MESSAGE_COUNT = "org.tosl.coronawarncompanion.COUNT_MESSAGE";
-    private static boolean DEMO_MODE;
     private static boolean backgroundThreadsRunning = false;
     CWCApplication app = null;
-    private int timeZoneOffsetSeconds;
     private RpiList rpiList = null;
     private final long todayLastMidnightInMillis = getMillisFromDays(getDaysFromMillis(System.currentTimeMillis()));
     private Date maxDate = new Date(todayLastMidnightInMillis);
@@ -146,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        DEMO_MODE = CWCApplication.DEMO_MODE;
+        boolean DEMO_MODE = CWCApplication.DEMO_MODE;
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -163,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         app = (CWCApplication) getApplicationContext();
-        timeZoneOffsetSeconds = app.getTimeZoneOffsetSeconds();
+        int timeZoneOffsetSeconds = CWCApplication.getTimeZoneOffsetSeconds();
         Log.d(TAG, "Local TimeZone Offset in seconds: "+ timeZoneOffsetSeconds);
 
         textView1 = findViewById(R.id.textView1);
@@ -178,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
 
         // 1st Section: Get RPIs from database (requires root)
 
-        ContactDbOnDisk contactDbOnDisk = new ContactDbOnDisk();
+        ContactDbOnDisk contactDbOnDisk = new ContactDbOnDisk(app);
         rpiList = contactDbOnDisk.getRpisFromContactDB(DEMO_MODE);
 
         if (rpiList != null) {  // check that getting the RPIs didn't fail, e.g. because we didn't get root rights
@@ -215,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
             backgroundThreadsRunning = true;  // this temporarily disables toggling the DEMO_MODE
 
             if (!DEMO_MODE) {
-                diagnosisKeysDownload = new DKDownload();
+                diagnosisKeysDownload = new DKDownload(app);
                 diagnosisKeysDownload.availableDatesRequest(new availableDatesResponseCallbackCommand(),
                         new errorResponseCallbackCommand());
                 // (the rest is done asynchronously in callback functions)
@@ -313,7 +311,7 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            DiagnosisKeysImport diagnosisKeysImport = new DiagnosisKeysImport(exportDotBinBytes);
+            DiagnosisKeysImport diagnosisKeysImport = new DiagnosisKeysImport(exportDotBinBytes, app);
             List<DiagnosisKeysProtos.TemporaryExposureKey> dkList = diagnosisKeysImport.getDiagnosisKeys();
             if (dkList != null) {
                 Log.d(TAG, "Number of keys in this file: " + dkList.size());
@@ -407,7 +405,7 @@ public class MainActivity extends AppCompatActivity {
                                 () -> textView3.setText(getResources().getString(R.string.
                                         title_matching_not_done_yet_with_progress, progress.first, progress.second))));
                 Log.d(TAG, "Finished matching, sending the message...");
-                app.setMatchEntryContent(matchEntryContent);
+                CWCApplication.setMatchEntryContent(matchEntryContent);
             }
             Message completeMessage = mainActivity.uiThreadHandler.obtainMessage();
             completeMessage.sendToTarget();
@@ -416,7 +414,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void presentMatchResults() {
         if ((rpiList != null) && (diagnosisKeysList != null)) {
-            MatchEntryContent matchEntryContent = app.getMatchEntryContent();
+            MatchEntryContent matchEntryContent = CWCApplication.getMatchEntryContent();
             int numberOfMatches = matchEntryContent.matchEntries.getTotalMatchingDkCount();
             Resources res = getResources();
             if (numberOfMatches > 0) {
@@ -470,7 +468,7 @@ public class MainActivity extends AppCompatActivity {
             if (y > 0) {
                 int x = (int)e.getX();
                 Log.d(TAG, "Detected selection "+x+" ("+y+")");
-                Intent intent = new Intent(getApplicationContext(), DisplayDetailsActivity.class);
+                Intent intent = new Intent(app, DisplayDetailsActivity.class);
                 intent.putExtra(EXTRA_MESSAGE_DAY, String.valueOf(x));
                 intent.putExtra(EXTRA_MESSAGE_COUNT, String.valueOf(y));
                 startActivity(intent);

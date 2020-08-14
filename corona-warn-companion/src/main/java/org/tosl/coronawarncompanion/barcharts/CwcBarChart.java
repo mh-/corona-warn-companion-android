@@ -35,7 +35,6 @@ public class CwcBarChart  {
     private BarData barData;
 
     private final int gridColor = Color.parseColor("#E0E0E0");
-    private final int matchBarColor = Color.parseColor("#FF0000");
     private final float textScalingFactor;
 
     public CwcBarChart(BarChart barChart, ProgressBar progressBar, BarChartSync barChartSync, Context context) {

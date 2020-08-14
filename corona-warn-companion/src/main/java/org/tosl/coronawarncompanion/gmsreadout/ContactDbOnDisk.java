@@ -19,6 +19,7 @@
 package org.tosl.coronawarncompanion.gmsreadout;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.res.AssetManager;
 import android.util.Log;
 
@@ -31,7 +32,6 @@ import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.ReadOptions;
 import org.iq80.leveldb.impl.Iq80DBFactory;
-import org.tosl.coronawarncompanion.CWCApplication;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -53,10 +53,16 @@ public class ContactDbOnDisk {
     private static final String dbNameModifier = "_";
     private static final String dbNameModified = dbName+dbNameModifier;
 
+    private final Context context;
+
+    public ContactDbOnDisk(Context context) {
+        this.context = context;
+    }
+
     public void copyFromGMS() {
         // Copy the GMS LevelDB to local app cache
         Log.d(TAG, "Trying to copy LevelDB");
-        String cachePathStr = Objects.requireNonNull(CWCApplication.getAppContext().getExternalCacheDir()).getPath();
+        String cachePathStr = Objects.requireNonNull(context.getExternalCacheDir()).getPath();
 
         // First rename the LevelDB directory, then copy it, then rename to the original name
         String result = sudo(
@@ -103,9 +109,9 @@ public class ContactDbOnDisk {
         // Copy the GMS LevelDB from our app's assets to local app cache
 
         Log.d(TAG, "Trying to copy LevelDB from Assets");
-        String cachePathStr = Objects.requireNonNull(CWCApplication.getAppContext().getExternalCacheDir()).getPath();
+        String cachePathStr = Objects.requireNonNull(context.getExternalCacheDir()).getPath();
 
-        AssetManager assetManager = CWCApplication.getAppContext().getAssets();
+        AssetManager assetManager = context.getAssets();
         String[] files = null;
         try {
             files = assetManager.list("demo_rpi_db");
@@ -146,7 +152,7 @@ public class ContactDbOnDisk {
         options.createIfMissing(false);
         options.compressionType(CompressionType.NONE);
         DBFactory factory = new Iq80DBFactory();
-        String cachePathStr = Objects.requireNonNull(CWCApplication.getAppContext().getExternalCacheDir()).getPath();
+        String cachePathStr = Objects.requireNonNull(context.getExternalCacheDir()).getPath();
         try {
             levelDBStore = factory.open(new File(cachePathStr + "/" + dbNameModified), options);
         } catch (IllegalArgumentException | IOException e) {
@@ -204,7 +210,7 @@ public class ContactDbOnDisk {
         try {
             // delete cache:
             try {
-                File dir = CWCApplication.getAppContext().getExternalCacheDir();
+                File dir = context.getExternalCacheDir();
                 deleteDir(dir);
             } catch (Exception e) { e.printStackTrace();}
 

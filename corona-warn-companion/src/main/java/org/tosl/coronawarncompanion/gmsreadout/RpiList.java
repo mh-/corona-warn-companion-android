@@ -119,7 +119,7 @@ public class RpiList {
     public RpiList() {
         mapOfDaysUTCAndListsOfRPIs = new HashMap<>();
         mapOfDailyCountsLocalTZ = new TreeMap<>();
-        timeZoneOffsetSeconds = ((CWCApplication) CWCApplication.getAppContext()).getTimeZoneOffsetSeconds();
+        timeZoneOffsetSeconds = CWCApplication.getTimeZoneOffsetSeconds();
     }
 
     public void addEntry(Integer daysSinceEpochUTC, byte[] rpiBytes, ContactRecordsProtos.ContactRecords contactRecords) {

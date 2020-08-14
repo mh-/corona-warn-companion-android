@@ -69,11 +69,12 @@ public class Matcher {
 
     final int timeZoneOffsetSeconds;
 
-    public Matcher(RpiList rpis, ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeys, MatchEntryContent matchEntryContent) {
+    public Matcher(RpiList rpis, ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeys,
+                   MatchEntryContent matchEntryContent) {
         this.rpiList = rpis;
         this.diagnosisKeysList = diagnosisKeys;
         this.matchEntryContent = matchEntryContent;
-        timeZoneOffsetSeconds = ((CWCApplication) CWCApplication.getAppContext()).getTimeZoneOffsetSeconds();
+        timeZoneOffsetSeconds = CWCApplication.getTimeZoneOffsetSeconds();
     }
 
     public void findMatches(Consumer<Pair<Integer, Integer>> progressCallback) {
