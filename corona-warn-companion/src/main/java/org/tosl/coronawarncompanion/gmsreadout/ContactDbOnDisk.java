@@ -69,7 +69,6 @@ public class ContactDbOnDisk {
         Log.d(TAG, "Result from trying to copy LevelDB: "+result);
         if (result.length() < 10) {
             Log.e(TAG, "ERROR: Super User rights not granted!");
-            //TODO
         }
     }
 

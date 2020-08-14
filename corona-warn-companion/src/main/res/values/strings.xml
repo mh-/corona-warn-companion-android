@@ -4,15 +4,15 @@
         <item quantity="one">Risk encounter on %s:</item>
         <item quantity="other">Risk encounters on %s:</item>
     </plurals>
-    <plurals name="number_of_matches_found">
+    <plurals name="title_number_of_matches_found">
         <item quantity="one">%d risk encounter. Tap to see details…</item>
         <item quantity="other">%d risk encounters. Tap to see details…</item>
     </plurals>
-    <string name="no_matches_found">No risk encounters found.</string>
-    <string name="rpis_extracted" tools:ignore="PluralsCandidate">%d encounters scanned (%s-%s).</string>
-    <string name="diagnosis_keys_downloaded" tools:ignore="PluralsCandidate">%d diagnosis keys downloaded."</string>
-    <string name="matching_not_done_yet">Matching in progress…</string>
-    <string name="matching_not_done_yet_with_progress" tools:ignore="PluralsCandidate">Matching in progress… %1$d%% (%2$d found)</string>
+    <string name="title_no_matches_found">No risk encounters found.</string>
+    <string name="title_rpis_extracted" tools:ignore="PluralsCandidate">%d encounters scanned (%s-%s).</string>
+    <string name="title_diagnosis_keys_downloaded" tools:ignore="PluralsCandidate">%d diagnosis keys downloaded."</string>
+    <string name="title_matching_not_done_yet">Matching in progress…</string>
+    <string name="title_matching_not_done_yet_with_progress" tools:ignore="PluralsCandidate">Matching in progress… %1$d%% (%2$d found)</string>
     <string name="time">Time</string>
     <string name="transmission_risk_level">Transmission Risk</string>
     <string name="min_attenuation">Minimum Attenuation</string>
@@ -39,10 +39,11 @@
     <string name="title_activity_details_demo">DEMO sample details</string>
     <string name="menu_entry_view_further_oss_licenses">Further Open Source Software Licenses</string>
     <string name="title_activity_further_licenses">Further OSS Licenses</string>
-    <string name="demo_mode_switching_not_possible">Sorry, at the moment we cannot switch modes.\nPlease wait until all operations have finished.</string>
+    <string name="error_demo_mode_switching_not_possible">Sorry, at the moment we cannot switch modes.\nPlease wait until all operations have finished.</string>
     <string name="error_no_rpis">ERROR!\n\nNo encounters could be extracted.\nAre Exposure Notifications enabled?\nDid you grant ROOT rights to this app?</string>
     <string name="error_download">Error!\n\nDownload of Diagnosis Keys failed.\nIs your internet connection working?</string>
     <string name="menu_entry_about">About this app</string>
     <string name="title_activity_about">About this app</string>
     <string name="about_version">Version\n%s (%d, %s)</string>
+    <string name="error_download_invalid_key_file_header">Error!\n\nDownloaded Diagnosis Keys file starts with incorrect header!</string>
 </resources>

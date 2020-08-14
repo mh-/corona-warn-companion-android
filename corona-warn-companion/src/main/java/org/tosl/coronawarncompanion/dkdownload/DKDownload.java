@@ -132,7 +132,6 @@ public class DKDownload {
             doCallback(callbackCommand, result);
         };
         Response.ErrorListener localErrorResponseListener = error -> {
-            //TODO
             Log.i(TAG, "VolleyError "+error);
             Log.i(TAG, "No hourly downloads available yet.");
             LinkedList<String> result = new LinkedList<>();

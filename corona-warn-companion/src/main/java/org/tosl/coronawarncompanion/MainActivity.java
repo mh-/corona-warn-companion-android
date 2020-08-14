@@ -93,8 +93,7 @@ public class MainActivity extends AppCompatActivity {
 
     private DKDownload diagnosisKeysDownload;
     private final LinkedList<URL> diagnosisKeysUrls = new LinkedList<>();
-    private ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList = null;
-
+    private final ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList = new ArrayList<>();
     private final int normalBarColor = Color.parseColor("#8CEAFF");
     private final int matchBarColor = Color.parseColor("red");
 
@@ -127,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
                     recreate();
                     return true;
                 } else {
-                    CharSequence text = getString(R.string.demo_mode_switching_not_possible);
+                    CharSequence text = getString(R.string.error_demo_mode_switching_not_possible);
                     Toast toast = Toast.makeText(this, text, Toast.LENGTH_LONG);
                     toast.setGravity(Gravity.CENTER, 0, 0);
                     toast.show();
@@ -205,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
             maxDate = new Date(getMillisFromDays(rpiListDaysSinceEpochLocalTZ.last()));
             String maxDateStr = dateFormat.format(maxDate);
 
-            textView1.setText(getString(R.string.rpis_extracted, count, minDateStr, maxDateStr));
+            textView1.setText(getString(R.string.title_rpis_extracted, count, minDateStr, maxDateStr));
 
             chart1.setData(dataPoints1, normalBarColor, "RPIs", false);
             chart1.setFormatAndRefresh();
@@ -315,10 +314,11 @@ public class MainActivity extends AppCompatActivity {
             }
 
             DiagnosisKeysImport diagnosisKeysImport = new DiagnosisKeysImport(exportDotBinBytes);
-            Log.d(TAG, "Number of keys in this file: " + diagnosisKeysImport.getDiagnosisKeys().size());
-
-            if (diagnosisKeysList == null) diagnosisKeysList = new ArrayList<>();
-            diagnosisKeysList.addAll(diagnosisKeysImport.getDiagnosisKeys());
+            List<DiagnosisKeysProtos.TemporaryExposureKey> dkList = diagnosisKeysImport.getDiagnosisKeys();
+            if (dkList != null) {
+                Log.d(TAG, "Number of keys in this file: " + dkList.size());
+                diagnosisKeysList.addAll(dkList);
+            }
 
             diagnosisKeysUrls.remove(fileResponse.url);
             Log.d(TAG, "Downloads left: " + diagnosisKeysUrls.size());
@@ -352,7 +352,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        textView2.setText(getString(R.string.diagnosis_keys_downloaded, count));
+        textView2.setText(getString(R.string.title_diagnosis_keys_downloaded, count));
 
         List<BarEntry> dataPoints2 = new ArrayList<>();
 
@@ -366,7 +366,7 @@ public class MainActivity extends AppCompatActivity {
         chart2.setData(dataPoints2, normalBarColor,"DKs", false);
         chart2.setFormatAndRefresh();
 
-        textView3.setText(getString(R.string.matching_not_done_yet));
+        textView3.setText(getString(R.string.title_matching_not_done_yet));
         startMatching();
     }
 
@@ -377,7 +377,7 @@ public class MainActivity extends AppCompatActivity {
         uiThreadHandler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@SuppressWarnings("NullableProblems") Message inputMessage) {
-                Log.d(TAG, "Message received.");
+                Log.d(TAG, "Message received: Matching finished.");
                 presentMatchResults();
             }
         };
@@ -399,13 +399,13 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_DISPLAY);
 
-            if ((rpiList != null) && (diagnosisKeysList != null)) {
+            if ((rpiList != null) && (diagnosisKeysList.size() != 0)) {
                 MatchEntryContent matchEntryContent = new MatchEntryContent();
                 Matcher matcher = new Matcher(rpiList, diagnosisKeysList, matchEntryContent);
                 matcher.findMatches(
                         progress -> runOnUiThread(
                                 () -> textView3.setText(getResources().getString(R.string.
-                                        matching_not_done_yet_with_progress, progress.first, progress.second))));
+                                        title_matching_not_done_yet_with_progress, progress.first, progress.second))));
                 Log.d(TAG, "Finished matching, sending the message...");
                 app.setMatchEntryContent(matchEntryContent);
             }
@@ -420,10 +420,10 @@ public class MainActivity extends AppCompatActivity {
             int numberOfMatches = matchEntryContent.matchEntries.getTotalMatchingDkCount();
             Resources res = getResources();
             if (numberOfMatches > 0) {
-                textView3.setText(res.getQuantityString(R.plurals.number_of_matches_found, numberOfMatches, numberOfMatches));
+                textView3.setText(res.getQuantityString(R.plurals.title_number_of_matches_found, numberOfMatches, numberOfMatches));
                 textView3.setTextColor(matchBarColor);
             } else {
-                textView3.setText(R.string.no_matches_found);
+                textView3.setText(R.string.title_no_matches_found);
             }
             Log.d(TAG, "Number of matches: " + numberOfMatches);
 

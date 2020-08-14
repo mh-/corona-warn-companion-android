@@ -4,15 +4,15 @@
         <item quantity="one">Risiko-Begegnung am %s:</item>
         <item quantity="other">Risiko-Begegnungen am %s:</item>
     </plurals>
-    <string name="no_matches_found">Keine Risiko-Begegnungen gefunden.</string>
-    <plurals name="number_of_matches_found">
+    <string name="title_no_matches_found">Keine Risiko-Begegnungen gefunden.</string>
+    <plurals name="title_number_of_matches_found">
         <item quantity="one">%d Risiko-Begegnung. Tippe für Details…</item>
         <item quantity="other">%d Risiko-Begegnungen. Tippe für Details…</item>
     </plurals>
-    <string name="rpis_extracted">%d Begegnungen erfasst (%s-%s).</string>
-    <string name="diagnosis_keys_downloaded">%d Diagnoseschlüssel heruntergeladen.</string>
-    <string name="matching_not_done_yet">Abgleich wird erstellt…</string>
-    <string name="matching_not_done_yet_with_progress">Abgleich wird erstellt… %1$d%% (%2$d gefunden)</string>
+    <string name="title_rpis_extracted">%d Begegnungen erfasst (%s-%s).</string>
+    <string name="title_diagnosis_keys_downloaded">%d Diagnoseschlüssel heruntergeladen.</string>
+    <string name="title_matching_not_done_yet">Abgleich wird erstellt…</string>
+    <string name="title_matching_not_done_yet_with_progress">Abgleich wird erstellt… %1$d%% (%2$d gefunden)</string>
     <string name="time">🕐</string>
     <string name="transmission_risk_level">Übertragungsrisiko</string>
     <string name="min_attenuation">Minimale Dämpfung</string>
@@ -39,10 +39,11 @@
     <string name="title_activity_details_demo">DEMO Beispiel-Details</string>
     <string name="menu_entry_view_further_oss_licenses">Weitere Open Source Software Lizenzen</string>
     <string name="title_activity_further_licenses">Weitere OSS Lizenzen</string>
-    <string name="demo_mode_switching_not_possible">Im Moment kann der Modus leider nicht gewechselt werden.\nBitte warte, bis alle Berechnungen abgeschlossen sind.</string>
+    <string name="error_demo_mode_switching_not_possible">Im Moment kann der Modus leider nicht gewechselt werden.\nBitte warte, bis alle Berechnungen abgeschlossen sind.</string>
     <string name="error_no_rpis">FEHLER!\n\Begegnungen konnten nicht ausgelesen werden.\nSind Exposure Notifications eingeschaltet?\nHast Du dieser App ROOT-Rechte gegeben?</string>
     <string name="error_download">Fehler!\n\nEs gab ein Problem beim Herunterladen der Diagnoseschlüssel.\nFunktioniert Deine Internetverbindung?</string>
     <string name="menu_entry_about">Über diese App</string>
     <string name="title_activity_about">Über diese App</string>
     <string name="about_version">Version\n%s (%d, %s)</string>
+    <string name="error_download_invalid_key_file_header">Fehler!\n\nEine heruntergeladene Diagnoseschlüssel-Datei beginnt nicht mit der erwarteten Zeichenfolge!</string>
 </resources>

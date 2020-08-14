@@ -18,11 +18,16 @@
 
 package org.tosl.coronawarncompanion.diagnosiskeys;
 
+import android.content.Context;
 import android.util.Log;
+import android.view.Gravity;
+import android.widget.Toast;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import org.tosl.coronawarncompanion.BuildConfig;
+import org.tosl.coronawarncompanion.CWCApplication;
+import org.tosl.coronawarncompanion.R;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -47,12 +52,20 @@ public class DiagnosisKeysImport {
                 e.printStackTrace();
             }
         } else {
-            //TODO
             Log.e(TAG, "Invalid Header: export.bin does not start with 'EK Export v1'");
+            Context context = CWCApplication.getAppContext();
+            CharSequence text = context.getResources().getString(R.string.error_download_invalid_key_file_header);
+            Toast toast = Toast.makeText(context, text, Toast.LENGTH_LONG);
+            toast.setGravity(Gravity.CENTER, 0, 0);
+            toast.show();
         }
     }
 
     public List<DiagnosisKeysProtos.TemporaryExposureKey> getDiagnosisKeys() {
-        return dkImport.getKeysList();
+        if (dkImport != null) {
+            return dkImport.getKeysList();
+        } else {
+            return null;
+        }
     }
 }
