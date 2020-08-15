@@ -97,7 +97,7 @@
             app:layout_constraintTop_toTopOf="@+id/chart3" />
 
         <TextView
-            android:id="@+id/textViewErrorNoRpis"
+            android:id="@+id/textViewError"
             android:layout_width="match_parent"
             android:layout_height="400dp"
             android:layout_gravity="center"

@@ -18,6 +18,12 @@
 
 package org.tosl.coronawarncompanion.tools;
 
+import android.content.Context;
+import android.content.res.Resources;
+import android.util.TypedValue;
+
+import androidx.core.content.ContextCompat;
+
 import java.util.Date;
 
 public class Utils {
@@ -80,5 +86,24 @@ public class Utils {
         for(byte b: a)
             sb.append(String.format("%02x", b));
         return sb.toString();
+    }
+
+    public static int resolveColorAttr(int colorAttr, Context context) {
+        TypedValue resolvedAttr = resolveThemeAttr(colorAttr, context);
+        // resourceId is used if it's a ColorStateList, and data if it's a color reference or a hex color
+        int colorRes;
+        if (resolvedAttr.resourceId != 0) {
+            colorRes = resolvedAttr.resourceId;
+        } else {
+            colorRes = resolvedAttr.data;
+        }
+        return ContextCompat.getColor(context, colorRes);
+    }
+
+    private static TypedValue resolveThemeAttr(int attrRes, Context context) {
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme theme = context.getTheme();
+        theme.resolveAttribute(attrRes, typedValue, true);
+        return typedValue;
     }
 }

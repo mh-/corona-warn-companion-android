@@ -13,7 +13,7 @@
     <string name="title_diagnosis_keys_downloaded" tools:ignore="PluralsCandidate">%d diagnosis keys downloaded."</string>
     <string name="title_matching_not_done_yet">Matching in progress…</string>
     <string name="title_matching_not_done_yet_with_progress" tools:ignore="PluralsCandidate">Matching in progress… %1$d%% (%2$d found)</string>
-    <string name="time">Time</string>
+    <string name="time">🕐</string>
     <string name="transmission_risk_level">Transmission Risk</string>
     <string name="please_wait">Please wait…</string>
     <string name="extracting_encounters">Extracting encounters…</string>

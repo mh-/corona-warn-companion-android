@@ -19,6 +19,7 @@
 package org.tosl.coronawarncompanion.matchentries;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
@@ -60,6 +61,7 @@ import java.util.TreeMap;
 
 import static org.tosl.coronawarncompanion.tools.Utils.byteArrayToHex;
 import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromSeconds;
+import static org.tosl.coronawarncompanion.tools.Utils.resolveColorAttr;
 import static org.tosl.coronawarncompanion.tools.Utils.xorTwoByteArrays;
 
 /**
@@ -68,12 +70,11 @@ import static org.tosl.coronawarncompanion.tools.Utils.xorTwoByteArrays;
 public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecyclerViewAdapter.ViewHolder> {
 
     private static final String TAG = "CRRecyclerViewAdapter";
-    private static final int gridColor = Color.parseColor("#E0E0E0");
+    private final int lineColor;
     private static final int redColor = Color.parseColor("#FF0000");
     private static final int orangeColor = Color.parseColor("#FFA500");
     private static final int yellowColor = Color.parseColor("#FFFF00");
     private static final int greenColor = Color.parseColor("#00FF00");
-    private static final int blackColor = Color.parseColor("#000000");
     private final float textScalingFactor;
 
     private final ArrayList<Pair<DiagnosisKeysProtos.TemporaryExposureKey, MatchEntryContent.GroupedByDkMatchEntries>> mValues;
@@ -93,6 +94,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         mValues.addAll(treeMap.values());
         DisplayMetrics metrics = this.mContext.getResources().getDisplayMetrics();
         this.textScalingFactor = metrics.scaledDensity/metrics.density;
+        this.lineColor = resolveColorAttr(android.R.attr.textColorSecondary, context);
     }
 
     @NonNull
@@ -172,7 +174,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         // Graph:
         configureDetailsChart(holder.mChartView, matchEntryDetails.dataPointsMinAttenuation, matchEntryDetails.dotColorsMinAttenuation,
                 matchEntryDetails.dataPoints, matchEntryDetails.dotColors,
-                minTimestampLocalTZDay0, maxTimestampLocalTZDay0);
+                minTimestampLocalTZDay0, maxTimestampLocalTZDay0, mContext);
         holder.mChartView.getLineData().getDataSetByIndex(1).setVisible(this.showAllScans);
     }
 
@@ -341,12 +343,14 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
 
     private void configureDetailsChart(LineChart chartView, List<Entry> dataPointsMinAttenuation, ArrayList<Integer> dotColorsMinAttenuation,
                                        List<Entry> dataPoints, ArrayList<Integer> dotColors,
-                                       int minTimestampLocalTZDay0, int maxTimestampLocalTZDay0) {
+                                       int minTimestampLocalTZDay0, int maxTimestampLocalTZDay0, Context context) {
         LineDataSet dataSetMin = new LineDataSet(dataPointsMinAttenuation, "Minimum Attenuation"); // add entries to dataSetMin
         dataSetMin.setAxisDependency(YAxis.AxisDependency.LEFT);
         dataSetMin.setCircleColors(dotColorsMinAttenuation);
+        dataSetMin.setDrawCircleHole(false);
+        dataSetMin.setCircleHoleColor(resolveColorAttr(android.R.attr.colorBackgroundFloating, context));
         //dataSetMin.enableDashedLine(0, 1, 0);
-        dataSetMin.setColor(gridColor);
+        dataSetMin.setColor(lineColor);
         dataSetMin.setDrawValues(false);
         dataSetMin.setHighlightEnabled(false);
         dataSetMin.setCircleRadius(5.0f);
@@ -355,6 +359,8 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         LineDataSet dataSetRest = new LineDataSet(dataPoints, "Attenuation"); // add entries to dataSetRest
         dataSetRest.setAxisDependency(YAxis.AxisDependency.LEFT);
         dataSetRest.setCircleColors(dotColors);
+        dataSetRest.setDrawCircleHole(false);
+        dataSetRest.setCircleHoleColor(resolveColorAttr(android.R.attr.colorBackgroundFloating, context));
         dataSetRest.enableDashedLine(0, 1, 0);  // these parameters mean: do not show line
         dataSetRest.setDrawValues(false);
         dataSetRest.setHighlightEnabled(false);
@@ -395,18 +401,23 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         xAxis.setAxisMinimum(minTimestampLocalTZDay0-60);
         xAxis.setAxisMaximum(maxTimestampLocalTZDay0+60);
         xAxis.setTextSize(11.0f*this.textScalingFactor);
+        xAxis.setTextColor(resolveColorAttr(android.R.attr.textColorPrimary, context));
         chartView.setExtraBottomOffset(3.0f);
 
         YAxis yAxis = chartView.getAxisLeft();
         yAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
         yAxis.setGranularityEnabled(true);
         yAxis.setAxisMinimum(0.0f);
-        yAxis.setGridColor(gridColor);
+        yAxis.setGridColor(ContextCompat.getColor(context, R.color.colorGridLines));
+        yAxis.setGridLineWidth(1.0f);
+        yAxis.setDrawGridLines(true);
         yAxis.setValueFormatter(yAxisFormatter);
         yAxis.setInverted(true);
+        yAxis.setTextColor(resolveColorAttr(android.R.attr.textColorPrimary, context));
 
         chartView.getAxisRight().setAxisMinimum(0.0f);
         chartView.getAxisRight().setDrawLabels(false);
+        chartView.getAxisRight().setDrawGridLines(false);
         chartView.getLegend().setEnabled(false);
         chartView.getDescription().setEnabled(false);
         chartView.setScaleYEnabled(false);

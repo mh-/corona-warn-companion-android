@@ -21,6 +21,7 @@ package org.tosl.coronawarncompanion;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -76,6 +77,7 @@ import static org.tosl.coronawarncompanion.tools.Utils.getDaysSinceEpochFromENIN
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromMillis;
 import static org.tosl.coronawarncompanion.tools.Utils.getENINFromDate;
 import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromDays;
+import static org.tosl.coronawarncompanion.tools.Utils.resolveColorAttr;
 import static org.tosl.coronawarncompanion.tools.Utils.standardRollingPeriod;
 
 public class MainActivity extends AppCompatActivity {
@@ -84,7 +86,6 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_MESSAGE_DAY = "org.tosl.coronawarncompanion.DAY_MESSAGE";
     public static final String EXTRA_MESSAGE_COUNT = "org.tosl.coronawarncompanion.COUNT_MESSAGE";
     private static boolean demoModeShouldToggle = false;
-    CWCApplication app = null;
     private RpiList rpiList = null;
     private final long todayLastMidnightInMillis = getMillisFromDays(getDaysFromMillis(System.currentTimeMillis()));
     private Date maxDate = new Date(todayLastMidnightInMillis);
@@ -104,7 +105,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView textView1;
     private TextView textView2;
     private TextView textView3;
-    private TextView textViewErrorNoRpis;
+    private TextView textViewError;
+    private Context context;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -144,10 +146,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void toggleDemoMode() {
+        demoModeShouldToggle = false;
+        CWCApplication.DEMO_MODE = !CWCApplication.DEMO_MODE;
+        recreate();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        this.context = this;
 
         boolean DEMO_MODE = CWCApplication.DEMO_MODE;
 
@@ -177,23 +186,22 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        app = (CWCApplication) getApplicationContext();
         int timeZoneOffsetSeconds = CWCApplication.getTimeZoneOffsetSeconds();
         Log.d(TAG, "Local TimeZone Offset in seconds: "+ timeZoneOffsetSeconds);
 
         textView1 = findViewById(R.id.textView1);
         textView2 = findViewById(R.id.textView2);
         textView3 = findViewById(R.id.textView3);
-        textViewErrorNoRpis = findViewById(R.id.textViewErrorNoRpis);
+        textViewError = findViewById(R.id.textViewError);
         barChartSync = new BarChartSync();
-        chart1 = new CwcBarChart(findViewById(R.id.chart1), findViewById(R.id.progressBar1), barChartSync, app);
-        chart2 = new CwcBarChart(findViewById(R.id.chart2), findViewById(R.id.progressBar2), barChartSync, app);
-        chart3 = new CwcBarChart(findViewById(R.id.chart3), findViewById(R.id.progressBar3), barChartSync, app);
+        chart1 = new CwcBarChart(findViewById(R.id.chart1), findViewById(R.id.progressBar1), barChartSync, this);
+        chart2 = new CwcBarChart(findViewById(R.id.chart2), findViewById(R.id.progressBar2), barChartSync, this);
+        chart3 = new CwcBarChart(findViewById(R.id.chart3), findViewById(R.id.progressBar3), barChartSync, this);
         chart3.getBarChart().setOnChartValueSelectedListener(new Chart3ValueSelectedListener());
 
         // 1st Section: Get RPIs from database (requires root)
 
-        ContactDbOnDisk contactDbOnDisk = new ContactDbOnDisk(app);
+        ContactDbOnDisk contactDbOnDisk = new ContactDbOnDisk(this);
         rpiList = contactDbOnDisk.getRpisFromContactDB(DEMO_MODE);
 
         if (rpiList != null) {  // check that getting the RPIs didn't fail, e.g. because we didn't get root rights
@@ -221,14 +229,14 @@ public class MainActivity extends AppCompatActivity {
 
             textView1.setText(getString(R.string.title_rpis_extracted, count, minDateStr, maxDateStr));
 
-            chart1.setData(dataPoints1, normalBarColor, "RPIs", false);
-            chart1.setFormatAndRefresh();
+            chart1.setData(dataPoints1, normalBarColor, "RPIs", false, this);
+            chart1.setFormatAndRefresh(this);
 
 
             // 2nd Section: Diagnosis Keys
 
             if (!DEMO_MODE) {
-                diagnosisKeysDownload = new DKDownload(app);
+                diagnosisKeysDownload = new DKDownload(this);
                 diagnosisKeysDownload.availableDatesRequest(new availableDatesResponseCallbackCommand(),
                         new errorResponseCallbackCommand());
                 // (the rest is done asynchronously in callback functions)
@@ -258,26 +266,20 @@ public class MainActivity extends AppCompatActivity {
             for (int day = daysSinceEpochLocalTZ-13; day <= daysSinceEpochLocalTZ; day++) {
                 dataPoints1.add(new BarEntry(day, 0));
             }
-            chart1.setData(dataPoints1, normalBarColor, "RPIs", false);
-            chart1.setFormatAndRefresh();
+            chart1.setData(dataPoints1, normalBarColor, "RPIs", false, this);
+            chart1.setFormatAndRefresh(this);
             chart2.switchProgressBarOff();
             chart3.switchProgressBarOff();
-            textViewErrorNoRpis.setText(R.string.error_no_rpis);
-            textViewErrorNoRpis.setBackgroundColor(Color.parseColor("white"));
+            textViewError.setText(R.string.error_no_rpis);
+            textViewError.setBackgroundColor(resolveColorAttr(android.R.attr.colorBackground, context));
         }
     }
 
     public class errorResponseCallbackCommand implements DKDownload.CallbackCommand {
         public void execute(Object data) {
-            textViewErrorNoRpis.setText(R.string.error_download);
-            textViewErrorNoRpis.setBackgroundColor(Color.parseColor("white"));
+            textViewError.setText(R.string.error_download);
+            textViewError.setBackgroundColor(resolveColorAttr(android.R.attr.colorBackground, context));
         }
-    }
-
-    private void toggleDemoMode() {
-        demoModeShouldToggle = false;
-        CWCApplication.DEMO_MODE = !CWCApplication.DEMO_MODE;
-        recreate();
     }
 
     public class availableDatesResponseCallbackCommand implements DKDownload.CallbackCommand {
@@ -336,7 +338,7 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            DiagnosisKeysImport diagnosisKeysImport = new DiagnosisKeysImport(exportDotBinBytes, app);
+            DiagnosisKeysImport diagnosisKeysImport = new DiagnosisKeysImport(exportDotBinBytes, getApplicationContext());
             List<DiagnosisKeysProtos.TemporaryExposureKey> dkList = diagnosisKeysImport.getDiagnosisKeys();
             if (dkList != null) {
                 Log.d(TAG, "Number of keys in this file: " + dkList.size());
@@ -386,8 +388,8 @@ public class MainActivity extends AppCompatActivity {
             dataPoints2.add(new BarEntry(getDaysSinceEpochFromENIN(ENIN), numEntries));
         }
 
-        chart2.setData(dataPoints2, normalBarColor,"DKs", false);
-        chart2.setFormatAndRefresh();
+        chart2.setData(dataPoints2, normalBarColor,"DKs", false, this);
+        chart2.setFormatAndRefresh(this);
 
         textView3.setText(getString(R.string.title_matching_not_done_yet));
         startMatching();
@@ -470,8 +472,8 @@ public class MainActivity extends AppCompatActivity {
             }
             Log.d(TAG, "Number of matches displayed: " + total);
 
-            chart3.setData(dataPoints3, matchBarColor, "Matches", true);
-            chart3.setFormatAndRefresh();
+            chart3.setData(dataPoints3, matchBarColor, "Matches", true, this);
+            chart3.setFormatAndRefresh(this);
 
             // End of this path.
             // From now on, the user can scroll the charts,
@@ -500,7 +502,7 @@ public class MainActivity extends AppCompatActivity {
             if (y > 0) {
                 int x = (int)e.getX();
                 Log.d(TAG, "Detected selection "+x+" ("+y+")");
-                Intent intent = new Intent(app, DisplayDetailsActivity.class);
+                Intent intent = new Intent(getApplicationContext(), DisplayDetailsActivity.class);
                 intent.putExtra(EXTRA_MESSAGE_DAY, String.valueOf(x));
                 intent.putExtra(EXTRA_MESSAGE_COUNT, String.valueOf(y));
                 startActivity(intent);
