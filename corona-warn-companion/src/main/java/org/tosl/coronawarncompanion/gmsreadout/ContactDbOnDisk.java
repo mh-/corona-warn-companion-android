@@ -52,6 +52,7 @@ public class ContactDbOnDisk {
     private static final String dbName = "app_contact-tracing-contact-record-db";
     private static final String dbNameModifier = "_";
     private static final String dbNameModified = dbName+dbNameModifier;
+    private static String cachePathStr = "";
 
     private final Context context;
 
@@ -62,7 +63,12 @@ public class ContactDbOnDisk {
     public void copyFromGMS() {
         // Copy the GMS LevelDB to local app cache
         Log.d(TAG, "Trying to copy LevelDB");
-        String cachePathStr = Objects.requireNonNull(context.getExternalCacheDir()).getPath();
+        File cacheDir = context.getExternalCacheDir();
+        if (cacheDir == null) {
+            cacheDir = context.getCacheDir();
+        }
+        assert cacheDir != null;
+        cachePathStr = cacheDir.getPath();
 
         // First rename the LevelDB directory, then copy it, then rename to the original name
         String result = sudo(
@@ -109,7 +115,12 @@ public class ContactDbOnDisk {
         // Copy the GMS LevelDB from our app's assets to local app cache
 
         Log.d(TAG, "Trying to copy LevelDB from Assets");
-        String cachePathStr = Objects.requireNonNull(context.getExternalCacheDir()).getPath();
+        File cacheDir = context.getExternalCacheDir();
+        if (cacheDir == null) {
+            cacheDir = context.getCacheDir();
+        }
+        assert cacheDir != null;
+        cachePathStr = cacheDir.getPath();
 
         AssetManager assetManager = context.getAssets();
         String[] files = null;
@@ -152,7 +163,6 @@ public class ContactDbOnDisk {
         options.createIfMissing(false);
         options.compressionType(CompressionType.NONE);
         DBFactory factory = new Iq80DBFactory();
-        String cachePathStr = Objects.requireNonNull(context.getExternalCacheDir()).getPath();
         try {
             levelDBStore = factory.open(new File(cachePathStr + "/" + dbNameModified), options);
         } catch (IllegalArgumentException | IOException e) {
