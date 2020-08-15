@@ -37,6 +37,9 @@ public class CWCApplication extends Application {
     private static int timeZoneOffsetSeconds;
     public static int getTimeZoneOffsetSeconds() {return timeZoneOffsetSeconds;}
 
+    public static boolean backgroundThreadsRunning = false;
+    public static boolean backgroundThreadsShouldStop = false;
+
     @Override
     public void onCreate() {
         super.onCreate();

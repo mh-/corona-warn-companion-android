@@ -18,26 +18,37 @@
 
         <activity
             android:name="org.tosl.coronawarncompanion.MainActivity"
-            android:launchMode="singleTask">
-            <intent-filter>
+            android:launchMode="singleTask"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait">
+        <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name="org.tosl.coronawarncompanion.DisplayDetailsActivity">
+        <activity
+            android:name="org.tosl.coronawarncompanion.DisplayDetailsActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.tosl.coronawarncompanion.MainActivity" />
         </activity>
-        <activity android:name="org.tosl.coronawarncompanion.DisplayLicensesActivity">
+        <activity
+            android:name="org.tosl.coronawarncompanion.DisplayLicensesActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.tosl.coronawarncompanion.MainActivity" />
         </activity>
-        <activity android:name="org.tosl.coronawarncompanion.AboutActivity">
-            <meta-data
+        <activity
+            android:name="org.tosl.coronawarncompanion.AboutActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait">
+        <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.tosl.coronawarncompanion.MainActivity" />
         </activity>

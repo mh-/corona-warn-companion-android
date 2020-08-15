@@ -31,7 +31,7 @@ import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
 
 import java.util.ArrayList;
 
-import static org.tosl.coronawarncompanion.matcher.Crypto.createListOfRpisForIntervalRange;
+import static org.tosl.coronawarncompanion.CWCApplication.backgroundThreadsShouldStop;
 import static org.tosl.coronawarncompanion.matcher.Crypto.decryptAem;
 import static org.tosl.coronawarncompanion.matcher.Crypto.deriveAemKey;
 import static org.tosl.coronawarncompanion.matcher.Crypto.deriveRpiKey;
@@ -77,7 +77,11 @@ public class Matcher {
         int lastProgress = 0;
         int currentProgress;
         int numMatches = 0;
+        Crypto crypto = new Crypto();
         for (DiagnosisKeysProtos.TemporaryExposureKey dk : diagnosisKeysList) {
+            if (backgroundThreadsShouldStop) {
+                break;
+            }
             currentDiagnosisKey += 1;
             currentProgress = (int) (100f * currentDiagnosisKey / diagnosisKeysListLength);
             if (currentProgress != lastProgress) {
@@ -87,9 +91,12 @@ public class Matcher {
                 }
             }
             int dkIntervalNumber = dk.getRollingStartIntervalNumber();
-            ArrayList<Crypto.RpiWithInterval> dkRpisWithIntervals = createListOfRpisForIntervalRange(deriveRpiKey(dk.getKeyData().toByteArray()),
+            ArrayList<Crypto.RpiWithInterval> dkRpisWithIntervals = crypto.createListOfRpisForIntervalRange(deriveRpiKey(dk.getKeyData().toByteArray()),
                     dkIntervalNumber, dk.getRollingPeriod());
             for (Crypto.RpiWithInterval dkRpiWithInterval : dkRpisWithIntervals) {
+                if (backgroundThreadsShouldStop) {
+                    break;
+                }
                 RpiList.RpiEntry rpiEntry =
                         rpiList.searchForRpiOnDaySinceEpochUTCWith2HoursTolerance(dkRpiWithInterval, getDaysSinceEpochFromENIN(dkIntervalNumber));
                 if (rpiEntry != null) {

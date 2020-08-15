@@ -16,7 +16,7 @@
 /*
  * Michael Huebler, 2020-08: As required by the license
  * ("You must cause any modified files to carry prominent notices stating that You changed the files")
- * I hereby state that I changed this file: I modified the "package" line.
+ * I hereby state that I changed this file.
  */
 
 package org.tosl.coronawarncompanion.crypto;
@@ -36,23 +36,19 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * Encryptor that encapsulates aes/ecb encryption, but separates initialization and encryption steps.
  *
- * <p>If used repeatedly, call {@link #create()} and {@link #init(byte[])} sparingly.
+ * <p>If used repeatedly, call {@link #AesEcbEncryptor()} and {@link #init(byte[])} sparingly.
  */
 public final class AesEcbEncryptor {
 
     private final Cipher cipher;
 
     @SuppressLint("GetInstance")
-    public static AesEcbEncryptor create() throws CryptoException {
+    public AesEcbEncryptor() throws CryptoException {
         try {
-            return new AesEcbEncryptor(Cipher.getInstance("AES/ECB/NoPadding"));
+            this.cipher = Cipher.getInstance("AES/ECB/NoPadding");
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new CryptoException(e);
         }
-    }
-
-    private AesEcbEncryptor(Cipher cipher) {
-        this.cipher = cipher;
     }
 
     /**

@@ -181,43 +181,51 @@ public class RpiList {
     public RpiEntry searchForRpiOnDaySinceEpochUTCWith2HoursTolerance(Crypto.RpiWithInterval searchRpiWithInterval,
                                                                       Integer daysSinceEpochUTC) {
         RpiEntry matchingRpiEntry = null;
-        RpiBytes rpiBytes = new RpiBytes(searchRpiWithInterval.rpiBytes);
+        if (searchRpiWithInterval != null) {
+            RpiBytes rpiBytes = new RpiBytes(searchRpiWithInterval.rpiBytes);
 
-        for (int i=1; i<=3; i++) {  // search in (1) yesterday's "late" list, (2) today's full list, and (3) tomorrow's "early" list
-            ListsPerDayUTC listsPerDayUTC = null;
-            switch (i) {
-                case 1: listsPerDayUTC = mapOfDaysUTCAndListsOfRPIs.get(daysSinceEpochUTC-1); break;
-                case 2: listsPerDayUTC = mapOfDaysUTCAndListsOfRPIs.get(daysSinceEpochUTC); break;
-                case 3: listsPerDayUTC = mapOfDaysUTCAndListsOfRPIs.get(daysSinceEpochUTC+1); break;
-            }
-            if (listsPerDayUTC != null) {
-                RpiEntry rpiEntry = null;
+            for (int i=1; i<=3; i++) {  // search in (1) yesterday's "late" list, (2) today's full list, and (3) tomorrow's "early" list
+                ListsPerDayUTC listsPerDayUTC = null;
                 switch (i) {
                     case 1:
-                        if (listsPerDayUTC.rpiEntriesLate.containsKey(rpiBytes)) {
-                            rpiEntry = listsPerDayUTC.rpiEntriesLate.get(rpiBytes);
-                        }
+                        listsPerDayUTC = mapOfDaysUTCAndListsOfRPIs.get(daysSinceEpochUTC - 1);
                         break;
                     case 2:
-                        if (listsPerDayUTC.rpiEntries.containsKey(rpiBytes)) {
-                            rpiEntry = listsPerDayUTC.rpiEntries.get(rpiBytes);
-                        }
+                        listsPerDayUTC = mapOfDaysUTCAndListsOfRPIs.get(daysSinceEpochUTC);
                         break;
                     case 3:
-                        if (listsPerDayUTC.rpiEntriesEarly.containsKey(rpiBytes)) {
-                            rpiEntry = listsPerDayUTC.rpiEntriesEarly.get(rpiBytes);
-                        }
+                        listsPerDayUTC = mapOfDaysUTCAndListsOfRPIs.get(daysSinceEpochUTC + 1);
                         break;
                 }
-                if (rpiEntry != null && abs(searchRpiWithInterval.intervalNumber -
-                        getENINFromSeconds(rpiEntry.startTimeStampUTC)) <= 6*2) {  // max diff: 2 hours
-                    //Log.d(TAG, "Match confirmed!");
-                    //Log.d(TAG, "ENIN used for RPI generation: "+searchRpiWithInterval.intervalNumber+
-                    //        " ("+getDateFromENIN(searchRpiWithInterval.intervalNumber)+")");
-                    //Log.d(TAG, "ENIN when scan was recorded:  "+getENINFromSeconds(rpiEntry.startTimeStampUTC)+
-                    //        " ("+getDateFromENIN(getENINFromSeconds(rpiEntry.startTimeStampUTC))+")");
-                    matchingRpiEntry = rpiEntry;
-                    break;
+                if (listsPerDayUTC != null) {
+                    RpiEntry rpiEntry = null;
+                    switch (i) {
+                        case 1:
+                            if (listsPerDayUTC.rpiEntriesLate.containsKey(rpiBytes)) {
+                                rpiEntry = listsPerDayUTC.rpiEntriesLate.get(rpiBytes);
+                            }
+                            break;
+                        case 2:
+                            if (listsPerDayUTC.rpiEntries.containsKey(rpiBytes)) {
+                                rpiEntry = listsPerDayUTC.rpiEntries.get(rpiBytes);
+                            }
+                            break;
+                        case 3:
+                            if (listsPerDayUTC.rpiEntriesEarly.containsKey(rpiBytes)) {
+                                rpiEntry = listsPerDayUTC.rpiEntriesEarly.get(rpiBytes);
+                            }
+                            break;
+                    }
+                    if (rpiEntry != null && abs(searchRpiWithInterval.intervalNumber -
+                            getENINFromSeconds(rpiEntry.startTimeStampUTC)) <= 6 * 2) {  // max diff: 2 hours
+                        //Log.d(TAG, "Match confirmed!");
+                        //Log.d(TAG, "ENIN used for RPI generation: "+searchRpiWithInterval.intervalNumber+
+                        //        " ("+getDateFromENIN(searchRpiWithInterval.intervalNumber)+")");
+                        //Log.d(TAG, "ENIN when scan was recorded:  "+getENINFromSeconds(rpiEntry.startTimeStampUTC)+
+                        //        " ("+getDateFromENIN(getENINFromSeconds(rpiEntry.startTimeStampUTC))+")");
+                        matchingRpiEntry = rpiEntry;
+                        break;
+                    }
                 }
             }
         }

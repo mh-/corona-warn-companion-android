@@ -69,6 +69,8 @@ import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
+import static org.tosl.coronawarncompanion.CWCApplication.backgroundThreadsShouldStop;
+import static org.tosl.coronawarncompanion.CWCApplication.backgroundThreadsRunning;
 import static org.tosl.coronawarncompanion.dkdownload.Unzip.getUnzippedBytesFromZipFileBytes;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysSinceEpochFromENIN;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromMillis;
@@ -81,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     public static final String EXTRA_MESSAGE_DAY = "org.tosl.coronawarncompanion.DAY_MESSAGE";
     public static final String EXTRA_MESSAGE_COUNT = "org.tosl.coronawarncompanion.COUNT_MESSAGE";
-    private static boolean backgroundThreadsRunning = false;
+    private static boolean demoModeShouldToggle = false;
     CWCApplication app = null;
     private RpiList rpiList = null;
     private final long todayLastMidnightInMillis = getMillisFromDays(getDaysFromMillis(System.currentTimeMillis()));
@@ -119,18 +121,21 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(this, AboutActivity.class));
                 return true;
             case R.id.demomode:
-                if (!backgroundThreadsRunning) {  // don't do recreate() while background threads are running
-                    CWCApplication.DEMO_MODE = !CWCApplication.DEMO_MODE;
-                    recreate();
-                    return true;
-                } else {
+                if (backgroundThreadsShouldStop) {
+                    // user has to wait a little bit longer
                     CharSequence text = getString(R.string.error_demo_mode_switching_not_possible);
-                    Toast toast = Toast.makeText(this, text, Toast.LENGTH_LONG);
+                    Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.CENTER, 0, 0);
                     toast.show();
                     return false;
                 }
-                // TODO - handle this differently, safely stop the background threads
+                if (backgroundThreadsRunning) {  // don't do recreate() while background threads are running
+                    demoModeShouldToggle = true;
+                    backgroundThreadsShouldStop = true;
+                } else {
+                    toggleDemoMode();
+                }
+                return true;
             case R.id.osslicenses:
                 startActivity(new Intent(this, DisplayLicensesActivity.class));
                 return true;
@@ -158,6 +163,18 @@ public class MainActivity extends AppCompatActivity {
 
         if (DEMO_MODE) {
             Log.i(TAG, "--- DEMO MODE ---");
+        }
+
+        if(backgroundThreadsRunning) {
+            // reCreate() was called, e.g. by switching from portrait to landscape, etc.
+            backgroundThreadsShouldStop = true;
+            while(backgroundThreadsRunning) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         app = (CWCApplication) getApplicationContext();
@@ -210,8 +227,6 @@ public class MainActivity extends AppCompatActivity {
 
             // 2nd Section: Diagnosis Keys
 
-            backgroundThreadsRunning = true;  // this temporarily disables toggling the DEMO_MODE
-
             if (!DEMO_MODE) {
                 diagnosisKeysDownload = new DKDownload(app);
                 diagnosisKeysDownload.availableDatesRequest(new availableDatesResponseCallbackCommand(),
@@ -256,8 +271,13 @@ public class MainActivity extends AppCompatActivity {
         public void execute(Object data) {
             textViewErrorNoRpis.setText(R.string.error_download);
             textViewErrorNoRpis.setBackgroundColor(Color.parseColor("white"));
-            backgroundThreadsRunning = false;
         }
+    }
+
+    private void toggleDemoMode() {
+        demoModeShouldToggle = false;
+        CWCApplication.DEMO_MODE = !CWCApplication.DEMO_MODE;
+        recreate();
     }
 
     public class availableDatesResponseCallbackCommand implements DKDownload.CallbackCommand {
@@ -280,7 +300,7 @@ public class MainActivity extends AppCompatActivity {
 
     public class availableHoursResponseCallbackCommand implements DKDownload.CallbackCommand {
         public void execute(Object data) {
-            // get Daily Diagnosis Keys URLs for the previous days
+            // get Hourly Diagnosis Keys URLs for the current day
             @SuppressWarnings("unchecked") LinkedList<String> availableHours = (LinkedList<String>) data;
             for (String hour : availableHours) {
                 diagnosisKeysUrls.add(diagnosisKeysDownload.getHourlyDKsURLForDateAndHour(currentDate, hour));
@@ -291,10 +311,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void processUrlList() {
+        boolean atLeastOneDownloadStarted = false;
         for (URL url : diagnosisKeysUrls) {
             Log.d(TAG, "Going to download: " + url);
             diagnosisKeysDownload.dkFileRequest(url, new processUrlListCallbackCommand(),
                     new errorResponseCallbackCommand());
+            atLeastOneDownloadStarted = true;
+        }
+        if (!atLeastOneDownloadStarted) {
+            processDownloadedDiagnosisKeys();
         }
     }
 
@@ -372,6 +397,9 @@ public class MainActivity extends AppCompatActivity {
     public HandlerThread backgroundMatcher;
 
     private void startMatching() {
+        backgroundThreadsRunning = true;  // required so that DEMO_MODE toggle can safely stop the background threads
+        backgroundThreadsShouldStop = false;
+
         uiThreadHandler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@SuppressWarnings("NullableProblems") Message inputMessage) {
@@ -407,6 +435,8 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "Finished matching, sending the message...");
                 CWCApplication.setMatchEntryContent(matchEntryContent);
             }
+            backgroundThreadsRunning = false;
+            backgroundThreadsShouldStop = false;
             Message completeMessage = mainActivity.uiThreadHandler.obtainMessage();
             completeMessage.sendToTarget();
         }
@@ -447,7 +477,9 @@ public class MainActivity extends AppCompatActivity {
             // From now on, the user can scroll the charts,
             // or tap on a match to reach the DisplayDetailsActivity.
 
-            backgroundThreadsRunning = false;  // this enables toggling the DEMO_MODE again
+            if (demoModeShouldToggle) {
+                toggleDemoMode();
+            }
         }
     }
 

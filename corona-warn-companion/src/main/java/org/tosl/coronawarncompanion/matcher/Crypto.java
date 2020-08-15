@@ -35,10 +35,10 @@ public class Crypto {
 
     private static final int intervalLengthMinutes = 10;
     private static final int tekRollingPeriod = 144;
-    private static AesEcbEncryptor encryptor;
-    static {
+    private AesEcbEncryptor encryptor;
+    public Crypto() {
         try {
-            encryptor = AesEcbEncryptor.create();
+            this.encryptor = new AesEcbEncryptor();
         } catch (CryptoException e) {
             e.printStackTrace();
         }
@@ -71,7 +71,7 @@ public class Crypto {
         return derivedKey;
     }
 
-    public static byte[] encryptRpi(byte[] rpiKey, int intervalNumber) {
+    public byte[] encryptRpi(byte[] rpiKey, int intervalNumber) {
         byte[] enin = encodedEnIntervalNumber(intervalNumber);
         ByteArrayOutputStream padded_data = new ByteArrayOutputStream();
         try {
@@ -102,7 +102,7 @@ public class Crypto {
 
     private static final ArrayList<RpiWithInterval> rpis = new ArrayList<>(144);
 
-    public static ArrayList<RpiWithInterval> createListOfRpisForIntervalRange(byte[] rpiKey, int startIntervalNumber, int intervalCount) {
+    public ArrayList<RpiWithInterval> createListOfRpisForIntervalRange(byte[] rpiKey, int startIntervalNumber, int intervalCount) {
         rpis.clear();
         byte[] padded_data = {0x45, 0x4E, 0x2D, 0x52, 0x50, 0x49, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
         try {
