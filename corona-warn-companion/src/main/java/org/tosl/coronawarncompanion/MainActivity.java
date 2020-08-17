@@ -277,9 +277,13 @@ public class MainActivity extends AppCompatActivity {
 
     public class errorResponseCallbackCommand implements DKDownload.CallbackCommand {
         public void execute(Object data) {
-            textViewError.setText(R.string.error_download);
-            textViewError.setBackgroundColor(resolveColorAttr(android.R.attr.colorBackground, context));
+            showDownloadError();
         }
+    }
+
+    private void showDownloadError() {
+        textViewError.setText(R.string.error_download);
+        textViewError.setBackgroundColor(resolveColorAttr(android.R.attr.colorBackground, context));
     }
 
     public class availableDatesResponseCallbackCommand implements DKDownload.CallbackCommand {
@@ -291,12 +295,16 @@ public class MainActivity extends AppCompatActivity {
                     diagnosisKeysUrls.add(diagnosisKeysDownload.getDailyDKsURLForDate(date));
                 }
             }
-            // get Hourly Diagnosis Keys URLs for the current day
-            Calendar c = Calendar.getInstance();
-            c.setTime(availableDates.getLast());
-            c.add(Calendar.DATE, 1);
-            currentDate = c.getTime();
-            diagnosisKeysDownload.availableHoursForDateRequest(currentDate, new availableHoursResponseCallbackCommand());
+            if (availableDates.size() > 0) {
+                // get Hourly Diagnosis Keys URLs for the current day
+                Calendar c = Calendar.getInstance();
+                c.setTime(availableDates.getLast());
+                c.add(Calendar.DATE, 1);
+                currentDate = c.getTime();
+                diagnosisKeysDownload.availableHoursForDateRequest(currentDate, new availableHoursResponseCallbackCommand());
+            } else {
+                showDownloadError();
+            }
         }
     }
 

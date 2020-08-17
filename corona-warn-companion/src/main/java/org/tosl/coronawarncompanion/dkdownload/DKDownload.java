@@ -108,8 +108,10 @@ public class DKDownload {
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
-                //Log.d(TAG, "Date: "+date);
-                result.add(date);
+                if (date != null) {
+                    //Log.d(TAG, "Date: "+date);
+                    result.add(date);
+                }
             }
             doCallback(callbackCommand, result);
         };
