@@ -18,6 +18,7 @@
         app:srcCompat="@drawable/icon_large"
         tools:ignore="HardcodedText" />
 
+    <!--suppress AndroidDomInspection -->
     <TextView
         android:id="@+id/headingTextView"
         android:layout_width="0dp"

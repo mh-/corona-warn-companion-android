@@ -3,7 +3,6 @@ package org.tosl.coronawarncompanion.barcharts;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -67,7 +66,7 @@ public class CwcBarChart  {
     }
 
     public void setFormatAndRefresh(Context context) {
-        switchProgressBarOff();
+        switchPleaseWaitAnimationOff();
 
         // set date label formatter
         String deviceDateFormat = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "dM");
@@ -129,7 +128,8 @@ public class CwcBarChart  {
         barChart.invalidate(); // refresh
     }
 
-    public void switchProgressBarOff() {
+    public void switchPleaseWaitAnimationOff() {
         progressBar.setVisibility(View.GONE);
+        this.barChart.setNoDataText("");
     }
 }

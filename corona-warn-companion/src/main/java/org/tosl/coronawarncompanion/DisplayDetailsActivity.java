@@ -56,20 +56,18 @@ public class DisplayDetailsActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
-        //noinspection SwitchStatementWithTooFewBranches
-        switch (item.getItemId()) {
-            case R.id.showhideallscans:
-                RecyclerView recyclerView = (RecyclerView) this.matchesRecyclerViewFragment.getView();
-                MatchesRecyclerViewAdapter matchesRecyclerViewAdapter;
-                if (recyclerView != null) {
-                    matchesRecyclerViewAdapter = (MatchesRecyclerViewAdapter) recyclerView.getAdapter();
-                    if (matchesRecyclerViewAdapter != null) {
-                        matchesRecyclerViewAdapter.toggleShowAllScans();
-                    }
+        if (item.getItemId() == R.id.showhideallscans) {
+            RecyclerView recyclerView = (RecyclerView) this.matchesRecyclerViewFragment.getView();
+            MatchesRecyclerViewAdapter matchesRecyclerViewAdapter;
+            if (recyclerView != null) {
+                matchesRecyclerViewAdapter = (MatchesRecyclerViewAdapter) recyclerView.getAdapter();
+                if (matchesRecyclerViewAdapter != null) {
+                    matchesRecyclerViewAdapter.toggleShowAllScans();
                 }
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+            }
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
         }
     }
 
@@ -115,7 +113,7 @@ public class DisplayDetailsActivity extends AppCompatActivity {
             String dateStr = dateFormat.format(getDateFromDaysSinceEpoch(selectedDaysSinceEpochLocalTZ));
 
             TextView textView = findViewById(R.id.textView1);
-            textView.setText(getResources().getQuantityString(R.plurals.matches_on_day, count, dateStr));
+            textView.setText(getResources().getQuantityString(R.plurals.details_title_matches_on_day, count, dateStr));
 
             // RecyclerView List:
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();

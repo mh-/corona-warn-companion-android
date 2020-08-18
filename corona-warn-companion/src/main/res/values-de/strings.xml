@@ -1,23 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <plurals name="matches_on_day">
-        <item quantity="one">Risiko-Begegnung am %s:</item>
-        <item quantity="other">Risiko-Begegnungen am %s:</item>
-    </plurals>
+    <string name="title_extracting_encounters">Begegnungen auslesen…</string>
+    <string name="title_rpis_extracted">%d Begegnungen erfasst (%s-%s).</string>
+    <string name="title_no_rpis_extracted">Keine Begegnungen gefunden.</string>
+    <string name="title_diagnosis_keys_downloading">Diagnoseschlüssel herunterladen…</string>
+    <string name="title_diagnosis_keys_downloaded">%d Diagnoseschlüssel heruntergeladen.</string>
+    <string name="title_diagnosis_keys_download_failed">Keine Diagnoseschlüssel heruntergeladen.</string>
+    <string name="title_matching_not_done_yet">Abgleich wird erstellt…</string>
+    <string name="title_matching_not_done_yet_with_progress">Abgleich wird erstellt… %1$d%% (%2$d gefunden)</string>
+    <string name="title_matching_not_possible">Abgleich nicht möglich.</string>
     <string name="title_no_matches_found">Keine Risiko-Begegnungen gefunden.</string>
     <plurals name="title_number_of_matches_found">
         <item quantity="one">%d Risiko-Begegnung. Tippe für Details…</item>
         <item quantity="other">%d Risiko-Begegnungen. Tippe für Details…</item>
     </plurals>
-    <string name="title_rpis_extracted">%d Begegnungen erfasst (%s-%s).</string>
-    <string name="title_diagnosis_keys_downloaded">%d Diagnoseschlüssel heruntergeladen.</string>
-    <string name="title_matching_not_done_yet">Abgleich wird erstellt…</string>
-    <string name="title_matching_not_done_yet_with_progress">Abgleich wird erstellt… %1$d%% (%2$d gefunden)</string>
+    <plurals name="details_title_matches_on_day">
+        <item quantity="one">Risiko-Begegnung am %s:</item>
+        <item quantity="other">Risiko-Begegnungen am %s:</item>
+    </plurals>
     <string name="time">🕐</string>
     <string name="transmission_risk_level">Übertragungsrisiko</string>
     <string name="please_wait">Bitte warten…</string>
-    <string name="extracting_encounters">Begegnungen auslesen…</string>
-    <string name="downloading_diagnosis_keys">Diagnoseschlüssel herunterladen…</string>
     <string name="matching_soon">Hier wird gleich der Abgleich erstellt…</string>
     <string name="report_type">Report-Typ</string>
     <string name="report_type_revoked">widerrufen</string>
@@ -32,17 +35,19 @@
     <string name="menu_entry_toggle_demo_mode">Demo Modus an/aus</string>
     <string name="menu_entry_oss_licenses">Open Source Software Lizenzen</string>
     <string name="title_activity_licenses">OSS Lizenzen</string>
+    <!--suppress AndroidDomInspection -->
     <string name="title_activity_main">@string/app_name</string>
     <string name="title_activity_main_demo_prefix">"DEMO "</string>
+    <!--suppress AndroidDomInspection -->
     <string name="title_activity_details">@string/app_name</string>
     <string name="title_activity_details_demo">DEMO Beispiel-Details</string>
     <string name="menu_entry_view_further_oss_licenses">Weitere Open Source Software Lizenzen</string>
     <string name="title_activity_further_licenses">Weitere OSS Lizenzen</string>
     <string name="error_demo_mode_switching_not_possible">Im Moment kann der Modus leider nicht gewechselt werden.\nBitte warte, bis alle Berechnungen abgeschlossen sind.</string>
-    <string name="error_no_rpis">FEHLER!\n\Begegnungen konnten nicht ausgelesen werden.\nSind Exposure Notifications eingeschaltet?\nHast Du dieser App ROOT-Rechte gegeben?</string>
-    <string name="error_download">Fehler!\n\nEs gab ein Problem beim Herunterladen der Diagnoseschlüssel.\nFunktioniert Deine Internetverbindung?</string>
+    <string name="error_no_rpis">FEHLER!\nBegegnungen konnten nicht ausgelesen werden.\nSind Exposure Notifications eingeschaltet?\nHast Du dieser App ROOT-Rechte gegeben?</string>
+    <string name="error_download">FEHLER!\nEs gab ein Problem beim Herunterladen der Diagnoseschlüssel.\nFunktioniert Deine Internetverbindung?</string>
     <string name="menu_entry_about">Über diese App</string>
     <string name="title_activity_about">Über diese App</string>
     <string name="about_version">Version\n%s (%d, %s)</string>
-    <string name="error_download_invalid_key_file_header">Fehler!\n\nEine heruntergeladene Diagnoseschlüssel-Datei beginnt nicht mit der erwarteten Zeichenfolge!</string>
+    <string name="error_download_invalid_key_file_header">FEHLER!\nEine heruntergeladene Diagnoseschlüssel-Datei beginnt nicht mit der erwarteten Zeichenfolge!</string>
 </resources>

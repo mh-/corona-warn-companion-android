@@ -39,7 +39,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.util.Objects;
 
 import static org.tosl.coronawarncompanion.gmsreadout.Sudo.sudo;
 

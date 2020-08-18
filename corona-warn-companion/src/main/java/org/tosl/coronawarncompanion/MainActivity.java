@@ -87,9 +87,8 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_MESSAGE_COUNT = "org.tosl.coronawarncompanion.COUNT_MESSAGE";
     private static boolean demoModeShouldToggle = false;
     private RpiList rpiList = null;
-    private final long todayLastMidnightInMillis = getMillisFromDays(getDaysFromMillis(System.currentTimeMillis()));
-    private Date maxDate = new Date(todayLastMidnightInMillis);
-    private Date minDate = new Date(todayLastMidnightInMillis - getMillisFromDays(14));
+    private Date maxDate = null;
+    private Date minDate = null;
     private Date currentDate;  // usually the same as maxDate
 
     private DKDownload diagnosisKeysDownload;
@@ -98,14 +97,15 @@ public class MainActivity extends AppCompatActivity {
     private final int normalBarColor = Color.parseColor("#8CEAFF");
     private final int matchBarColor = Color.parseColor("red");
 
-    private BarChartSync barChartSync;
-    private CwcBarChart chart1;
-    private CwcBarChart chart2;
-    private CwcBarChart chart3;
-    private TextView textView1;
-    private TextView textView2;
-    private TextView textView3;
-    private TextView textViewError;
+    private CwcBarChart chartRpis;
+    private CwcBarChart chartDks;
+    private CwcBarChart chartMatches;
+    private TextView textViewRpis;
+    private TextView textViewDks;
+    private TextView textViewMatches;
+    private TextView textViewExtractionError;
+    private TextView textViewDownloadError;
+
     private Context context;
 
     @Override
@@ -118,31 +118,30 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
-        switch (item.getItemId()) {
-            case R.id.about:
-                startActivity(new Intent(this, AboutActivity.class));
-                return true;
-            case R.id.demomode:
-                if (backgroundThreadsShouldStop) {
-                    // user has to wait a little bit longer
-                    CharSequence text = getString(R.string.error_demo_mode_switching_not_possible);
-                    Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.CENTER, 0, 0);
-                    toast.show();
-                    return false;
-                }
-                if (backgroundThreadsRunning) {  // don't do recreate() while background threads are running
-                    demoModeShouldToggle = true;
-                    backgroundThreadsShouldStop = true;
-                } else {
-                    toggleDemoMode();
-                }
-                return true;
-            case R.id.osslicenses:
-                startActivity(new Intent(this, DisplayLicensesActivity.class));
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == R.id.about) {
+            startActivity(new Intent(this, AboutActivity.class));
+            return true;
+        } else if (item.getItemId() == R.id.demomode) {
+            if (backgroundThreadsShouldStop) {
+                // user has to wait a little bit longer
+                CharSequence text = getString(R.string.error_demo_mode_switching_not_possible);
+                Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+                toast.show();
+                return false;
+            }
+            if (backgroundThreadsRunning) {  // don't do recreate() while background threads are running
+                demoModeShouldToggle = true;
+                backgroundThreadsShouldStop = true;
+            } else {
+                toggleDemoMode();
+            }
+            return true;
+        } else if (item.getItemId() == R.id.osslicenses) {
+            startActivity(new Intent(this, DisplayLicensesActivity.class));
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
         }
     }
 
@@ -179,7 +178,8 @@ public class MainActivity extends AppCompatActivity {
             backgroundThreadsShouldStop = true;
             while(backgroundThreadsRunning) {
                 try {
-                    Thread.sleep(10);
+                    //noinspection BusyWait
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -189,15 +189,20 @@ public class MainActivity extends AppCompatActivity {
         int timeZoneOffsetSeconds = CWCApplication.getTimeZoneOffsetSeconds();
         Log.d(TAG, "Local TimeZone Offset in seconds: "+ timeZoneOffsetSeconds);
 
-        textView1 = findViewById(R.id.textView1);
-        textView2 = findViewById(R.id.textView2);
-        textView3 = findViewById(R.id.textView3);
-        textViewError = findViewById(R.id.textViewError);
-        barChartSync = new BarChartSync();
-        chart1 = new CwcBarChart(findViewById(R.id.chart1), findViewById(R.id.progressBar1), barChartSync, this);
-        chart2 = new CwcBarChart(findViewById(R.id.chart2), findViewById(R.id.progressBar2), barChartSync, this);
-        chart3 = new CwcBarChart(findViewById(R.id.chart3), findViewById(R.id.progressBar3), barChartSync, this);
-        chart3.getBarChart().setOnChartValueSelectedListener(new Chart3ValueSelectedListener());
+        long todayLastMidnightInMillis = getMillisFromDays(getDaysFromMillis(System.currentTimeMillis()));
+        maxDate = new Date(todayLastMidnightInMillis);
+        minDate = new Date(todayLastMidnightInMillis - getMillisFromDays(14));
+
+        textViewRpis = findViewById(R.id.textView1);
+        textViewDks = findViewById(R.id.textView2);
+        textViewMatches = findViewById(R.id.textView3);
+        textViewExtractionError = findViewById(R.id.textViewExtractionError);
+        textViewDownloadError = findViewById(R.id.textViewDownloadError);
+        BarChartSync barChartSync = new BarChartSync();
+        chartRpis = new CwcBarChart(findViewById(R.id.chart1), findViewById(R.id.progressBar1), barChartSync, this);
+        chartDks = new CwcBarChart(findViewById(R.id.chart2), findViewById(R.id.progressBar2), barChartSync, this);
+        chartMatches = new CwcBarChart(findViewById(R.id.chart3), findViewById(R.id.progressBar3), barChartSync, this);
+        chartMatches.getBarChart().setOnChartValueSelectedListener(new Chart3ValueSelectedListener());
 
         // 1st Section: Get RPIs from database (requires root)
 
@@ -227,37 +232,11 @@ public class MainActivity extends AppCompatActivity {
             maxDate = new Date(getMillisFromDays(rpiListDaysSinceEpochLocalTZ.last()));
             String maxDateStr = dateFormat.format(maxDate);
 
-            textView1.setText(getString(R.string.title_rpis_extracted, count, minDateStr, maxDateStr));
+            textViewRpis.setText(getString(R.string.title_rpis_extracted, count, minDateStr, maxDateStr));
 
-            chart1.setData(dataPoints1, normalBarColor, "RPIs", false, this);
-            chart1.setFormatAndRefresh(this);
+            chartRpis.setData(dataPoints1, normalBarColor, "RPIs", false, this);
+            chartRpis.setFormatAndRefresh(this);
 
-
-            // 2nd Section: Diagnosis Keys
-
-            if (!DEMO_MODE) {
-                diagnosisKeysDownload = new DKDownload(this);
-                diagnosisKeysDownload.availableDatesRequest(new availableDatesResponseCallbackCommand(),
-                        new errorResponseCallbackCommand());
-                // (the rest is done asynchronously in callback functions)
-            } else {
-                try {
-                    InputStream inputStream = getAssets().open("demo_dks.zip");
-                    byte[] buffer = new byte[100000];
-                    int bytesRead;
-                    ByteArrayOutputStream output = new ByteArrayOutputStream();
-                    while ((bytesRead = inputStream.read(buffer)) != -1) {
-                        output.write(buffer, 0, bytesRead);
-                    }
-                    DKDownload.FileResponse response = new DKDownload.FileResponse();
-                    response.url = new URL("https://tosl.org/demo_dks.zip");
-                    response.fileBytes = output.toByteArray();
-
-                    new processUrlListCallbackCommand().execute(response);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         } else {  // getting the RPIs failed, e.g. because we didn't get root rights
             List<BarEntry> dataPoints1 = new ArrayList<>();
             long currentTimeMillis = System.currentTimeMillis();
@@ -266,24 +245,63 @@ public class MainActivity extends AppCompatActivity {
             for (int day = daysSinceEpochLocalTZ-13; day <= daysSinceEpochLocalTZ; day++) {
                 dataPoints1.add(new BarEntry(day, 0));
             }
-            chart1.setData(dataPoints1, normalBarColor, "RPIs", false, this);
-            chart1.setFormatAndRefresh(this);
-            chart2.switchProgressBarOff();
-            chart3.switchProgressBarOff();
-            textViewError.setText(R.string.error_no_rpis);
-            textViewError.setBackgroundColor(resolveColorAttr(android.R.attr.colorBackground, context));
+            chartRpis.setData(dataPoints1, normalBarColor, "RPIs", false, this);
+            chartRpis.setFormatAndRefresh(this);
+            showExtractionError();
+            showMatchingNotPossible();
+        }
+
+        // 2nd Section: Diagnosis Keys
+
+        if (!DEMO_MODE) {
+            diagnosisKeysDownload = new DKDownload(this);
+            diagnosisKeysDownload.availableDatesRequest(new availableDatesResponseCallbackCommand(),
+                    new errorResponseCallbackCommand());
+            // (the rest is done asynchronously in callback functions)
+        } else {
+            try {
+                InputStream inputStream = getAssets().open("demo_dks.zip");
+                byte[] buffer = new byte[100000];
+                int bytesRead;
+                ByteArrayOutputStream output = new ByteArrayOutputStream();
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    output.write(buffer, 0, bytesRead);
+                }
+                DKDownload.FileResponse response = new DKDownload.FileResponse();
+                response.url = new URL("https://tosl.org/demo_dks.zip");
+                response.fileBytes = output.toByteArray();
+
+                new processUrlListCallbackCommand().execute(response);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     public class errorResponseCallbackCommand implements DKDownload.CallbackCommand {
         public void execute(Object data) {
             showDownloadError();
+            showMatchingNotPossible();
         }
     }
 
+    private void showExtractionError() {
+        textViewExtractionError.setText(R.string.error_no_rpis);
+        textViewExtractionError.setBackgroundColor(resolveColorAttr(android.R.attr.colorBackground, context));
+        textViewRpis.setText(getString(R.string.title_no_rpis_extracted));
+        chartRpis.switchPleaseWaitAnimationOff();
+    }
+
     private void showDownloadError() {
-        textViewError.setText(R.string.error_download);
-        textViewError.setBackgroundColor(resolveColorAttr(android.R.attr.colorBackground, context));
+        textViewDownloadError.setText(R.string.error_download);
+        textViewDownloadError.setBackgroundColor(resolveColorAttr(android.R.attr.colorBackground, context));
+        textViewDks.setText(getString(R.string.title_diagnosis_keys_download_failed));
+        chartDks.switchPleaseWaitAnimationOff();
+    }
+
+    private void showMatchingNotPossible() {
+        textViewMatches.setText(getString(R.string.title_matching_not_possible));
+        chartMatches.switchPleaseWaitAnimationOff();
     }
 
     public class availableDatesResponseCallbackCommand implements DKDownload.CallbackCommand {
@@ -385,7 +403,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        textView2.setText(getString(R.string.title_diagnosis_keys_downloaded, count));
+        textViewDks.setText(getString(R.string.title_diagnosis_keys_downloaded, count));
 
         List<BarEntry> dataPoints2 = new ArrayList<>();
 
@@ -396,11 +414,13 @@ public class MainActivity extends AppCompatActivity {
             dataPoints2.add(new BarEntry(getDaysSinceEpochFromENIN(ENIN), numEntries));
         }
 
-        chart2.setData(dataPoints2, normalBarColor,"DKs", false, this);
-        chart2.setFormatAndRefresh(this);
+        chartDks.setData(dataPoints2, normalBarColor,"DKs", false, this);
+        chartDks.setFormatAndRefresh(this);
 
-        textView3.setText(getString(R.string.title_matching_not_done_yet));
-        startMatching();
+        if (rpiList != null) {
+            textViewMatches.setText(getString(R.string.title_matching_not_done_yet));
+            startMatching();
+        }
     }
 
     public Handler uiThreadHandler;
@@ -440,7 +460,7 @@ public class MainActivity extends AppCompatActivity {
                 Matcher matcher = new Matcher(rpiList, diagnosisKeysList, matchEntryContent);
                 matcher.findMatches(
                         progress -> runOnUiThread(
-                                () -> textView3.setText(getResources().getString(R.string.
+                                () -> textViewMatches.setText(getResources().getString(R.string.
                                         title_matching_not_done_yet_with_progress, progress.first, progress.second))));
                 Log.d(TAG, "Finished matching, sending the message...");
                 CWCApplication.setMatchEntryContent(matchEntryContent);
@@ -458,10 +478,10 @@ public class MainActivity extends AppCompatActivity {
             int numberOfMatches = matchEntryContent.matchEntries.getTotalMatchingDkCount();
             Resources res = getResources();
             if (numberOfMatches > 0) {
-                textView3.setText(res.getQuantityString(R.plurals.title_number_of_matches_found, numberOfMatches, numberOfMatches));
-                textView3.setTextColor(matchBarColor);
+                textViewMatches.setText(res.getQuantityString(R.plurals.title_number_of_matches_found, numberOfMatches, numberOfMatches));
+                textViewMatches.setTextColor(matchBarColor);
             } else {
-                textView3.setText(R.string.title_no_matches_found);
+                textViewMatches.setText(R.string.title_no_matches_found);
             }
             Log.d(TAG, "Number of matches: " + numberOfMatches);
 
@@ -480,8 +500,8 @@ public class MainActivity extends AppCompatActivity {
             }
             Log.d(TAG, "Number of matches displayed: " + total);
 
-            chart3.setData(dataPoints3, matchBarColor, "Matches", true, this);
-            chart3.setFormatAndRefresh(this);
+            chartMatches.setData(dataPoints3, matchBarColor, "Matches", true, this);
+            chartMatches.setFormatAndRefresh(this);
 
             // End of this path.
             // From now on, the user can scroll the charts,
@@ -514,7 +534,7 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra(EXTRA_MESSAGE_DAY, String.valueOf(x));
                 intent.putExtra(EXTRA_MESSAGE_COUNT, String.valueOf(y));
                 startActivity(intent);
-                chart3.getBarChart().highlightValues(null);
+                chartMatches.getBarChart().highlightValues(null);
             }
         }
 

@@ -50,7 +50,7 @@ public class Utils {
     }
 
     public static int getDaysFromMillis(long millis) {
-        return (int) millis / (24*3600*1000);
+        return (int) (millis / (24*3600*1000L));
     }
 
     public static int getENINFromDate(Date date) {

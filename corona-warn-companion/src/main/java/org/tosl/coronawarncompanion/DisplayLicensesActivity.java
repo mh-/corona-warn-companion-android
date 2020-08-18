@@ -49,14 +49,12 @@ public class DisplayLicensesActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
-        //noinspection SwitchStatementWithTooFewBranches
-        switch (item.getItemId()) {
-            case R.id.osslicenses:
-                OssLicensesMenuActivity.setActivityTitle(getString(R.string.title_activity_further_licenses));  // start the activity
-                startActivity(new Intent(this, OssLicensesMenuActivity.class));
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == R.id.osslicenses) {
+            OssLicensesMenuActivity.setActivityTitle(getString(R.string.title_activity_further_licenses));  // start the activity
+            startActivity(new Intent(this, OssLicensesMenuActivity.class));
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
         }
     }
 
