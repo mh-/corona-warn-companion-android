@@ -33,6 +33,7 @@ import org.iq80.leveldb.Options;
 import org.iq80.leveldb.ReadOptions;
 import org.iq80.leveldb.impl.Iq80DBFactory;
 import org.tosl.coronawarncompanion.CWCApplication;
+import org.tosl.coronawarncompanion.rpis.RpiList;
 
 import java.io.File;
 import java.io.FileOutputStream;

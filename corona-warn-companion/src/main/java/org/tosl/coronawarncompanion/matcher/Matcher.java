@@ -26,7 +26,7 @@ import androidx.core.util.Consumer;
 import org.tosl.coronawarncompanion.CWCApplication;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
 import org.tosl.coronawarncompanion.gmsreadout.ContactRecordsProtos;
-import org.tosl.coronawarncompanion.gmsreadout.RpiList;
+import org.tosl.coronawarncompanion.rpis.RpiList;
 import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
 
 import java.util.ArrayList;

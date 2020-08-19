@@ -50,7 +50,8 @@ import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysImport;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
 import org.tosl.coronawarncompanion.dkdownload.DKDownload;
 import org.tosl.coronawarncompanion.gmsreadout.ContactDbOnDisk;
-import org.tosl.coronawarncompanion.gmsreadout.RpiList;
+import org.tosl.coronawarncompanion.ramblereadout.RambleDbOnDisk;
+import org.tosl.coronawarncompanion.rpis.RpiList;
 import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
 import org.tosl.coronawarncompanion.matcher.Matcher;
 
@@ -72,6 +73,7 @@ import java.util.TreeMap;
 
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.DEMO_MODE;
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.NORMAL_MODE;
+import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.RAMBLE_MODE;
 import static org.tosl.coronawarncompanion.CWCApplication.backgroundThreadsShouldStop;
 import static org.tosl.coronawarncompanion.CWCApplication.backgroundThreadsRunning;
 import static org.tosl.coronawarncompanion.dkdownload.Unzip.getUnzippedBytesFromZipFileBytes;
@@ -124,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.about) {
             startActivity(new Intent(this, AboutActivity.class));
             return true;
-        } else if (item.getItemId() == R.id.demomode) {
+        } else if (item.getItemId() == R.id.demomode || item.getItemId() == R.id.ramblemode) {
             if (backgroundThreadsShouldStop) {
                 // user has to wait a little bit longer
                 CharSequence text = getString(R.string.error_app_mode_switching_not_possible);
@@ -133,10 +135,18 @@ public class MainActivity extends AppCompatActivity {
                 toast.show();
                 return false;
             }
-            if (CWCApplication.appMode == DEMO_MODE) {
-                desiredAppMode = NORMAL_MODE;
+            if (item.getItemId() == R.id.demomode) {
+                if (CWCApplication.appMode == DEMO_MODE) {
+                    desiredAppMode = NORMAL_MODE;
+                } else {
+                    desiredAppMode = DEMO_MODE;
+                }
             } else {
-                desiredAppMode = DEMO_MODE;
+                if (CWCApplication.appMode == RAMBLE_MODE) {
+                    desiredAppMode = NORMAL_MODE;
+                } else {
+                    desiredAppMode = RAMBLE_MODE;
+                }
             }
             if (backgroundThreadsRunning) {  // don't do recreate() while background threads are running
                 appModeShouldToggle = true;
@@ -170,8 +180,9 @@ public class MainActivity extends AppCompatActivity {
             if (CWCApplication.appMode == NORMAL_MODE) {
                 actionBar.setTitle(R.string.title_activity_main);
             } else if (CWCApplication.appMode == DEMO_MODE) {
-                actionBar.setTitle(getString(R.string.title_activity_main_demo_prefix) +
-                        getString(R.string.title_activity_main));
+                actionBar.setTitle(getString(R.string.title_activity_main_demo_prefix) + getString(R.string.title_activity_main));
+            } else if (CWCApplication.appMode == RAMBLE_MODE) {
+                actionBar.setTitle(getString(R.string.title_activity_main_ramble_prefix) + getString(R.string.title_activity_main));
             } else {
                 throw new IllegalStateException();
             }
@@ -212,10 +223,17 @@ public class MainActivity extends AppCompatActivity {
         chartMatches = new CwcBarChart(findViewById(R.id.chart3), findViewById(R.id.progressBar3), barChartSync, this);
         chartMatches.getBarChart().setOnChartValueSelectedListener(new Chart3ValueSelectedListener());
 
-        // 1st Section: Get RPIs from database (requires root)
+        // 1st Section: Get RPIs from database (requires root), or from demo database, or from RaMBLE
 
-        ContactDbOnDisk contactDbOnDisk = new ContactDbOnDisk(this);
-        rpiList = contactDbOnDisk.getRpisFromContactDB();
+        if (CWCApplication.appMode == NORMAL_MODE || CWCApplication.appMode == DEMO_MODE) {
+            ContactDbOnDisk contactDbOnDisk = new ContactDbOnDisk(this);
+            rpiList = contactDbOnDisk.getRpisFromContactDB();
+        } else if (CWCApplication.appMode == RAMBLE_MODE) {
+            RambleDbOnDisk rambleDbOnDisk = new RambleDbOnDisk(this);
+            rpiList = rambleDbOnDisk.getRpisFromContactDB();
+        } else {
+            throw new IllegalStateException();
+        }
 
         if (rpiList != null) {  // check that getting the RPIs didn't fail, e.g. because we didn't get root rights
             SortedSet<Integer> rpiListDaysSinceEpochLocalTZ = rpiList.getAvailableDaysSinceEpochLocalTZ();
@@ -261,7 +279,7 @@ public class MainActivity extends AppCompatActivity {
 
         // 2nd Section: Diagnosis Keys
 
-        if (CWCApplication.appMode == NORMAL_MODE) {
+        if (CWCApplication.appMode == NORMAL_MODE || CWCApplication.appMode == RAMBLE_MODE) {
             diagnosisKeysDownload = new DKDownload(this);
             diagnosisKeysDownload.availableDatesRequest(new availableDatesResponseCallbackCommand(),
                     new errorResponseCallbackCommand());
@@ -296,7 +314,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showExtractionError() {
-        textViewExtractionError.setText(R.string.error_no_rpis);
+        if (CWCApplication.appMode == NORMAL_MODE) {
+            textViewExtractionError.setText(R.string.error_no_rpis_normal_mode);
+        } else if (CWCApplication.appMode == RAMBLE_MODE) {
+            textViewExtractionError.setText(R.string.error_no_rpis_ramble_mode);
+        } else {
+            throw new IllegalStateException();
+        }
         textViewExtractionError.setBackgroundColor(resolveColorAttr(android.R.attr.colorBackground, context));
         textViewRpis.setText(getString(R.string.title_no_rpis_extracted));
         chartRpis.switchPleaseWaitAnimationOff();
