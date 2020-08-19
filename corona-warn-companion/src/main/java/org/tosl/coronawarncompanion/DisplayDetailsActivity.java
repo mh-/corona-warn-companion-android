@@ -97,10 +97,12 @@ public class DisplayDetailsActivity extends AppCompatActivity {
             ActionBar actionBar = getSupportActionBar();
             if (actionBar != null) {
                 actionBar.setDisplayHomeAsUpEnabled(true);
-                if (!CWCApplication.DEMO_MODE) {
+                if (CWCApplication.appMode == CWCApplication.AppModeOptions.NORMAL_MODE) {
                     actionBar.setTitle(R.string.title_activity_details);
-                } else {
+                } else if (CWCApplication.appMode == CWCApplication.AppModeOptions.DEMO_MODE) {
                     actionBar.setTitle(R.string.title_activity_details_demo);
+                } else {
+                    throw new IllegalStateException();
                 }
             }
 

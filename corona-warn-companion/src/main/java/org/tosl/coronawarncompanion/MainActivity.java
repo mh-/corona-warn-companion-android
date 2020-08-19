@@ -70,6 +70,8 @@ import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
+import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.DEMO_MODE;
+import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.NORMAL_MODE;
 import static org.tosl.coronawarncompanion.CWCApplication.backgroundThreadsShouldStop;
 import static org.tosl.coronawarncompanion.CWCApplication.backgroundThreadsRunning;
 import static org.tosl.coronawarncompanion.dkdownload.Unzip.getUnzippedBytesFromZipFileBytes;
@@ -85,7 +87,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     public static final String EXTRA_MESSAGE_DAY = "org.tosl.coronawarncompanion.DAY_MESSAGE";
     public static final String EXTRA_MESSAGE_COUNT = "org.tosl.coronawarncompanion.COUNT_MESSAGE";
-    private static boolean demoModeShouldToggle = false;
+    private static boolean appModeShouldToggle = false;
+    private static CWCApplication.AppModeOptions desiredAppMode;
     private RpiList rpiList = null;
     private Date maxDate = null;
     private Date minDate = null;
@@ -124,17 +127,22 @@ public class MainActivity extends AppCompatActivity {
         } else if (item.getItemId() == R.id.demomode) {
             if (backgroundThreadsShouldStop) {
                 // user has to wait a little bit longer
-                CharSequence text = getString(R.string.error_demo_mode_switching_not_possible);
+                CharSequence text = getString(R.string.error_app_mode_switching_not_possible);
                 Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.CENTER, 0, 0);
                 toast.show();
                 return false;
             }
+            if (CWCApplication.appMode == DEMO_MODE) {
+                desiredAppMode = NORMAL_MODE;
+            } else {
+                desiredAppMode = DEMO_MODE;
+            }
             if (backgroundThreadsRunning) {  // don't do recreate() while background threads are running
-                demoModeShouldToggle = true;
+                appModeShouldToggle = true;
                 backgroundThreadsShouldStop = true;
             } else {
-                toggleDemoMode();
+                toggleAppMode();
             }
             return true;
         } else if (item.getItemId() == R.id.osslicenses) {
@@ -145,9 +153,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void toggleDemoMode() {
-        demoModeShouldToggle = false;
-        CWCApplication.DEMO_MODE = !CWCApplication.DEMO_MODE;
+    private void toggleAppMode() {
+        appModeShouldToggle = false;
+        CWCApplication.appMode = desiredAppMode;
         recreate();
     }
 
@@ -157,19 +165,19 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         this.context = this;
 
-        boolean DEMO_MODE = CWCApplication.DEMO_MODE;
-
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            if (!DEMO_MODE) {
+            if (CWCApplication.appMode == NORMAL_MODE) {
                 actionBar.setTitle(R.string.title_activity_main);
-            } else {
-                actionBar.setTitle(getString(R.string.title_activity_main_demo_prefix)+
+            } else if (CWCApplication.appMode == DEMO_MODE) {
+                actionBar.setTitle(getString(R.string.title_activity_main_demo_prefix) +
                         getString(R.string.title_activity_main));
+            } else {
+                throw new IllegalStateException();
             }
         }
 
-        if (DEMO_MODE) {
+        if (CWCApplication.appMode == DEMO_MODE) {
             Log.i(TAG, "--- DEMO MODE ---");
         }
 
@@ -207,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
         // 1st Section: Get RPIs from database (requires root)
 
         ContactDbOnDisk contactDbOnDisk = new ContactDbOnDisk(this);
-        rpiList = contactDbOnDisk.getRpisFromContactDB(DEMO_MODE);
+        rpiList = contactDbOnDisk.getRpisFromContactDB();
 
         if (rpiList != null) {  // check that getting the RPIs didn't fail, e.g. because we didn't get root rights
             SortedSet<Integer> rpiListDaysSinceEpochLocalTZ = rpiList.getAvailableDaysSinceEpochLocalTZ();
@@ -253,12 +261,12 @@ public class MainActivity extends AppCompatActivity {
 
         // 2nd Section: Diagnosis Keys
 
-        if (!DEMO_MODE) {
+        if (CWCApplication.appMode == NORMAL_MODE) {
             diagnosisKeysDownload = new DKDownload(this);
             diagnosisKeysDownload.availableDatesRequest(new availableDatesResponseCallbackCommand(),
                     new errorResponseCallbackCommand());
             // (the rest is done asynchronously in callback functions)
-        } else {
+        } else if (CWCApplication.appMode == DEMO_MODE) {
             try {
                 InputStream inputStream = getAssets().open("demo_dks.zip");
                 byte[] buffer = new byte[100000];
@@ -275,6 +283,8 @@ public class MainActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        } else {
+            throw new IllegalStateException();
         }
     }
 
@@ -408,7 +418,6 @@ public class MainActivity extends AppCompatActivity {
         List<BarEntry> dataPoints2 = new ArrayList<>();
 
         for (Integer ENIN : diagnosisKeyCountMap.keySet()) {
-            //noinspection ConstantConditions
             int numEntries = diagnosisKeyCountMap.get(ENIN);
             //Log.d(TAG, "Datapoint: " + ENIN + ": " + numEntries);
             dataPoints2.add(new BarEntry(getDaysSinceEpochFromENIN(ENIN), numEntries));
@@ -507,8 +516,8 @@ public class MainActivity extends AppCompatActivity {
             // From now on, the user can scroll the charts,
             // or tap on a match to reach the DisplayDetailsActivity.
 
-            if (demoModeShouldToggle) {
-                toggleDemoMode();
+            if (appModeShouldToggle) {
+                toggleAppMode();
             }
         }
     }

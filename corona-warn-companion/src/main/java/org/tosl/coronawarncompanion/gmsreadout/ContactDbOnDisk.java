@@ -32,6 +32,7 @@ import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.ReadOptions;
 import org.iq80.leveldb.impl.Iq80DBFactory;
+import org.tosl.coronawarncompanion.CWCApplication;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -130,7 +131,7 @@ public class ContactDbOnDisk {
         }
         String outDir = cachePathStr+'/'+dbNameModified;
         File outDirFile = new File(outDir);
-        @SuppressWarnings("unused") boolean mkdirResult = outDirFile.mkdir();
+        boolean mkdirResult = outDirFile.mkdir();
         if (files != null) {
             for (String filename : files) {
                 InputStream in;
@@ -214,7 +215,7 @@ public class ContactDbOnDisk {
         return rpiList;
     }
 
-    public RpiList getRpisFromContactDB(boolean demoMode) {
+    public RpiList getRpisFromContactDB() {
         RpiList rpiList = null;
         try {
             // delete cache:
@@ -223,10 +224,12 @@ public class ContactDbOnDisk {
                 deleteDir(dir);
             } catch (Exception e) { e.printStackTrace();}
 
-            if (!demoMode) {
+            if (CWCApplication.appMode == CWCApplication.AppModeOptions.NORMAL_MODE) {
                 copyFromGMS();
-            } else {
+            } else if (CWCApplication.appMode == CWCApplication.AppModeOptions.DEMO_MODE) {
                 copyFromAssets();
+            } else {
+                throw new IllegalStateException();
             }
             open();
             if (levelDBStore != null) {
