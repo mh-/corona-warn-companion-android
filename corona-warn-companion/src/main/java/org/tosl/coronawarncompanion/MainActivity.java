@@ -182,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
             } else if (CWCApplication.appMode == DEMO_MODE) {
                 actionBar.setTitle(getString(R.string.title_activity_main_demo_prefix) + getString(R.string.title_activity_main));
             } else if (CWCApplication.appMode == RAMBLE_MODE) {
-                actionBar.setTitle(getString(R.string.title_activity_main_ramble_prefix) + getString(R.string.title_activity_main));
+                actionBar.setTitle(getString(R.string.title_activity_main_ramble_version));
             } else {
                 throw new IllegalStateException();
             }
@@ -190,6 +190,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (CWCApplication.appMode == DEMO_MODE) {
             Log.i(TAG, "--- DEMO MODE ---");
+        } else if (CWCApplication.appMode == RAMBLE_MODE) {
+            Log.i(TAG, "--- RAMBLE MODE ---");
         }
 
         if(backgroundThreadsRunning) {
@@ -230,7 +232,7 @@ public class MainActivity extends AppCompatActivity {
             rpiList = contactDbOnDisk.getRpisFromContactDB();
         } else if (CWCApplication.appMode == RAMBLE_MODE) {
             RambleDbOnDisk rambleDbOnDisk = new RambleDbOnDisk(this);
-            rpiList = rambleDbOnDisk.getRpisFromContactDB();
+            rpiList = rambleDbOnDisk.getRpisFromContactDB(this);
         } else {
             throw new IllegalStateException();
         }
@@ -442,7 +444,7 @@ public class MainActivity extends AppCompatActivity {
         List<BarEntry> dataPoints2 = new ArrayList<>();
 
         for (Integer ENIN : diagnosisKeyCountMap.keySet()) {
-            int numEntries = diagnosisKeyCountMap.get(ENIN);
+            @SuppressWarnings("ConstantConditions") int numEntries = diagnosisKeyCountMap.get(ENIN);
             //Log.d(TAG, "Datapoint: " + ENIN + ": " + numEntries);
             dataPoints2.add(new BarEntry(getDaysSinceEpochFromENIN(ENIN), numEntries));
         }

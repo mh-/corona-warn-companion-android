@@ -138,7 +138,7 @@ public class ContactDbOnDisk {
                 InputStream in;
                 OutputStream out;
                 try {
-                    in = assetManager.open("demo_rpi_db/"+filename);
+                    in = assetManager.open("demo_rpi_db/" +filename);
                     File outFile = new File(outDir, filename);
                     out = new FileOutputStream(outFile);
                     copyFile(in, out);
