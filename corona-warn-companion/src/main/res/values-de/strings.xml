@@ -33,20 +33,24 @@
     <string name="distance_shown_as_attenuation">Abstand (Dämpfung in dB)</string>
     <string name="menu_entry_show_hide_all_scans">Alle Begegnungen zeigen/verbergen</string>
     <string name="menu_entry_toggle_demo_mode">Demo Modus an/aus</string>
+    <string name="menu_entry_toggle_ramble_mode">RaMBLE Modus an/aus</string>
     <string name="menu_entry_oss_licenses">Open Source Software Lizenzen</string>
+    <string name="menu_entry_view_further_oss_licenses">Weitere Open Source Software Lizenzen</string>
+    <string name="menu_entry_about">Über diese App</string>
     <string name="title_activity_licenses">OSS Lizenzen</string>
     <!--suppress AndroidDomInspection -->
     <string name="title_activity_main">@string/app_name</string>
     <string name="title_activity_main_demo_prefix">"DEMO "</string>
+    <string name="title_activity_main_ramble_version">"RaMBLE-Warn-Companion"</string>
     <!--suppress AndroidDomInspection -->
     <string name="title_activity_details">@string/app_name</string>
     <string name="title_activity_details_demo">DEMO Beispiel-Details</string>
-    <string name="menu_entry_view_further_oss_licenses">Weitere Open Source Software Lizenzen</string>
+    <string name="title_activity_details_ramble">RaMBLE-basierte Details</string>
     <string name="title_activity_further_licenses">Weitere OSS Lizenzen</string>
     <string name="error_app_mode_switching_not_possible">Im Moment kann der Modus leider nicht gewechselt werden.\nBitte warte, bis alle Berechnungen abgeschlossen sind.</string>
-    <string name="error_no_rpis">FEHLER!\nBegegnungen konnten nicht ausgelesen werden.\nSind Exposure Notifications eingeschaltet?\nHast Du dieser App ROOT-Rechte gegeben?</string>
+    <string name="error_no_rpis_normal_mode">FEHLER!\nBegegnungen konnten nicht ausgelesen werden.\nSind Exposure Notifications eingeschaltet?\nHast Du dieser App ROOT-Rechte gegeben?</string>
+    <string name="error_no_rpis_ramble_mode">FEHLER!\nBegegnungen konnten nicht ausgelesen werden.\nHast Du der App erlaubt, auf Dateien auf Deinem Gerät zuzugreifen?\nHast Du eine RaMBLE Datenbank exportiert? Falls ja, ist sie möglicherweise defekt.</string>
     <string name="error_download">FEHLER!\nEs gab ein Problem beim Herunterladen der Diagnoseschlüssel.\nFunktioniert Deine Internetverbindung?</string>
-    <string name="menu_entry_about">Über diese App</string>
     <string name="title_activity_about">Über diese App</string>
     <string name="about_version">Version\n%s (%d, %s)</string>
     <string name="error_download_invalid_key_file_header">FEHLER!\nEine heruntergeladene Diagnoseschlüssel-Datei beginnt nicht mit der erwarteten Zeichenfolge!</string>

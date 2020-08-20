@@ -101,6 +101,8 @@ public class DisplayDetailsActivity extends AppCompatActivity {
                     actionBar.setTitle(R.string.title_activity_details);
                 } else if (CWCApplication.appMode == CWCApplication.AppModeOptions.DEMO_MODE) {
                     actionBar.setTitle(R.string.title_activity_details_demo);
+                } else if (CWCApplication.appMode == CWCApplication.AppModeOptions.RAMBLE_MODE) {
+                    actionBar.setTitle(R.string.title_activity_details_ramble);
                 } else {
                     throw new IllegalStateException();
                 }

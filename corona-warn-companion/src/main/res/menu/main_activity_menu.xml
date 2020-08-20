@@ -4,6 +4,8 @@
         android:title="@string/menu_entry_about" />
     <item android:id="@+id/demomode"
         android:title="@string/menu_entry_toggle_demo_mode" />
+    <item android:id="@+id/ramblemode"
+        android:title="@string/menu_entry_toggle_ramble_mode" />
     <item android:id="@+id/osslicenses"
         android:title="@string/menu_entry_oss_licenses" />
 </menu>

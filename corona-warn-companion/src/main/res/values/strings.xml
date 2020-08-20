@@ -33,20 +33,24 @@
     <string name="distance_shown_as_attenuation">Distance (attenuation in dB)</string>
     <string name="menu_entry_show_hide_all_scans">Show/Hide All Scans</string>
     <string name="menu_entry_toggle_demo_mode">Toggle Demo Mode</string>
+    <string name="menu_entry_toggle_ramble_mode">Toggle RaMBLE Mode</string>
     <string name="menu_entry_oss_licenses">Open Source Software Licenses</string>
+    <string name="menu_entry_view_further_oss_licenses">Further Open Source Software Licenses</string>
+    <string name="menu_entry_about">About this app</string>
     <string name="title_activity_licenses">OSS Licenses</string>
     <!--suppress AndroidDomInspection -->
     <string name="title_activity_main">@string/app_name</string>
     <string name="title_activity_main_demo_prefix">"DEMO "</string>
+    <string name="title_activity_main_ramble_version">"RaMBLE-Warn-Companion"</string>
     <!--suppress AndroidDomInspection -->
     <string name="title_activity_details">@string/app_name</string>
     <string name="title_activity_details_demo">DEMO sample details</string>
-    <string name="menu_entry_view_further_oss_licenses">Further Open Source Software Licenses</string>
+    <string name="title_activity_details_ramble">RaMBLE-based details</string>
     <string name="title_activity_further_licenses">Further OSS Licenses</string>
     <string name="error_app_mode_switching_not_possible">Sorry, at the moment we cannot switch modes.\nPlease wait until all operations have finished.</string>
-    <string name="error_no_rpis">ERROR!\nNo encounters could be extracted.\nAre Exposure Notifications enabled?\nDid you grant ROOT rights to this app?</string>
+    <string name="error_no_rpis_normal_mode">ERROR!\nNo encounters could be extracted.\nAre Exposure Notifications enabled?\nDid you grant ROOT rights to this app?</string>
+    <string name="error_no_rpis_ramble_mode">ERROR!\nNo encounters could be extracted.\nDid you allow file access?\nDid you export a RaMBLE database? If yes, the database is probably broken.</string>
     <string name="error_download">ERROR!\nDownload of Diagnosis Keys failed.\nIs your internet connection working?</string>
-    <string name="menu_entry_about">About this app</string>
     <string name="title_activity_about">About this app</string>
     <string name="about_version">Version\n%s (%d, %s)</string>
     <string name="error_download_invalid_key_file_header">ERROR!\nDownloaded Diagnosis Keys file starts with incorrect header!</string>

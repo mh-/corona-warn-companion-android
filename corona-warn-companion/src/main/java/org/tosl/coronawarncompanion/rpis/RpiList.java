@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.tosl.coronawarncompanion.gmsreadout;
+package org.tosl.coronawarncompanion.rpis;
 
 import org.tosl.coronawarncompanion.CWCApplication;
+import org.tosl.coronawarncompanion.gmsreadout.ContactRecordsProtos;
 import org.tosl.coronawarncompanion.matcher.Crypto;
 
 import java.util.*;

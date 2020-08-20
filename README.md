@@ -26,11 +26,12 @@ The `release` build variant will probably build out-of-the box only on macOS bec
 # Features
 This app helps you to better understand warnings of the official Corona-Warn-App.
 
-**ATTENTION:** THE APP REQUIRES ROOT PERMISSIONS. Without root permissions, only a demo mode is possible that cannot access your risk encounters.
+**ATTENTION:** FOR FULL FUNCTIONALITY, THE APP REQUIRES ROOT PERMISSIONS. Without root permissions, the app cannot access your risk encounters, and only three features are available: 1. Test how many diagnosis keys can be downloaded from the server; 2. Use RaMBLE data; 3. Demo Mode.
 
 ### What the app does:
 1. The app reads the Rolling Proximity IDs recorded by your device from the Exposure Notifications database (this is only possible with root permissions, which is why the official Corona-Warn-App cannot display these details).  
    ![-Example Recorded Encounters-](screenshots/rpis_en.png)
+   Alternatively, the app can also read a database exported from RaMBLE (does not need root permissions).
 2. The app downloads the Diagnosis Keys from the official Corona-Warn-Server. It downloads the keys published daily for the last few days, and the keys published every hour for today. Therefore, different information than in the official Corona-Warn-App might be displayed.  
    Only keys for the days found in step 1 are shown and counted.  
    ![-Example Diagnosis Keys-](screenshots/dks_en.png)
@@ -53,6 +54,11 @@ Note that 1 means a low and 8 means a high transmission risk.
 
 # Open Source
 The source code of the app is published at https://github.com/mh-/corona-warn-companion-android, so you can check the source code, build the app yourself, and you are also welcome to contribute to improvements.
+
+# RaMBLE mode - works without root permissions
+In RaMBLE mode, the app will not read the Exposure Notification database, but instead read the most recent RaMBLE database export stored in the `Download` folder.
+Note that the Exposure Notifications database contains `calibrated_rssi` ([see here](https://developers.google.com/android/exposure-notifications/ble-attenuation-overview#calibration_per-device_tx_power_and_per-device_rssi_correction)).
+RaMBLE however stores only `raw_rssi`, which means that the colors shown on the details screen are probably different from the case when the app reads the Exposure Notifications database.
 
 # Other
 - The app is used for private purposes only, it is not used for any business purposes.

@@ -4,14 +4,15 @@ Die Veröffentlichung dieses Programms erfolgt in der Hoffnung, dass es Dir von 
 # Funktionen
 Diese App hilft Dir, Warnungen der offiziellen Corona-Warn-App besser zu verstehen und einzuordnen.
 
-**ACHTUNG:** DIE APP BENÖTIGT ROOT RECHTE. Ohne Root Rechte ist nur ein Demo-Modus möglich, der nicht auf Deine Risiko-Begegnungen zugreifen kann.
+**ACHTUNG:** FÜR VOLLE FUNKTION BENÖTIGT DIE APP ROOT RECHTE. Ohne Root Rechte kann sie nicht auf Deine Risiko-Begegnungen zugreifen, dann gibt es nur drei Funktionen: 1. Testen, wie viele Positiv-Schlüssel vom Server geladen werden können, 2. RaMBLE Daten verwenden und 3. Demo Modus.
 
 ### Was die App macht:
 1. Die App liest die von Deinem Gerät aufgezeichneten Rolling Proximity IDs aus der Exposure Notifications Datenbank aus (das geht nur mit Root Rechten, weshalb die offizielle Corona-Warn-App diese Details nicht anzeigen kann).  
    ![-Beispiel Erfasste Begegnungen-](file:///android_asset/rpis_de.png)
-2. Die App lädt die Positiv-Schlüssel (Diagnose-Schlüssel, Diagnosis Keys) vom offiziellen Corona-Warn-Server. Dabei lädt sie die täglich veröffentlichen Schlüssel der letzten Tage und die stündlich veröffentlichten Schlüssel des heutigen Tages. Daher werden möglicherweise andere Informationen als in der offiziellen Corona-Warn-App angezeigt.  
+   Alternativ kann die App auch eine aus RaMBLE exportierte Datenbank lesen (auch ohne Root Rechte).
+2. Die App lädt die Positiv-Schlüssel (Diagnose-Schlüssel, Diagnosis Keys) vom offiziellen Corona-Warn-Server. Dabei lädt sie die täglich veröffentlichen Schlüssel der letzten Tage und die stündlich veröffentlichten Schlüssel des heutigen Tages. Daher werden möglicherweise andere Informationen als in der offiziellen Corona-Warn-App angezeigt.
    ![-Beispiel Positiv-Schlüssel-](file:///android_asset/dks_de.png)
-3. Die App gleicht beides ab, um Übereinstimmungen (Risiko-Begegnungen) zu finden.  
+3. Die App gleicht beides ab, um Übereinstimmungen (Risiko-Begegnungen) zu finden.
    ![-Beispiel Treffer-](file:///android_asset/matches_de.png)
 
 Wenn Risiko-Begegnungen gefunden wurden, zeigt sie die Details dazu an: 

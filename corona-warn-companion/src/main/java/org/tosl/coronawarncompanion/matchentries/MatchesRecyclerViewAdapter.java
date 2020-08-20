@@ -59,7 +59,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
-import static org.tosl.coronawarncompanion.tools.Utils.byteArrayToHex;
+import static org.tosl.coronawarncompanion.tools.Utils.byteArrayToHexString;
 import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromSeconds;
 import static org.tosl.coronawarncompanion.tools.Utils.resolveColorAttr;
 import static org.tosl.coronawarncompanion.tools.Utils.xorTwoByteArrays;
@@ -213,7 +213,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
             for (ContactRecordsProtos.ScanRecord scanRecord : matchEntry.contactRecords.getRecordList()) {
                 byte[] aem = xorTwoByteArrays(scanRecord.getAem().toByteArray(), matchEntry.aemXorBytes);
                 if ((aem[0] != 0x40) || (aem[2] != 0x00) || (aem[3] != 0x00)) {
-                    Log.w(TAG, "WARNING: Invalid AEM: " + byteArrayToHex(aem));
+                    Log.w(TAG, "WARNING: Invalid AEM: " + byteArrayToHexString(aem));
                 }
                 byte txPower = aem[1];
                 //Log.d(TAG, "TXPower: "+txPower+" dBm");

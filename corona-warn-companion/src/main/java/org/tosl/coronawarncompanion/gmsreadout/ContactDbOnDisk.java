@@ -33,6 +33,7 @@ import org.iq80.leveldb.Options;
 import org.iq80.leveldb.ReadOptions;
 import org.iq80.leveldb.impl.Iq80DBFactory;
 import org.tosl.coronawarncompanion.CWCApplication;
+import org.tosl.coronawarncompanion.rpis.RpiList;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -137,7 +138,7 @@ public class ContactDbOnDisk {
                 InputStream in;
                 OutputStream out;
                 try {
-                    in = assetManager.open("demo_rpi_db/"+filename);
+                    in = assetManager.open("demo_rpi_db/" +filename);
                     File outFile = new File(outDir, filename);
                     out = new FileOutputStream(outFile);
                     copyFile(in, out);
