@@ -117,6 +117,13 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_activity_menu, menu);
+        if (CWCApplication.appMode == NORMAL_MODE) {
+            menu.findItem(R.id.normalmode).setChecked(true);
+        } else if (CWCApplication.appMode == DEMO_MODE) {
+            menu.findItem(R.id.demomode).setChecked(true);
+        } if (CWCApplication.appMode == RAMBLE_MODE) {
+            menu.findItem(R.id.ramblemode).setChecked(true);
+        }
         return true;
     }
 
@@ -126,7 +133,8 @@ public class MainActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.about) {
             startActivity(new Intent(this, AboutActivity.class));
             return true;
-        } else if (item.getItemId() == R.id.demomode || item.getItemId() == R.id.ramblemode) {
+        } else if (item.getItemId() == R.id.normalmode || item.getItemId() == R.id.demomode ||
+                item.getItemId() == R.id.ramblemode) {
             if (backgroundThreadsShouldStop) {
                 // user has to wait a little bit longer
                 CharSequence text = getString(R.string.error_app_mode_switching_not_possible);
@@ -135,18 +143,13 @@ public class MainActivity extends AppCompatActivity {
                 toast.show();
                 return false;
             }
-            if (item.getItemId() == R.id.demomode) {
-                if (CWCApplication.appMode == DEMO_MODE) {
-                    desiredAppMode = NORMAL_MODE;
-                } else {
-                    desiredAppMode = DEMO_MODE;
-                }
+            item.setChecked(true);
+            if (item.getItemId() == R.id.normalmode) {
+                desiredAppMode = NORMAL_MODE;
+            } else if (item.getItemId() == R.id.demomode) {
+                desiredAppMode = DEMO_MODE;
             } else {
-                if (CWCApplication.appMode == RAMBLE_MODE) {
-                    desiredAppMode = NORMAL_MODE;
-                } else {
-                    desiredAppMode = RAMBLE_MODE;
-                }
+                desiredAppMode = RAMBLE_MODE;
             }
             if (backgroundThreadsRunning) {  // don't do recreate() while background threads are running
                 appModeShouldToggle = true;
