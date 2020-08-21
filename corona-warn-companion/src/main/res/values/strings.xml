@@ -55,4 +55,5 @@
     <string name="title_activity_about">About this app</string>
     <string name="about_version">Version\n%s (%d, %s)</string>
     <string name="error_download_invalid_key_file_header">ERROR!\nDownloaded Diagnosis Keys file starts with incorrect header!</string>
+    <string name="saved_app_mode" translatable="false">APP_MODE</string>
 </resources>

@@ -23,6 +23,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -151,6 +152,12 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 desiredAppMode = RAMBLE_MODE;
             }
+            if (desiredAppMode != CWCApplication.appMode) {
+                SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putInt(getString(R.string.saved_app_mode), desiredAppMode.ordinal());
+                editor.apply();
+            }
             if (backgroundThreadsRunning) {  // don't do recreate() while background threads are running
                 appModeShouldToggle = true;
                 backgroundThreadsShouldStop = true;
@@ -177,6 +184,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         this.context = this;
+
+        SharedPreferences sharedPreferences = this.getPreferences(MODE_PRIVATE);
+        int appModeOrdinal = sharedPreferences.getInt(getString(R.string.saved_app_mode), NORMAL_MODE.ordinal());
+        try {
+            CWCApplication.appMode = CWCApplication.AppModeOptions.values()[appModeOrdinal];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            CWCApplication.appMode = NORMAL_MODE;
+        }
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
