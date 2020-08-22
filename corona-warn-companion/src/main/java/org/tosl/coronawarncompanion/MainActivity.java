@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
     private DKDownload diagnosisKeysDownload;
     private LinkedList<URL> diagnosisKeysUrls;
     private int numDiagnosisKeysUrls;
-    private final ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList = new ArrayList<>();
+    private ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList;
     @SuppressWarnings("SpellCheckingInspection")
     private final int normalBarColor = Color.parseColor("#8CEAFF");
     private final int matchBarColor = Color.parseColor("red");
@@ -302,7 +302,8 @@ public class MainActivity extends AppCompatActivity {
         // 2nd Section: Diagnosis Keys
 
         if (CWCApplication.appMode == NORMAL_MODE || CWCApplication.appMode == RAMBLE_MODE) {
-            diagnosisKeysDownload = new DKDownload(this);
+            diagnosisKeysList = new ArrayList<>();
+            diagnosisKeysDownload = new DKDownload(this, diagnosisKeysList);
             diagnosisKeysUrls = new LinkedList<>();
             diagnosisKeysDownload.availableDatesRequest(new availableDatesResponseCallbackCommand(),
                     new errorResponseCallbackCommand());
@@ -320,7 +321,9 @@ public class MainActivity extends AppCompatActivity {
                 response.url = new URL("https://tosl.org/demo_dks.zip");
                 response.fileBytes = output.toByteArray();
 
-                new downloadCompleteCallbackCommand().execute(response);
+                diagnosisKeysList = new ArrayList<>();
+                numDiagnosisKeysUrls = 1;
+                new downloadCompleteCallbackCommand().execute(response, diagnosisKeysList);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -330,7 +333,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public class errorResponseCallbackCommand implements DKDownload.CallbackCommand {
-        public void execute(Object data) {
+        public void execute(Object data, ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList) {
             showDownloadError();
             showMatchingNotPossible();
         }
@@ -362,7 +365,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public class availableDatesResponseCallbackCommand implements DKDownload.CallbackCommand {
-        public void execute(Object data) {
+        public void execute(Object data, ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList) {
             // get Daily Diagnosis Keys URLs for the previous days
             @SuppressWarnings("unchecked") LinkedList<Date> availableDates = (LinkedList<Date>) data;
             for (Date date : availableDates) {
@@ -384,7 +387,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public class availableHoursResponseCallbackCommand implements DKDownload.CallbackCommand {
-        public void execute(Object data) {
+        public void execute(Object data, ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList) {
             // get Hourly Diagnosis Keys URLs for the current day
             @SuppressWarnings("unchecked") LinkedList<String> availableHours = (LinkedList<String>) data;
             for (String hour : availableHours) {
@@ -404,12 +407,12 @@ public class MainActivity extends AppCompatActivity {
                         new errorResponseCallbackCommand());
             }
         } else {
-            processDownloadedDiagnosisKeys();
+            processDownloadedDiagnosisKeys(diagnosisKeysList);
         }
     }
 
     public class downloadCompleteCallbackCommand implements DKDownload.CallbackCommand {
-        public void execute(Object data) {
+        public void execute(Object data, ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList) {
             DKDownload.FileResponse fileResponse = (DKDownload.FileResponse) data;
             Log.d(TAG, "Download complete: " + fileResponse.url);
 
@@ -430,13 +433,13 @@ public class MainActivity extends AppCompatActivity {
 
             numDiagnosisKeysUrls--;
             Log.d(TAG, "Downloads left: " + numDiagnosisKeysUrls);
-            if (numDiagnosisKeysUrls == 0) {  // all files have been downloaded
-                processDownloadedDiagnosisKeys();
+            if (numDiagnosisKeysUrls <= 0) {  // all files have been downloaded
+                processDownloadedDiagnosisKeys(diagnosisKeysList);
             }
         }
     }
 
-    private void processDownloadedDiagnosisKeys() {
+    private void processDownloadedDiagnosisKeys(ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList) {
         // Count the downloaded Diagnosis Keys
         Log.d(TAG, "Number of keys that have been downloaded: " + diagnosisKeysList.size());
 
@@ -475,14 +478,14 @@ public class MainActivity extends AppCompatActivity {
 
         if (rpiList != null) {
             textViewMatches.setText(getString(R.string.title_matching_not_done_yet));
-            startMatching();
+            startMatching(diagnosisKeysList);
         }
     }
 
     public Handler uiThreadHandler;
     public HandlerThread backgroundMatcher;
 
-    private void startMatching() {
+    private void startMatching(ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList) {
         backgroundThreadsRunning = true;  // required so that DEMO_MODE toggle can safely stop the background threads
         backgroundThreadsShouldStop = false;
 
@@ -497,14 +500,17 @@ public class MainActivity extends AppCompatActivity {
         backgroundMatcher = new HandlerThread("BackgroundMatcher");
         backgroundMatcher.start();
         Handler backgroundThreadHandler = new Handler(backgroundMatcher.getLooper());
-        backgroundThreadHandler.post(new BackgroundMatching(this));
+        backgroundThreadHandler.post(new BackgroundMatching(this, diagnosisKeysList));
     }
 
     private class BackgroundMatching implements Runnable {
         private final MainActivity mainActivity;
+        private final ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList;
 
-        BackgroundMatching(MainActivity theMainActivity) {
+        BackgroundMatching(MainActivity theMainActivity,
+                           ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList) {
             mainActivity = theMainActivity;
+            this.diagnosisKeysList = diagnosisKeysList;
         }
 
         @Override

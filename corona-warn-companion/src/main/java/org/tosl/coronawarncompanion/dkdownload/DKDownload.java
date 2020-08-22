@@ -30,12 +30,14 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.tosl.coronawarncompanion.MainActivity;
+import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.FieldPosition;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
@@ -48,11 +50,14 @@ public class DKDownload {
     @SuppressLint("SimpleDateFormat")
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 
+    private final ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList;
     private final RequestQueue queue;
     private final Response.ErrorListener errorResponseListener;
     private CallbackCommand errorResponseCallbackCommand;
 
-    public DKDownload(Context context) {
+    public DKDownload(Context context, ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList) {
+        this.diagnosisKeysList = diagnosisKeysList;
+
         // Instantiate the Volley RequestQueue.
         queue = Volley.newRequestQueue(context);
 
@@ -79,11 +84,11 @@ public class DKDownload {
     }
 
     public interface CallbackCommand {
-        void execute(Object data);
+        void execute(Object data, ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList);
     }
 
-    public static void doCallback(CallbackCommand callbackCommand, Object data) {
-        callbackCommand.execute(data);
+    public void doCallback(CallbackCommand callbackCommand, Object data) {
+        callbackCommand.execute(data, this.diagnosisKeysList);
     }
 
     String[] parseCwsListResponse(String str) {
