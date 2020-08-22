@@ -98,8 +98,10 @@ public class MainActivity extends AppCompatActivity {
     private Date currentDate;  // usually the same as maxDate
 
     private DKDownload diagnosisKeysDownload;
-    private final LinkedList<URL> diagnosisKeysUrls = new LinkedList<>();
+    private LinkedList<URL> diagnosisKeysUrls;
+    private int numDiagnosisKeysUrls;
     private final ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList = new ArrayList<>();
+    @SuppressWarnings("SpellCheckingInspection")
     private final int normalBarColor = Color.parseColor("#8CEAFF");
     private final int matchBarColor = Color.parseColor("red");
 
@@ -301,6 +303,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (CWCApplication.appMode == NORMAL_MODE || CWCApplication.appMode == RAMBLE_MODE) {
             diagnosisKeysDownload = new DKDownload(this);
+            diagnosisKeysUrls = new LinkedList<>();
             diagnosisKeysDownload.availableDatesRequest(new availableDatesResponseCallbackCommand(),
                     new errorResponseCallbackCommand());
             // (the rest is done asynchronously in callback functions)
@@ -317,7 +320,7 @@ public class MainActivity extends AppCompatActivity {
                 response.url = new URL("https://tosl.org/demo_dks.zip");
                 response.fileBytes = output.toByteArray();
 
-                new processUrlListCallbackCommand().execute(response);
+                new downloadCompleteCallbackCommand().execute(response);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -388,24 +391,24 @@ public class MainActivity extends AppCompatActivity {
                 diagnosisKeysUrls.add(diagnosisKeysDownload.getHourlyDKsURLForDateAndHour(currentDate, hour));
             }
             // Now we have all Diagnosis Keys URLs, let's process them
+            numDiagnosisKeysUrls = diagnosisKeysUrls.size();
             processUrlList();
         }
     }
 
     private void processUrlList() {
-        boolean atLeastOneDownloadStarted = false;
-        for (URL url : diagnosisKeysUrls) {
-            Log.d(TAG, "Going to download: " + url);
-            diagnosisKeysDownload.dkFileRequest(url, new processUrlListCallbackCommand(),
-                    new errorResponseCallbackCommand());
-            atLeastOneDownloadStarted = true;
-        }
-        if (!atLeastOneDownloadStarted) {
+        if (numDiagnosisKeysUrls > 0) {
+            for (URL url : diagnosisKeysUrls) {
+                Log.d(TAG, "Going to download: " + url);
+                diagnosisKeysDownload.dkFileRequest(url, new downloadCompleteCallbackCommand(),
+                        new errorResponseCallbackCommand());
+            }
+        } else {
             processDownloadedDiagnosisKeys();
         }
     }
 
-    public class processUrlListCallbackCommand implements DKDownload.CallbackCommand {
+    public class downloadCompleteCallbackCommand implements DKDownload.CallbackCommand {
         public void execute(Object data) {
             DKDownload.FileResponse fileResponse = (DKDownload.FileResponse) data;
             Log.d(TAG, "Download complete: " + fileResponse.url);
@@ -425,9 +428,9 @@ public class MainActivity extends AppCompatActivity {
                 diagnosisKeysList.addAll(dkList);
             }
 
-            diagnosisKeysUrls.remove(fileResponse.url);
-            Log.d(TAG, "Downloads left: " + diagnosisKeysUrls.size());
-            if (diagnosisKeysUrls.size() == 0) {  // all files have been downloaded
+            numDiagnosisKeysUrls--;
+            Log.d(TAG, "Downloads left: " + numDiagnosisKeysUrls);
+            if (numDiagnosisKeysUrls == 0) {  // all files have been downloaded
                 processDownloadedDiagnosisKeys();
             }
         }
@@ -462,7 +465,7 @@ public class MainActivity extends AppCompatActivity {
         List<BarEntry> dataPoints2 = new ArrayList<>();
 
         for (Integer ENIN : diagnosisKeyCountMap.keySet()) {
-            @SuppressWarnings("ConstantConditions") int numEntries = diagnosisKeyCountMap.get(ENIN);
+            int numEntries = diagnosisKeyCountMap.get(ENIN);
             //Log.d(TAG, "Datapoint: " + ENIN + ": " + numEntries);
             dataPoints2.add(new BarEntry(getDaysSinceEpochFromENIN(ENIN), numEntries));
         }

@@ -86,19 +86,18 @@ public class DKDownload {
         callbackCommand.execute(data);
     }
 
-    String[] parseCwaListResponse(String str) {
+    String[] parseCwsListResponse(String str) {
         String reducedStr = str.replace("\"","");
         reducedStr = reducedStr.replace("[","");
         reducedStr = reducedStr.replace("]","");
         return reducedStr.split(",");
     }
 
-    public void availableDatesRequest(CallbackCommand callbackCommand,
+    public void availableDatesRequest(CallbackCommand callbackHandleAvailableDates,
                                       MainActivity.errorResponseCallbackCommand errorResponseCallbackCommand) {
-
         Listener<String> responseListener = availableDatesStr -> {
             //Log.d(TAG, "Available Dates: "+availableDatesStr);
-            String[] dateStringArray = parseCwaListResponse(availableDatesStr);
+            String[] dateStringArray = parseCwsListResponse(availableDatesStr);
             LinkedList<Date> result = new LinkedList<>();
             for (String str : dateStringArray) {
                 //Log.d(TAG, "Date: "+str);
@@ -113,26 +112,26 @@ public class DKDownload {
                     result.add(date);
                 }
             }
-            doCallback(callbackCommand, result);
+            doCallback(callbackHandleAvailableDates, result);
         };
         this.errorResponseCallbackCommand = errorResponseCallbackCommand;
         startHttpRequestForStringResponse(CWA_URL+"", responseListener, errorResponseListener);
     }
 
-    public void availableHoursForDateRequest(Date date, CallbackCommand callbackCommand) {
+    public void availableHoursForDateRequest(Date date, CallbackCommand callbackHandleAvailableHours) {
 
         Listener<String> responseListener = availableHoursStr -> {
             //Log.d(TAG, "Available Hours: "+availableHoursStr);
-            String[] hourStringArray = parseCwaListResponse(availableHoursStr);
+            String[] hourStringArray = parseCwsListResponse(availableHoursStr);
             LinkedList<String> result = new LinkedList<>();
             Collections.addAll(result, hourStringArray);
-            doCallback(callbackCommand, result);
+            doCallback(callbackHandleAvailableHours, result);
         };
         Response.ErrorListener localErrorResponseListener = error -> {
             Log.i(TAG, "VolleyError "+error);
             Log.i(TAG, "No hourly downloads available yet.");
             LinkedList<String> result = new LinkedList<>();
-            doCallback(callbackCommand, result);
+            doCallback(callbackHandleAvailableHours, result);
         };
 
         startHttpRequestForStringResponse(CWA_URL+"/"+getStringFromDate(date)+"/"+"hour", responseListener, localErrorResponseListener);
@@ -147,7 +146,7 @@ public class DKDownload {
         queue.add(byteArrayRequest);
     }
 
-    public void dkFileRequest(URL url, MainActivity.processUrlListCallbackCommand callbackCommand,
+    public void dkFileRequest(URL url, MainActivity.downloadCompleteCallbackCommand callbackCommand,
                               CallbackCommand errorResponseCallbackCommand) {
         FileResponse fileResponse = new FileResponse();
         fileResponse.url = url;
