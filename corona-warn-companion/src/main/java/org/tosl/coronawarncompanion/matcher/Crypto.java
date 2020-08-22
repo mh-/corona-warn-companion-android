@@ -36,12 +36,17 @@ public class Crypto {
     private static final int intervalLengthMinutes = 10;
     private static final int tekRollingPeriod = 144;
     private AesEcbEncryptor encryptor;
+
+    private final ArrayList<RpiWithInterval> rpiBuffer;  // only one is required per Crypto object
+    // (But this can't be static, otherwise there's a concurrency problem when MainActivity is recreated.)
+
     public Crypto() {
         try {
             this.encryptor = new AesEcbEncryptor();
         } catch (CryptoException e) {
             e.printStackTrace();
         }
+        rpiBuffer = new ArrayList<>(144);
     }
 
     public static byte[] encodedEnIntervalNumber(int enin) {
@@ -100,10 +105,8 @@ public class Crypto {
         }
     }
 
-    private static final ArrayList<RpiWithInterval> rpis = new ArrayList<>(144);
-
     public ArrayList<RpiWithInterval> createListOfRpisForIntervalRange(byte[] rpiKey, int startIntervalNumber, int intervalCount) {
-        rpis.clear();
+        rpiBuffer.clear();
         byte[] padded_data = {0x45, 0x4E, 0x2D, 0x52, 0x50, 0x49, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
         try {
             encryptor.init(rpiKey);
@@ -114,12 +117,12 @@ public class Crypto {
                 padded_data[15] = (byte) ((interval&0xff000000)>>24);
 
                 RpiWithInterval rpiWithInterval = new RpiWithInterval(encryptor.encrypt(padded_data), interval);
-                rpis.add(rpiWithInterval);
+                rpiBuffer.add(rpiWithInterval);
             }
         } catch (CryptoException e) {
             e.printStackTrace();
         }
-        return rpis;
+        return rpiBuffer;
     }
 
     public static byte[] decryptAem(byte[] aemKey, byte[] aem, byte[] rpi) {
