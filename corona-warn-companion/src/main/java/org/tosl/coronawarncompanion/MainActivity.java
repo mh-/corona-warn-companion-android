@@ -535,9 +535,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void presentMatchResults() {
-        if ((rpiList != null) && (diagnosisKeysList != null)) {
-            MatchEntryContent matchEntryContent = CWCApplication.getMatchEntryContent();
-            int numberOfMatches = matchEntryContent.matchEntries.getTotalMatchingDkCount();
+        MatchEntryContent matchEntryContent = CWCApplication.getMatchEntryContent();
+        if ((rpiList != null) && (diagnosisKeysList != null) && (matchEntryContent != null)) {
+            int numberOfMatches = 0;
+            if (matchEntryContent.matchEntries != null) {
+                numberOfMatches = matchEntryContent.matchEntries.getTotalMatchingDkCount();
+            }
             Resources res = getResources();
             if (numberOfMatches > 0) {
                 textViewMatches.setText(res.getQuantityString(R.plurals.title_number_of_matches_found, numberOfMatches, numberOfMatches));
@@ -572,6 +575,8 @@ public class MainActivity extends AppCompatActivity {
             if (appModeShouldToggle) {
                 toggleAppMode();
             }
+        } else {
+            showMatchingNotPossible();
         }
     }
 
