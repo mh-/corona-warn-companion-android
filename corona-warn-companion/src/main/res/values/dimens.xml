@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="text_margin">8dp</dimen>
+    <dimen name="details_text_view_3_height">22sp</dimen>
+    <dimen name="details_text_view_3_height_disabled">0.1dp</dimen>
 </resources>

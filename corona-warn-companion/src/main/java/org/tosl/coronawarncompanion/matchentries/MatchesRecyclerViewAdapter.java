@@ -176,6 +176,25 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
                 matchEntryDetails.dataPoints, matchEntryDetails.dotColors,
                 minTimestampLocalTZDay0, maxTimestampLocalTZDay0, mContext);
         holder.mChartView.getLineData().getDataSetByIndex(1).setVisible(this.showAllScans);
+
+        if (this.showAllScans) {
+            String txPowerStr;
+            if (matchEntryDetails.minTxPower == matchEntryDetails.maxTxPower) {
+                txPowerStr = String.valueOf(matchEntryDetails.minTxPower);
+            } else {
+                txPowerStr = String.valueOf(matchEntryDetails.minTxPower) + ".." +
+                        String.valueOf(matchEntryDetails.maxTxPower);
+            }
+            holder.mTextView3.setText(this.mContext.getResources().getString(R.string.tx_power, txPowerStr));
+            ViewGroup.LayoutParams params = (ViewGroup.LayoutParams) holder.mTextView3.getLayoutParams();
+            params.height = this.mContext.getResources().getDimensionPixelSize(R.dimen.details_text_view_3_height);
+            holder.mTextView3.setLayoutParams(params);
+        } else {
+            holder.mTextView3.setText("");
+            ViewGroup.LayoutParams params = (ViewGroup.LayoutParams) holder.mTextView3.getLayoutParams();
+            params.height = this.mContext.getResources().getDimensionPixelSize(R.dimen.details_text_view_3_height_disabled);
+            holder.mTextView3.setLayoutParams(params);
+        }
     }
 
     public static class MatchEntryDetails {
@@ -184,6 +203,8 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         public ArrayList<Entry> dataPointsMinAttenuation;
         public ArrayList<Integer> dotColorsMinAttenuation;
         public int minAttenuation;
+        public byte minTxPower;
+        public byte maxTxPower;
         public int minTimestampLocalTZDay0;
         public int maxTimestampLocalTZDay0;
         public MatchEntryDetails() {
@@ -205,6 +226,8 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         result.dataPointsMinAttenuation = new ArrayList<>();
         result.dotColorsMinAttenuation = new ArrayList<>();
         result.minAttenuation = Integer.MAX_VALUE;
+        result.minTxPower = Byte.MAX_VALUE;
+        result.maxTxPower = Byte.MIN_VALUE;
 
         TreeMap<Integer, Integer> dataPointsInterimMap = new TreeMap<>();
 
@@ -230,6 +253,12 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
                 dataPointsInterimMap.put(timestampLocalTZDay0, attenuation);
 
                 // if found, store max/min values
+                if (result.minTxPower > txPower) {
+                    result.minTxPower = txPower;
+                }
+                if (result.maxTxPower < txPower) {
+                    result.maxTxPower = txPower;
+                }
                 if (result.minAttenuation > attenuation) {
                     result.minAttenuation = attenuation;
                 }
@@ -458,6 +487,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public final TextView mTextView1;
         public final TextView mTextView2;
+        public final TextView mTextView3;
         public final LineChart mChartView;
         public Pair<DiagnosisKeysProtos.TemporaryExposureKey, MatchEntryContent.GroupedByDkMatchEntries> mMatchEntriesPair;
 
@@ -465,6 +495,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
             super(view);
             mTextView1 = view.findViewById(R.id.textView1);
             mTextView2 = view.findViewById(R.id.textView2);
+            mTextView3 = view.findViewById(R.id.textView3);
             mChartView = view.findViewById(R.id.chart);
         }
 
