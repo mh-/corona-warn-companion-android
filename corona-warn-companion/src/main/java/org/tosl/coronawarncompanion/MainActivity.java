@@ -18,12 +18,15 @@
 
 package org.tosl.coronawarncompanion;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -160,12 +163,7 @@ public class MainActivity extends AppCompatActivity {
                 editor.putInt(getString(R.string.saved_app_mode), desiredAppMode.ordinal());
                 editor.apply();
             }
-            if (backgroundThreadsRunning) {  // don't do recreate() while background threads are running
-                appModeShouldToggle = true;
-                backgroundThreadsShouldStop = true;
-            } else {
-                toggleAppMode();
-            }
+            toggleAppModeOnNextPossibleOccasion();
             return true;
         } else if (item.getItemId() == R.id.osslicenses) {
             startActivity(new Intent(this, DisplayLicensesActivity.class));
@@ -175,7 +173,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void toggleAppMode() {
+    private void toggleAppModeOnNextPossibleOccasion() {
+        if (backgroundThreadsRunning) {  // don't do recreate() while background threads are running
+            appModeShouldToggle = true;
+            backgroundThreadsShouldStop = true;
+        } else {
+            toggleAppModeNow();
+        }
+    }
+
+    private void toggleAppModeNow() {
         appModeShouldToggle = false;
         CWCApplication.appMode = desiredAppMode;
         recreate();
@@ -362,6 +369,16 @@ public class MainActivity extends AppCompatActivity {
     private void showMatchingNotPossible() {
         textViewMatches.setText(getString(R.string.title_matching_not_possible));
         chartMatches.switchPleaseWaitAnimationOff();
+    }
+
+    @Override
+    public void onRequestPermissionsResult (int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == 0 && permissions.length == 1 &&
+                permissions[0].equals(Manifest.permission.WRITE_EXTERNAL_STORAGE) &&
+                grantResults[0] == PackageManager.PERMISSION_GRANTED)
+        {
+            toggleAppModeOnNextPossibleOccasion();
+        }
     }
 
     public class availableDatesResponseCallbackCommand implements DKDownload.CallbackCommand {
@@ -573,7 +590,7 @@ public class MainActivity extends AppCompatActivity {
             // or tap on a match to reach the DisplayDetailsActivity.
 
             if (appModeShouldToggle) {
-                toggleAppMode();
+                toggleAppModeNow();
             }
         } else {
             showMatchingNotPossible();
