@@ -22,7 +22,6 @@ import java.io.FileFilter;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
-import static org.tosl.coronawarncompanion.tools.Utils.byteArrayToHexString;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromSeconds;
 import static org.tosl.coronawarncompanion.tools.Utils.hexStringToByteArray;
 

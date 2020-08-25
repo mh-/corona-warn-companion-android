@@ -485,7 +485,11 @@ public class MainActivity extends AppCompatActivity {
         List<BarEntry> dataPoints2 = new ArrayList<>();
 
         for (Integer ENIN : diagnosisKeyCountMap.keySet()) {
-            int numEntries = diagnosisKeyCountMap.get(ENIN);
+            Integer numEntriesInteger = diagnosisKeyCountMap.get(ENIN);
+            int numEntries = 0;
+            if (numEntriesInteger != null) {
+                numEntries = numEntriesInteger;
+            }
             //Log.d(TAG, "Datapoint: " + ENIN + ": " + numEntries);
             dataPoints2.add(new BarEntry(getDaysSinceEpochFromENIN(ENIN), numEntries));
         }
@@ -572,9 +576,11 @@ public class MainActivity extends AppCompatActivity {
             int total = 0;
             for (Integer daysSinceEpochLocalTZ : rpiListDaysSinceEpochLocalTZ) {
                 int dailyCount = 0;
-                MatchEntryContent.DailyMatchEntries dailyMatchEntries = matchEntryContent.matchEntries.getDailyMatchEntries(daysSinceEpochLocalTZ);
-                if (dailyMatchEntries != null) {
-                    dailyCount = dailyMatchEntries.getDailyMatchingDkCount();
+                if (matchEntryContent.matchEntries != null) {
+                    MatchEntryContent.DailyMatchEntries dailyMatchEntries = matchEntryContent.matchEntries.getDailyMatchEntries(daysSinceEpochLocalTZ);
+                    if (dailyMatchEntries != null) {
+                        dailyCount = dailyMatchEntries.getDailyMatchingDkCount();
+                    }
                 }
                 //Log.d(TAG, "Datapoint: " + daysSinceEpochLocalTZ + ": " + count);
                 dataPoints3.add(new BarEntry(daysSinceEpochLocalTZ, dailyCount));

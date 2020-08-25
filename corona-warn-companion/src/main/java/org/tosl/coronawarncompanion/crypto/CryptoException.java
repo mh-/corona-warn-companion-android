@@ -24,7 +24,6 @@ package org.tosl.coronawarncompanion.crypto;
 /**
  * Exception related to cryptographic operations in exposure notification.
  */
-@SuppressWarnings("unused")
 public class CryptoException extends Exception {
     public CryptoException() {
         super();
