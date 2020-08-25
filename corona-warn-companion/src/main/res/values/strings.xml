@@ -50,7 +50,7 @@
     <string name="title_activity_further_licenses">Further OSS Licenses</string>
     <string name="error_app_mode_switching_not_possible">Sorry, at the moment we cannot switch modes.\nPlease wait until all operations have finished.</string>
     <string name="error_no_rpis_normal_mode">ERROR!\nNo encounters could be extracted.\nAre Exposure Notifications enabled?\nDid you grant ROOT rights to this app?</string>
-    <string name="error_no_rpis_ramble_mode">ERROR!\nNo encounters could be extracted.\nDid you allow file access?\nDid you export a RaMBLE database? If yes, the database is probably broken.</string>
+    <string name="error_no_rpis_ramble_mode">ERROR!\nNo encounters could be extracted.\nDid you allow file access?\nDid you export a RaMBLE database? If yes, the database is probably empty or broken.</string>
     <string name="error_download">ERROR!\nDownload of Diagnosis Keys failed.\nIs your internet connection working?</string>
     <string name="title_activity_about">About this app</string>
     <string name="about_version">Version\n%s (%d, %s)</string>

@@ -264,7 +264,7 @@ public class MainActivity extends AppCompatActivity {
             throw new IllegalStateException();
         }
 
-        if (rpiList != null) {  // check that getting the RPIs didn't fail, e.g. because we didn't get root rights
+        if ((rpiList != null) && (!rpiList.isEmpty())) {  // check that getting the RPIs didn't fail, e.g. because we didn't get root rights
             SortedSet<Integer> rpiListDaysSinceEpochLocalTZ = rpiList.getAvailableDaysSinceEpochLocalTZ();
             List<BarEntry> dataPoints1 = new ArrayList<>();
 
@@ -497,7 +497,7 @@ public class MainActivity extends AppCompatActivity {
         chartDks.setData(dataPoints2, normalBarColor,"DKs", false, this);
         chartDks.setFormatAndRefresh(this);
 
-        if (rpiList != null) {
+        if ((rpiList != null) && (!rpiList.isEmpty())) {
             textViewMatches.setText(getString(R.string.title_matching_not_done_yet));
             startMatching(diagnosisKeysList);
         }

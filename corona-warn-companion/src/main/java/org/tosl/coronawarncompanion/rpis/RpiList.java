@@ -236,4 +236,8 @@ public class RpiList {
     public SortedSet<Integer> getAvailableDaysSinceEpochLocalTZ() {
         return (SortedSet<Integer>) mapOfDailyCountsLocalTZ.keySet();
     }
+
+    public boolean isEmpty() {
+        return mapOfDailyCountsLocalTZ.isEmpty();
+    }
 }
