@@ -26,13 +26,18 @@ apply plugin: 'com.google.android.gms.oss-licenses-plugin'
 def getPassword(String keyChain) {
     def stdout = new ByteArrayOutputStream()
     def stderr = new ByteArrayOutputStream()
-    exec {
-        commandLine 'security', '-q', 'find-generic-password', '-gl', keyChain
-        standardOutput = stdout
-        errorOutput = stderr
-        ignoreExitValue true
+    try {
+        exec {
+            commandLine 'security', '-q', 'find-generic-password', '-gl', keyChain
+            standardOutput = stdout
+            errorOutput = stderr
+            ignoreExitValue true
+        }
+        return (stderr.toString().trim() =~ /password: "(.*)"/)[0][1]
+    } catch (Exception e) {
+        logger.warn("getting signing password failed, probably not running on macOS: ${e.getMessage()}")
+        return 'dummy'
     }
-    (stderr.toString().trim() =~ /password: "(.*)"/)[0][1]
 }
 
 android {
