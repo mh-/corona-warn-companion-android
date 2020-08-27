@@ -43,6 +43,8 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.highlight.Highlight;
@@ -50,9 +52,12 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
 import org.tosl.coronawarncompanion.barcharts.BarChartSync;
 import org.tosl.coronawarncompanion.barcharts.CwcBarChart;
-import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysImport;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
-import org.tosl.coronawarncompanion.dkdownload.DKDownload;
+import org.tosl.coronawarncompanion.dkdownload.DKDownloadCountry;
+import org.tosl.coronawarncompanion.dkdownload.DKDownloadGermany;
+import org.tosl.coronawarncompanion.dkdownload.DKDownloadPoland;
+import org.tosl.coronawarncompanion.dkdownload.DKDownloadSwitzerland;
+import org.tosl.coronawarncompanion.dkdownload.DKDownloadUtils;
 import org.tosl.coronawarncompanion.gmsreadout.ContactDbOnDisk;
 import org.tosl.coronawarncompanion.ramblereadout.RambleDbOnDisk;
 import org.tosl.coronawarncompanion.rpis.RpiList;
@@ -66,21 +71,21 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
+
+import io.reactivex.rxjava3.core.Single;
 
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.DEMO_MODE;
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.NORMAL_MODE;
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.RAMBLE_MODE;
 import static org.tosl.coronawarncompanion.CWCApplication.backgroundThreadsShouldStop;
 import static org.tosl.coronawarncompanion.CWCApplication.backgroundThreadsRunning;
-import static org.tosl.coronawarncompanion.dkdownload.Unzip.getUnzippedBytesFromZipFileBytes;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysSinceEpochFromENIN;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromMillis;
 import static org.tosl.coronawarncompanion.tools.Utils.getENINFromDate;
@@ -98,12 +103,7 @@ public class MainActivity extends AppCompatActivity {
     private RpiList rpiList = null;
     private Date maxDate = null;
     private Date minDate = null;
-    private Date currentDate;  // usually the same as maxDate
 
-    private DKDownload diagnosisKeysDownload;
-    private LinkedList<URL> diagnosisKeysUrls;
-    private int numDiagnosisKeysUrls;
-    private ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList;
     @SuppressWarnings("SpellCheckingInspection")
     private final int normalBarColor = Color.parseColor("#8CEAFF");
     private final int matchBarColor = Color.parseColor("red");
@@ -309,12 +309,17 @@ public class MainActivity extends AppCompatActivity {
         // 2nd Section: Diagnosis Keys
 
         if (CWCApplication.appMode == NORMAL_MODE || CWCApplication.appMode == RAMBLE_MODE) {
-            diagnosisKeysList = new ArrayList<>();
-            diagnosisKeysDownload = new DKDownload(this, diagnosisKeysList);
-            diagnosisKeysUrls = new LinkedList<>();
-            diagnosisKeysDownload.availableDatesRequest(new availableDatesResponseCallbackCommand(),
-                    new errorResponseCallbackCommand());
-            // (the rest is done asynchronously in callback functions)
+            RequestQueue queue = Volley.newRequestQueue(this);
+            List<DKDownloadCountry> dkDownloadCountries = new ArrayList<>();
+            dkDownloadCountries.add(new DKDownloadGermany());
+            dkDownloadCountries.add(new DKDownloadSwitzerland());
+            dkDownloadCountries.add(new DKDownloadPoland());
+            DKDownloadUtils.getDKsForCountries(context, queue, minDate, dkDownloadCountries)
+                    .subscribe(this::processDownloadedDiagnosisKeys, error -> {
+                        Log.e(TAG, "Error downloading diagnosis keys: " + error);
+                        showDownloadError();
+                        showMatchingNotPossible();
+                    });
         } else if (CWCApplication.appMode == DEMO_MODE) {
             try {
                 InputStream inputStream = getAssets().open("demo_dks.zip");
@@ -324,25 +329,12 @@ public class MainActivity extends AppCompatActivity {
                 while ((bytesRead = inputStream.read(buffer)) != -1) {
                     output.write(buffer, 0, bytesRead);
                 }
-                DKDownload.FileResponse response = new DKDownload.FileResponse();
-                response.url = new URL("https://tosl.org/demo_dks.zip");
-                response.fileBytes = output.toByteArray();
-
-                diagnosisKeysList = new ArrayList<>();
-                numDiagnosisKeysUrls = 1;
-                new downloadCompleteCallbackCommand().execute(response, diagnosisKeysList);
+                processDownloadedDiagnosisKeys(DKDownloadUtils.parseBytesToTeks(context, output.toByteArray()));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } else {
             throw new IllegalStateException();
-        }
-    }
-
-    public class errorResponseCallbackCommand implements DKDownload.CallbackCommand {
-        public void execute(Object data, ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList) {
-            showDownloadError();
-            showMatchingNotPossible();
         }
     }
 
@@ -381,82 +373,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public class availableDatesResponseCallbackCommand implements DKDownload.CallbackCommand {
-        public void execute(Object data, ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList) {
-            // get Daily Diagnosis Keys URLs for the previous days
-            @SuppressWarnings("unchecked") LinkedList<Date> availableDates = (LinkedList<Date>) data;
-            for (Date date : availableDates) {
-                if (date.compareTo(minDate) >= 0) {  // date >= minDate
-                    diagnosisKeysUrls.add(diagnosisKeysDownload.getDailyDKsURLForDate(date));
-                }
-            }
-            if (availableDates.size() > 0) {
-                // get Hourly Diagnosis Keys URLs for the current day
-                Calendar c = Calendar.getInstance();
-                c.setTime(availableDates.getLast());
-                c.add(Calendar.DATE, 1);
-                currentDate = c.getTime();
-                diagnosisKeysDownload.availableHoursForDateRequest(currentDate, new availableHoursResponseCallbackCommand());
-            } else {
-                showDownloadError();
-            }
-        }
-    }
 
-    public class availableHoursResponseCallbackCommand implements DKDownload.CallbackCommand {
-        public void execute(Object data, ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList) {
-            // get Hourly Diagnosis Keys URLs for the current day
-            @SuppressWarnings("unchecked") LinkedList<String> availableHours = (LinkedList<String>) data;
-            for (String hour : availableHours) {
-                diagnosisKeysUrls.add(diagnosisKeysDownload.getHourlyDKsURLForDateAndHour(currentDate, hour));
-            }
-            // Now we have all Diagnosis Keys URLs, let's process them
-            numDiagnosisKeysUrls = diagnosisKeysUrls.size();
-            processUrlList();
-        }
-    }
-
-    private void processUrlList() {
-        if (numDiagnosisKeysUrls > 0) {
-            for (URL url : diagnosisKeysUrls) {
-                Log.d(TAG, "Going to download: " + url);
-                diagnosisKeysDownload.dkFileRequest(url, new downloadCompleteCallbackCommand(),
-                        new errorResponseCallbackCommand());
-            }
-        } else {
-            processDownloadedDiagnosisKeys(diagnosisKeysList);
-        }
-    }
-
-    public class downloadCompleteCallbackCommand implements DKDownload.CallbackCommand {
-        public void execute(Object data, ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList) {
-            DKDownload.FileResponse fileResponse = (DKDownload.FileResponse) data;
-            Log.d(TAG, "Download complete: " + fileResponse.url);
-
-            // unzip the data
-            byte[] exportDotBinBytes = {};
-            try {
-                exportDotBinBytes = getUnzippedBytesFromZipFileBytes(fileResponse.fileBytes, "export.bin");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            DiagnosisKeysImport diagnosisKeysImport = new DiagnosisKeysImport(exportDotBinBytes, getApplicationContext());
-            List<DiagnosisKeysProtos.TemporaryExposureKey> dkList = diagnosisKeysImport.getDiagnosisKeys();
-            if (dkList != null) {
-                Log.d(TAG, "Number of keys in this file: " + dkList.size());
-                diagnosisKeysList.addAll(dkList);
-            }
-
-            numDiagnosisKeysUrls--;
-            Log.d(TAG, "Downloads left: " + numDiagnosisKeysUrls);
-            if (numDiagnosisKeysUrls <= 0) {  // all files have been downloaded
-                processDownloadedDiagnosisKeys(diagnosisKeysList);
-            }
-        }
-    }
-
-    private void processDownloadedDiagnosisKeys(ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList) {
+    private void processDownloadedDiagnosisKeys(List<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList) {
         // Count the downloaded Diagnosis Keys
         Log.d(TAG, "Number of keys that have been downloaded: " + diagnosisKeysList.size());
 
@@ -506,7 +424,7 @@ public class MainActivity extends AppCompatActivity {
     public Handler uiThreadHandler;
     public HandlerThread backgroundMatcher;
 
-    private void startMatching(ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList) {
+    private void startMatching(List<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList) {
         backgroundThreadsRunning = true;  // required so that DEMO_MODE toggle can safely stop the background threads
         backgroundThreadsShouldStop = false;
 
@@ -526,10 +444,10 @@ public class MainActivity extends AppCompatActivity {
 
     private class BackgroundMatching implements Runnable {
         private final MainActivity mainActivity;
-        private final ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList;
+        private final List<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList;
 
         BackgroundMatching(MainActivity theMainActivity,
-                           ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList) {
+                           List<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList) {
             mainActivity = theMainActivity;
             this.diagnosisKeysList = diagnosisKeysList;
         }
@@ -557,7 +475,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void presentMatchResults() {
         MatchEntryContent matchEntryContent = CWCApplication.getMatchEntryContent();
-        if ((rpiList != null) && (diagnosisKeysList != null) && (matchEntryContent != null)) {
+        if ((rpiList != null) && (matchEntryContent != null)) {
             int numberOfMatches = 0;
             if (matchEntryContent.matchEntries != null) {
                 numberOfMatches = matchEntryContent.matchEntries.getTotalMatchingDkCount();

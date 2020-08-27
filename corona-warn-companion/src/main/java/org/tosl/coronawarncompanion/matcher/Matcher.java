@@ -30,6 +30,7 @@ import org.tosl.coronawarncompanion.rpis.RpiList;
 import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.tosl.coronawarncompanion.CWCApplication.backgroundThreadsShouldStop;
 import static org.tosl.coronawarncompanion.matcher.Crypto.decryptAem;
@@ -58,11 +59,11 @@ public class Matcher {
     }
 
     private final RpiList rpiList;
-    private final ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList;
+    private final List<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList;
 
     final int timeZoneOffsetSeconds;
 
-    public Matcher(RpiList rpis, ArrayList<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeys,
+    public Matcher(RpiList rpis, List<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeys,
                    MatchEntryContent matchEntryContent) {
         this.rpiList = rpis;
         this.diagnosisKeysList = diagnosisKeys;
