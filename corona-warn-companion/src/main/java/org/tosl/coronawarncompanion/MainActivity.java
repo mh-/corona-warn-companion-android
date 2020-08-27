@@ -67,7 +67,6 @@ import org.tosl.coronawarncompanion.matcher.Matcher;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -77,9 +76,6 @@ import java.util.Locale;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
-
-import io.reactivex.rxjava3.core.Single;
 
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.DEMO_MODE;
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.NORMAL_MODE;
@@ -314,6 +310,7 @@ public class MainActivity extends AppCompatActivity {
             dkDownloadCountries.add(new DKDownloadGermany());
             dkDownloadCountries.add(new DKDownloadSwitzerland());
             dkDownloadCountries.add(new DKDownloadPoland());
+            //noinspection ResultOfMethodCallIgnored
             DKDownloadUtils.getDKsForCountries(context, queue, minDate, dkDownloadCountries)
                     .subscribe(this::processDownloadedDiagnosisKeys, error -> {
                         Log.e(TAG, "Error downloading diagnosis keys: " + error);

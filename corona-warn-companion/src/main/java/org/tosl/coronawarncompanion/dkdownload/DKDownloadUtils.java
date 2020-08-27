@@ -31,6 +31,7 @@ public class DKDownloadUtils {
         return Single.zip(singleList, results -> {
             List<URL> urlList = new ArrayList<>();
             for (Object result : results) {
+                //noinspection unchecked
                 urlList.addAll((List<URL>) result);
             }
             return urlList;
