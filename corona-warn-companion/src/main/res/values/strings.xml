@@ -3,8 +3,8 @@
     <string name="title_extracting_encounters">Extracting encounters…</string>
     <string name="title_rpis_extracted" tools:ignore="PluralsCandidate">%d encounters scanned (%s-%s).</string>
     <string name="title_no_rpis_extracted">No encounters found.</string>
-    <string name="title_diagnosis_keys_downloading">Downloading diagnosis keys…</string>
-    <string name="title_diagnosis_keys_downloaded" tools:ignore="PluralsCandidate">%d diagnosis keys downloaded."</string>
+    <string name="title_diagnosis_keys_downloading">Downloading diagnosis keys… (%s)</string>
+    <string name="title_diagnosis_keys_downloaded" tools:ignore="PluralsCandidate">%d diagnosis keys downloaded (%s)."</string>
     <string name="title_diagnosis_keys_download_failed">Download failed.</string>
     <string name="title_matching_not_done_yet">Matching in progress…</string>
     <string name="title_matching_not_done_yet_with_progress" tools:ignore="PluralsCandidate">Matching in progress… %1$d%% (%2$d found)</string>
@@ -57,4 +57,14 @@
     <string name="error_download_invalid_key_file_header">ERROR!\nDownloaded Diagnosis Keys file starts with incorrect header!</string>
     <string name="saved_app_mode" translatable="false">APP_MODE</string>
     <string name="tx_power">TX Power reported by sender: %s dB</string>
+    <string name="menu_entry_countries_sub_menu">Countries</string>
+    <string name="country_germany">🇩🇪 Germany</string>
+    <string name="flag_germany" translatable="false">🇩🇪</string>
+    <string name="saved_germany_active" translatable="false">DE</string>
+    <string name="country_poland">🇵🇱 Poland</string>
+    <string name="flag_poland" translatable="false">🇵🇱</string>
+    <string name="saved_poland_active" translatable="false">PL</string>
+    <string name="country_switzerland">🇨🇭 Switzerland</string>
+    <string name="flag_switzerland" translatable="false">🇨🇭</string>
+    <string name="saved_switzerland_active" translatable="false">CH</string>
 </resources>

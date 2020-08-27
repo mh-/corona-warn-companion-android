@@ -3,8 +3,8 @@
     <string name="title_extracting_encounters">Begegnungen auslesen…</string>
     <string name="title_rpis_extracted">%d Begegnungen erfasst (%s-%s).</string>
     <string name="title_no_rpis_extracted">Keine Begegnungen gefunden.</string>
-    <string name="title_diagnosis_keys_downloading">Diagnoseschlüssel herunterladen…</string>
-    <string name="title_diagnosis_keys_downloaded">%d Diagnoseschlüssel heruntergeladen.</string>
+    <string name="title_diagnosis_keys_downloading">Diagnoseschlüssel herunterladen… (%s)</string>
+    <string name="title_diagnosis_keys_downloaded">%d Diagnoseschlüssel heruntergeladen (%s).</string>
     <string name="title_diagnosis_keys_download_failed">Keine Diagnoseschlüssel heruntergeladen.</string>
     <string name="title_matching_not_done_yet">Abgleich wird erstellt…</string>
     <string name="title_matching_not_done_yet_with_progress">Abgleich wird erstellt… %1$d%% (%2$d gefunden)</string>
@@ -56,4 +56,8 @@
     <string name="about_version">Version\n%s (%d, %s)</string>
     <string name="error_download_invalid_key_file_header">FEHLER!\nEine heruntergeladene Diagnoseschlüssel-Datei beginnt nicht mit der erwarteten Zeichenfolge!</string>
     <string name="tx_power">Gemeldete Sendeleistung: %s dB</string>
+    <string name="menu_entry_countries_sub_menu">Länder</string>
+    <string name="country_germany">🇩🇪 Deutschland</string>
+    <string name="country_poland">🇵🇱 Polen</string>
+    <string name="country_switzerland">🇨🇭 Schweiz</string>
 </resources>

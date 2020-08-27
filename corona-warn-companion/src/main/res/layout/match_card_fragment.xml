@@ -15,7 +15,7 @@
         app:layout_constraintGuide_percent="0.5" />
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/textViewMainText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"
@@ -29,16 +29,16 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/textViewTransmissionRisk"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="4dp"
         android:background="?android:attr/colorBackgroundFloating"
         android:textColor="?android:attr/textColorPrimary"
         android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="@+id/textView1"
+        app:layout_constraintEnd_toEndOf="@+id/textViewMainText"
         app:layout_constraintStart_toStartOf="@+id/guideline"
-        app:layout_constraintTop_toTopOf="@+id/textView1" />
+        app:layout_constraintTop_toTopOf="@+id/textViewMainText" />
 
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/chart"
@@ -49,11 +49,11 @@
         android:textColor="?android:attr/textColorPrimary"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView1"
-        app:layout_constraintBottom_toTopOf="@+id/textView3" />
+        app:layout_constraintTop_toBottomOf="@+id/textViewMainText"
+        app:layout_constraintBottom_toTopOf="@+id/textViewTxPower" />
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/textViewTxPower"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"

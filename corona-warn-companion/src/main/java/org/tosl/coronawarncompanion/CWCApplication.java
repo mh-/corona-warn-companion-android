@@ -19,6 +19,7 @@
 package org.tosl.coronawarncompanion;
 
 import android.app.Application;
+import android.content.Context;
 
 import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
 
@@ -40,6 +41,24 @@ public class CWCApplication extends Application {
 
     public static boolean backgroundThreadsRunning = false;
     public static boolean backgroundThreadsShouldStop = false;
+
+    public static boolean downloadKeysFromGermany;
+    public static boolean downloadKeysFromPoland;
+    public static boolean downloadKeysFromSwitzerland;
+    public static int getNumberOfActiveCountries() {
+        int num = 0;
+        if (downloadKeysFromGermany) num++;
+        if (downloadKeysFromPoland) num++;
+        if (downloadKeysFromSwitzerland) num++;
+        return num;
+    }
+    public static String getFlagsString(Context context) {
+        StringBuilder sb = new StringBuilder();
+        if (downloadKeysFromGermany) {sb.append(context.getResources().getString(R.string.flag_germany));}
+        if (downloadKeysFromPoland) {sb.append(context.getResources().getString(R.string.flag_poland));}
+        if (downloadKeysFromSwitzerland) {sb.append(context.getResources().getString(R.string.flag_switzerland));}
+        return sb.toString();
+    }
 
     @Override
     public void onCreate() {

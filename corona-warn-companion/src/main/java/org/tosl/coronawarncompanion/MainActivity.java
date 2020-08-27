@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     public static final String EXTRA_MESSAGE_DAY = "org.tosl.coronawarncompanion.DAY_MESSAGE";
     public static final String EXTRA_MESSAGE_COUNT = "org.tosl.coronawarncompanion.COUNT_MESSAGE";
-    private static boolean appModeShouldToggle = false;
+    private static boolean mainActivityShouldBeRecreated = false;
     private static CWCApplication.AppModeOptions desiredAppMode;
     private RpiList rpiList = null;
     private Date maxDate = null;
@@ -126,6 +126,9 @@ public class MainActivity extends AppCompatActivity {
         } if (CWCApplication.appMode == RAMBLE_MODE) {
             menu.findItem(R.id.ramblemode).setChecked(true);
         }
+        if (CWCApplication.downloadKeysFromGermany) menu.findItem(R.id.germany).setChecked(true);
+        if (CWCApplication.downloadKeysFromPoland) menu.findItem(R.id.poland).setChecked(true);
+        if (CWCApplication.downloadKeysFromSwitzerland) menu.findItem(R.id.switzerland).setChecked(true);
         return true;
     }
 
@@ -159,27 +162,69 @@ public class MainActivity extends AppCompatActivity {
                 editor.putInt(getString(R.string.saved_app_mode), desiredAppMode.ordinal());
                 editor.apply();
             }
-            toggleAppModeOnNextPossibleOccasion();
+            recreateMainActivityOnNextPossibleOccasion();
             return true;
         } else if (item.getItemId() == R.id.osslicenses) {
             startActivity(new Intent(this, DisplayLicensesActivity.class));
             return true;
+        } else if (item.getItemId() == R.id.germany) {
+            boolean desiredNewState = !CWCApplication.downloadKeysFromGermany;
+            //noinspection PointlessBooleanExpression
+            if (desiredNewState==true || CWCApplication.getNumberOfActiveCountries() > 1) {
+                item.setChecked(desiredNewState);
+                CWCApplication.downloadKeysFromGermany = desiredNewState;
+                SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(getString(R.string.saved_germany_active), desiredNewState);
+                editor.apply();
+                recreateMainActivityOnNextPossibleOccasion();
+                return true;
+            }
+            return false;
+        } else if (item.getItemId() == R.id.poland) {
+            boolean desiredNewState = !CWCApplication.downloadKeysFromPoland;
+            //noinspection PointlessBooleanExpression
+            if (desiredNewState==true || CWCApplication.getNumberOfActiveCountries() > 1) {
+                item.setChecked(desiredNewState);
+                CWCApplication.downloadKeysFromPoland = desiredNewState;
+                SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(getString(R.string.saved_poland_active), desiredNewState);
+                editor.apply();
+                recreateMainActivityOnNextPossibleOccasion();
+                return true;
+            }
+            return false;
+        } else if (item.getItemId() == R.id.switzerland) {
+            boolean desiredNewState = !CWCApplication.downloadKeysFromSwitzerland;
+            //noinspection PointlessBooleanExpression
+            if (desiredNewState==true || CWCApplication.getNumberOfActiveCountries() > 1) {
+                item.setChecked(desiredNewState);
+                CWCApplication.downloadKeysFromSwitzerland = desiredNewState;
+                SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(getString(R.string.saved_switzerland_active), desiredNewState);
+                editor.apply();
+                recreateMainActivityOnNextPossibleOccasion();
+                return true;
+            }
+            return false;
         } else {
             return super.onOptionsItemSelected(item);
         }
     }
 
-    private void toggleAppModeOnNextPossibleOccasion() {
+    private void recreateMainActivityOnNextPossibleOccasion() {
         if (backgroundThreadsRunning) {  // don't do recreate() while background threads are running
-            appModeShouldToggle = true;
+            mainActivityShouldBeRecreated = true;
             backgroundThreadsShouldStop = true;
         } else {
-            toggleAppModeNow();
+            recreateMainActivityNow();
         }
     }
 
-    private void toggleAppModeNow() {
-        appModeShouldToggle = false;
+    private void recreateMainActivityNow() {
+        mainActivityShouldBeRecreated = false;
         CWCApplication.appMode = desiredAppMode;
         recreate();
     }
@@ -191,11 +236,22 @@ public class MainActivity extends AppCompatActivity {
         this.context = this;
 
         SharedPreferences sharedPreferences = this.getPreferences(MODE_PRIVATE);
+
+        // get App Mode from SharedPreferences
         int appModeOrdinal = sharedPreferences.getInt(getString(R.string.saved_app_mode), NORMAL_MODE.ordinal());
         try {
             CWCApplication.appMode = CWCApplication.AppModeOptions.values()[appModeOrdinal];
         } catch (ArrayIndexOutOfBoundsException e) {
             CWCApplication.appMode = NORMAL_MODE;
+        }
+        desiredAppMode = CWCApplication.appMode;
+
+        // get the active countries from SharedPreferences
+        CWCApplication.downloadKeysFromGermany = sharedPreferences.getBoolean(getString(R.string.saved_germany_active), true);
+        CWCApplication.downloadKeysFromPoland = sharedPreferences.getBoolean(getString(R.string.saved_poland_active), false);
+        CWCApplication.downloadKeysFromSwitzerland = sharedPreferences.getBoolean(getString(R.string.saved_switzerland_active), false);
+        if (CWCApplication.getNumberOfActiveCountries() < 1) {
+            CWCApplication.downloadKeysFromGermany = true;
         }
 
         ActionBar actionBar = getSupportActionBar();
@@ -237,15 +293,15 @@ public class MainActivity extends AppCompatActivity {
         maxDate = new Date(todayLastMidnightInMillis);
         minDate = new Date(todayLastMidnightInMillis - getMillisFromDays(14));
 
-        textViewRpis = findViewById(R.id.textView1);
-        textViewDks = findViewById(R.id.textView2);
-        textViewMatches = findViewById(R.id.textView3);
+        textViewRpis = findViewById(R.id.textViewRpis);
+        textViewDks = findViewById(R.id.textViewDks);
+        textViewMatches = findViewById(R.id.textViewMatches);
         textViewExtractionError = findViewById(R.id.textViewExtractionError);
         textViewDownloadError = findViewById(R.id.textViewDownloadError);
         BarChartSync barChartSync = new BarChartSync();
-        chartRpis = new CwcBarChart(findViewById(R.id.chart1), findViewById(R.id.progressBar1), barChartSync, this);
-        chartDks = new CwcBarChart(findViewById(R.id.chart2), findViewById(R.id.progressBar2), barChartSync, this);
-        chartMatches = new CwcBarChart(findViewById(R.id.chart3), findViewById(R.id.progressBar3), barChartSync, this);
+        chartRpis = new CwcBarChart(findViewById(R.id.chartRpis), findViewById(R.id.progressBarRpis), barChartSync, this);
+        chartDks = new CwcBarChart(findViewById(R.id.chartDks), findViewById(R.id.progressBarDks), barChartSync, this);
+        chartMatches = new CwcBarChart(findViewById(R.id.chartMatches), findViewById(R.id.progressBarMatches), barChartSync, this);
         chartMatches.getBarChart().setOnChartValueSelectedListener(new Chart3ValueSelectedListener());
 
         // 1st Section: Get RPIs from database (requires root), or from demo database, or from RaMBLE
@@ -304,12 +360,13 @@ public class MainActivity extends AppCompatActivity {
 
         // 2nd Section: Diagnosis Keys
 
+        textViewDks.setText(getString(R.string.title_diagnosis_keys_downloading, CWCApplication.getFlagsString(context)));
         if (CWCApplication.appMode == NORMAL_MODE || CWCApplication.appMode == RAMBLE_MODE) {
             RequestQueue queue = Volley.newRequestQueue(this);
             List<DKDownloadCountry> dkDownloadCountries = new ArrayList<>();
-            dkDownloadCountries.add(new DKDownloadGermany());
-            dkDownloadCountries.add(new DKDownloadSwitzerland());
-            dkDownloadCountries.add(new DKDownloadPoland());
+            if (CWCApplication.downloadKeysFromGermany) dkDownloadCountries.add(new DKDownloadGermany());
+            if (CWCApplication.downloadKeysFromPoland) dkDownloadCountries.add(new DKDownloadPoland());
+            if (CWCApplication.downloadKeysFromSwitzerland) dkDownloadCountries.add(new DKDownloadSwitzerland());
             //noinspection ResultOfMethodCallIgnored
             DKDownloadUtils.getDKsForCountries(context, queue, minDate, dkDownloadCountries)
                     .subscribe(this::processDownloadedDiagnosisKeys, error -> {
@@ -366,7 +423,7 @@ public class MainActivity extends AppCompatActivity {
                 permissions[0].equals(Manifest.permission.WRITE_EXTERNAL_STORAGE) &&
                 grantResults[0] == PackageManager.PERMISSION_GRANTED)
         {
-            toggleAppModeOnNextPossibleOccasion();
+            recreateMainActivityOnNextPossibleOccasion();
         }
     }
 
@@ -395,7 +452,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        textViewDks.setText(getString(R.string.title_diagnosis_keys_downloaded, count));
+        textViewDks.setText(getString(R.string.title_diagnosis_keys_downloaded, count, CWCApplication.getFlagsString(context)));
 
         List<BarEntry> dataPoints2 = new ArrayList<>();
 
@@ -510,8 +567,8 @@ public class MainActivity extends AppCompatActivity {
             // From now on, the user can scroll the charts,
             // or tap on a match to reach the DisplayDetailsActivity.
 
-            if (appModeShouldToggle) {
-                toggleAppModeNow();
+            if (mainActivityShouldBeRecreated) {
+                recreateMainActivityNow();
             }
         } else {
             showMatchingNotPossible();
