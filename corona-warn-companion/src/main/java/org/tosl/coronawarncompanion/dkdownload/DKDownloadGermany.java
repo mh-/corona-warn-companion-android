@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.subjects.AsyncSubject;
 import io.reactivex.rxjava3.subjects.ReplaySubject;
 import io.reactivex.rxjava3.subjects.Subject;
 
@@ -69,7 +70,7 @@ public class DKDownloadGermany implements DKDownloadCountry {
     }
 
     private static Single<List<DateURL>> getDailyUrls(RequestQueue queue, Date minDate) {
-        Subject<List<DateURL>> dailyUrlSubject = ReplaySubject.create();
+        Subject<List<DateURL>> dailyUrlSubject = AsyncSubject.create();
         StringRequest stringRequest = new StringRequest(
                 Request.Method.GET,
                 CWA_URL,
@@ -90,6 +91,7 @@ public class DKDownloadGermany implements DKDownloadCountry {
                         }
                     }
                     dailyUrlSubject.onNext(dailyUrlList);
+                    dailyUrlSubject.onComplete();
                 },
                 dailyUrlSubject::onError
         );
@@ -106,7 +108,7 @@ public class DKDownloadGermany implements DKDownloadCountry {
         c.setTime(dailyDateUrls.get(dailyDateUrls.size() - 1).getDate());
         c.add(Calendar.DATE, 1);
         Date currentDate = c.getTime();
-        Subject<List<URL>> dailyAndHourlyUrlSubject = ReplaySubject.create();
+        Subject<List<URL>> dailyAndHourlyUrlSubject = AsyncSubject.create();
         StringRequest stringRequest = new StringRequest(
                 Request.Method.GET,
                 CWA_URL+"/"+getStringFromDate(currentDate)+"/"+"hour",
@@ -123,6 +125,7 @@ public class DKDownloadGermany implements DKDownloadCountry {
                     }
                     dailyAndHourlyUrls.addAll(hourlyUrls);
                     dailyAndHourlyUrlSubject.onNext(dailyAndHourlyUrls);
+                    dailyAndHourlyUrlSubject.onComplete();
                 },
                 dailyAndHourlyUrlSubject::onError
         );

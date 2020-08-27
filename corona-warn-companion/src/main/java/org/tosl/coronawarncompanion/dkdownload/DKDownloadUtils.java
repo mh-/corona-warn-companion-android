@@ -55,7 +55,7 @@ public class DKDownloadUtils {
                     diagnosisKeysSubject::onError);
             queue.add(byteArrayRequest);
         }
-        return diagnosisKeysSubject.take(diagnosisKeysUrls.size()).reduce(new ArrayList<>(), (accumulated, current) -> {
+        return diagnosisKeysSubject.take(diagnosisKeysUrls.size()).doFinally(diagnosisKeysSubject::onComplete).reduce(new ArrayList<>(), (accumulated, current) -> {
             accumulated.addAll(current);
             return accumulated;
         });
