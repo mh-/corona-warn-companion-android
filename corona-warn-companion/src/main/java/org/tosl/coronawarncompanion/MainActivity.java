@@ -53,6 +53,7 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import org.tosl.coronawarncompanion.barcharts.BarChartSync;
 import org.tosl.coronawarncompanion.barcharts.CwcBarChart;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
+import org.tosl.coronawarncompanion.dkdownload.DKDownloadAustria;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadCountry;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadGermany;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadPoland;
@@ -310,6 +311,7 @@ public class MainActivity extends AppCompatActivity {
             dkDownloadCountries.add(new DKDownloadGermany());
             dkDownloadCountries.add(new DKDownloadSwitzerland());
             dkDownloadCountries.add(new DKDownloadPoland());
+            dkDownloadCountries.add(new DKDownloadAustria());
             //noinspection ResultOfMethodCallIgnored
             DKDownloadUtils.getDKsForCountries(context, queue, minDate, dkDownloadCountries)
                     .subscribe(this::processDownloadedDiagnosisKeys, error -> {
