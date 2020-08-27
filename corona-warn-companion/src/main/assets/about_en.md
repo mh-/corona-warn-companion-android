@@ -29,7 +29,7 @@ Note that 1 means a low and 8 means a high transmission risk.
 
 ### What the app does not do:
 - The app does not process any personal data.
-- The app only accesses the internet for the purpose 2 (see above), i.e. it only downloads data from the official Corona-Warn-Server and does not send any data to other servers.
+- The app only accesses the internet for the purpose 2 (see above), i.e. it only downloads data from the official warning servers and does not send any data to other servers.
 - The app does not show any advertising.
 
 **Note:** This app has only been tested on a few devices so far, so it is possible that it will not work and/or show incorrect results.

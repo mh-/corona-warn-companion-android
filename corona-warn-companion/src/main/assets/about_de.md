@@ -29,7 +29,7 @@ Dabei entspricht 1 einem niedrigen und 8 einem hohen Übertragungsrisiko.
 
 ### Was die App nicht macht:
 - Die App verarbeitet keine personenbezogenen Daten.
-- Die App greift auf das Internet nur zum o.g. Zweck 2 zu, d.h. sie lädt nur Daten vom offiziellen Corona-Warn-Server, und sie sendet keine Daten an andere Server.
+- Die App greift auf das Internet nur zum o.g. Zweck 2 zu, d.h. sie lädt nur Daten von offiziellen Corona-Warn-Servern, und sie sendet keine Daten an andere Server.
 - Die App zeigt keine Werbung.
 
 **Hinweis:**  Diese App wurde bisher nur auf wenigen Geräten getestet, es ist daher möglich, dass sie nicht funktioniert und/oder falsche Ergebnisse anzeigt. 
