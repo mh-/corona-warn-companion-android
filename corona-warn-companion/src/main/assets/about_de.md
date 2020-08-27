@@ -8,15 +8,21 @@ Diese App hilft Dir, Warnungen der offiziellen Corona-Warn-App besser zu versteh
 
 ### Was die App macht:
 1. Die App liest die von Deinem Gerät aufgezeichneten Rolling Proximity IDs aus der Exposure Notifications Datenbank aus (das geht nur mit Root Rechten, weshalb offizielle Exposure Notifications Apps wie die Corona-Warn-App diese Details nicht anzeigen können).
+
    ![-Beispiel Erfasste Begegnungen-](file:///android_asset/rpis_de.png)
    Alternativ kann die App auch eine aus RaMBLE exportierte Datenbank lesen (auch ohne Root Rechte).
+
 2. Die App lädt die Positiv-Schlüssel (Diagnose-Schlüssel, Diagnosis Keys) vom offiziellen Corona-Warn-Server und Servern in anderen Ländern, wie von Dir ausgewählt. Dabei lädt sie für Deutschland die täglich veröffentlichen Schlüssel der letzten Tage und die stündlich veröffentlichten Schlüssel des heutigen Tages. Daher werden möglicherweise andere Informationen als in der offiziellen Corona-Warn-App angezeigt.
+
    ![-Beispiel Positiv-Schlüssel-](file:///android_asset/dks_de.png)
+
 3. Die App gleicht beides ab, um Übereinstimmungen (Risiko-Begegnungen) zu finden.
+
    ![-Beispiel Treffer-](file:///android_asset/matches_de.png)
 
 Wenn Risiko-Begegnungen gefunden wurden, zeigt sie die Details dazu an: 
 Zu welchen Uhrzeiten und mit welcher Funk-Dämpfung (entspricht grob dem Abstand) haben die Begegnungen stattgefunden, und welche Übertragungsrisiko-Stufe hatte die Begegnung.
+
 ![-Beispiel Details-](file:///android_asset/details_de.png)
 
 Dabei entspricht 1 einem niedrigen und 8 einem hohen Übertragungsrisiko.
