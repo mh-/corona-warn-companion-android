@@ -53,6 +53,7 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import org.tosl.coronawarncompanion.barcharts.BarChartSync;
 import org.tosl.coronawarncompanion.barcharts.CwcBarChart;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
+import org.tosl.coronawarncompanion.dkdownload.DKDownloadAustria;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadCountry;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadGermany;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadPoland;
@@ -364,9 +365,12 @@ public class MainActivity extends AppCompatActivity {
         if (CWCApplication.appMode == NORMAL_MODE || CWCApplication.appMode == RAMBLE_MODE) {
             RequestQueue queue = Volley.newRequestQueue(this);
             List<DKDownloadCountry> dkDownloadCountries = new ArrayList<>();
+
             if (CWCApplication.downloadKeysFromGermany) dkDownloadCountries.add(new DKDownloadGermany());
             if (CWCApplication.downloadKeysFromPoland) dkDownloadCountries.add(new DKDownloadPoland());
             if (CWCApplication.downloadKeysFromSwitzerland) dkDownloadCountries.add(new DKDownloadSwitzerland());
+            //if (CWCApplication.downloadKeysFromAustria) dkDownloadCountries.add(new DKDownloadAustria());
+
             //noinspection ResultOfMethodCallIgnored
             DKDownloadUtils.getDKsForCountries(context, queue, minDate, dkDownloadCountries)
                     .subscribe(this::processDownloadedDiagnosisKeys, error -> {
