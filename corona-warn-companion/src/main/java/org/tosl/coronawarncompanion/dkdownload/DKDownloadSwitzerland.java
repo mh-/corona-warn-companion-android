@@ -13,7 +13,7 @@ import io.reactivex.rxjava3.core.Single;
 
 public class DKDownloadSwitzerland implements DKDownloadCountry {
 
-    private static final String DK_URL = "https://www.pt-d.bfs.admin.ch/v1/gaen/exposed/";
+    private static final String DK_URL = "https://www.pt.bfs.admin.ch/v1/gaen/exposed/";
 
     @Override
     public Single<List<URL>> getUrls(RequestQueue queue, Date minDate) {
