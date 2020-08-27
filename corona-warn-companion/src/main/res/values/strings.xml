@@ -67,4 +67,7 @@
     <string name="country_switzerland">🇨🇭 Switzerland</string>
     <string name="flag_switzerland" translatable="false">🇨🇭</string>
     <string name="saved_switzerland_active" translatable="false">CH</string>
+    <string name="country_austria">🇦🇹 Austria</string>
+    <string name="flag_austria" translatable="false">🇦🇹</string>
+    <string name="saved_austria_active" translatable="false">AT</string>
 </resources>

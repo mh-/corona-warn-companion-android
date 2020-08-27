@@ -127,6 +127,7 @@ public class MainActivity extends AppCompatActivity {
         } if (CWCApplication.appMode == RAMBLE_MODE) {
             menu.findItem(R.id.ramblemode).setChecked(true);
         }
+        if (CWCApplication.downloadKeysFromAustria) menu.findItem(R.id.austria).setChecked(true);
         if (CWCApplication.downloadKeysFromGermany) menu.findItem(R.id.germany).setChecked(true);
         if (CWCApplication.downloadKeysFromPoland) menu.findItem(R.id.poland).setChecked(true);
         if (CWCApplication.downloadKeysFromSwitzerland) menu.findItem(R.id.switzerland).setChecked(true);
@@ -168,6 +169,20 @@ public class MainActivity extends AppCompatActivity {
         } else if (item.getItemId() == R.id.osslicenses) {
             startActivity(new Intent(this, DisplayLicensesActivity.class));
             return true;
+        } else if (item.getItemId() == R.id.austria) {
+            boolean desiredNewState = !CWCApplication.downloadKeysFromAustria;
+            //noinspection PointlessBooleanExpression
+            if (desiredNewState==true || CWCApplication.getNumberOfActiveCountries() > 1) {
+                item.setChecked(desiredNewState);
+                CWCApplication.downloadKeysFromAustria = desiredNewState;
+                SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(getString(R.string.saved_austria_active), desiredNewState);
+                editor.apply();
+                recreateMainActivityOnNextPossibleOccasion();
+                return true;
+            }
+            return false;
         } else if (item.getItemId() == R.id.germany) {
             boolean desiredNewState = !CWCApplication.downloadKeysFromGermany;
             //noinspection PointlessBooleanExpression
@@ -248,6 +263,7 @@ public class MainActivity extends AppCompatActivity {
         desiredAppMode = CWCApplication.appMode;
 
         // get the active countries from SharedPreferences
+        CWCApplication.downloadKeysFromAustria = sharedPreferences.getBoolean(getString(R.string.saved_austria_active), false);
         CWCApplication.downloadKeysFromGermany = sharedPreferences.getBoolean(getString(R.string.saved_germany_active), true);
         CWCApplication.downloadKeysFromPoland = sharedPreferences.getBoolean(getString(R.string.saved_poland_active), false);
         CWCApplication.downloadKeysFromSwitzerland = sharedPreferences.getBoolean(getString(R.string.saved_switzerland_active), false);
@@ -366,10 +382,10 @@ public class MainActivity extends AppCompatActivity {
             RequestQueue queue = Volley.newRequestQueue(this);
             List<DKDownloadCountry> dkDownloadCountries = new ArrayList<>();
 
+            if (CWCApplication.downloadKeysFromAustria) dkDownloadCountries.add(new DKDownloadAustria());
             if (CWCApplication.downloadKeysFromGermany) dkDownloadCountries.add(new DKDownloadGermany());
             if (CWCApplication.downloadKeysFromPoland) dkDownloadCountries.add(new DKDownloadPoland());
             if (CWCApplication.downloadKeysFromSwitzerland) dkDownloadCountries.add(new DKDownloadSwitzerland());
-            //if (CWCApplication.downloadKeysFromAustria) dkDownloadCountries.add(new DKDownloadAustria());
 
             //noinspection ResultOfMethodCallIgnored
             DKDownloadUtils.getDKsForCountries(context, queue, minDate, dkDownloadCountries)
