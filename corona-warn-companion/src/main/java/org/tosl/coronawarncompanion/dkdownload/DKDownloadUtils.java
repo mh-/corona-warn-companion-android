@@ -12,7 +12,9 @@ import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.subjects.ReplaySubject;
@@ -23,6 +25,17 @@ import static org.tosl.coronawarncompanion.dkdownload.Unzip.getUnzippedBytesFrom
 public class DKDownloadUtils {
 
     private static final String TAG = "DKDownloadUtils";
+
+    public static Single<List<DiagnosisKeysProtos.TemporaryExposureKey>> getDKsForCountries(Context context, RequestQueue queue, Date minDate, List<DKDownloadCountry> countries) {
+        List<Single<List<URL>>> singleList = countries.stream().map(dkDownloadCountry -> dkDownloadCountry.getUrls(queue, minDate)).collect(Collectors.toList());
+        return Single.zip(singleList, results -> {
+            List<URL> urlList = new ArrayList<>();
+            for (Object result : results) {
+                urlList.addAll((List<URL>) result);
+            }
+            return urlList;
+        }).flatMap(urls -> processUrlList(context, queue, urls));
+    }
 
     public static List<DiagnosisKeysProtos.TemporaryExposureKey> parseBytesToTeks(Context context, byte[] fileBytes) {
         byte[] exportDotBinBytes = {};
@@ -41,16 +54,22 @@ public class DKDownloadUtils {
         return new ArrayList<>();
     }
 
-    public static Single<List<DiagnosisKeysProtos.TemporaryExposureKey>> processUrlList(Context context, RequestQueue queue, List<URL> diagnosisKeysUrls) {
+    private static Single<List<DiagnosisKeysProtos.TemporaryExposureKey>> processUrlList(Context context, RequestQueue queue, List<URL> diagnosisKeysUrls) {
         Subject<List<DiagnosisKeysProtos.TemporaryExposureKey>> diagnosisKeysSubject = ReplaySubject.create();
+
         for (URL url: diagnosisKeysUrls) {
             Log.d(TAG, "Going to download: " + url);
             ByteArrayRequest byteArrayRequest = new ByteArrayRequest(
                     Request.Method.GET,
                     url.toString(),
                     fileBytes -> {
-                        Log.d(TAG, "Download complete: " + url);
-                        diagnosisKeysSubject.onNext(parseBytesToTeks(context, fileBytes));
+                        if (fileBytes.length == 0) {
+                            Log.d(TAG, "Download resulted in 0 bytes: " + url);
+                            diagnosisKeysSubject.onNext(new ArrayList<>());
+                        } else {
+                            Log.d(TAG, "Download complete: " + url);
+                            diagnosisKeysSubject.onNext(parseBytesToTeks(context, fileBytes));
+                        }
                     },
                     diagnosisKeysSubject::onError);
             queue.add(byteArrayRequest);

@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.subjects.AsyncSubject;
-import io.reactivex.rxjava3.subjects.ReplaySubject;
 import io.reactivex.rxjava3.subjects.Subject;
 
 public class DKDownloadGermany implements DKDownloadCountry {
@@ -134,7 +133,7 @@ public class DKDownloadGermany implements DKDownloadCountry {
     }
 
     @Override
-    public Single<List<URL>> getUrls(RequestQueue queue, Date minDate, Date maxDate) {
+    public Single<List<URL>> getUrls(RequestQueue queue, Date minDate) {
         return getDailyUrls(queue, minDate)
                 .flatMap(dailyDateUrls -> getDailyAndHourlyUrls(queue, dailyDateUrls));
     }
