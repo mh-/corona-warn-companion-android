@@ -163,13 +163,13 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         // text += CWCApplication.getAppContext().getResources().getString(R.string.min_attenuation)+": "+minAttenuation+"dB\n";
         // text += "("+byteArrayToHex(dk.getKeyData().toByteArray())+")";
         text += this.mContext.getResources().getString(R.string.distance_shown_as_attenuation)+":";
-        holder.mTextView1.setText(text);
+        holder.mTextViewMainText.setText(text);
 
         text = "";
         if (hasTransmissionRiskLevel) {
             text = this.mContext.getResources().getString(R.string.transmission_risk_level) + ": " + transmissionRiskLevel;
         }
-        holder.mTextView2.setText(text);
+        holder.mTextViewTransmissionRisk.setText(text);
 
         // Graph:
         configureDetailsChart(holder.mChartView, matchEntryDetails.dataPointsMinAttenuation, matchEntryDetails.dotColorsMinAttenuation,
@@ -185,15 +185,15 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
                 txPowerStr = String.valueOf(matchEntryDetails.minTxPower) + ".." +
                         String.valueOf(matchEntryDetails.maxTxPower);
             }
-            holder.mTextView3.setText(this.mContext.getResources().getString(R.string.tx_power, txPowerStr));
-            ViewGroup.LayoutParams params = (ViewGroup.LayoutParams) holder.mTextView3.getLayoutParams();
+            holder.mTextViewTxPower.setText(this.mContext.getResources().getString(R.string.tx_power, txPowerStr));
+            ViewGroup.LayoutParams params = (ViewGroup.LayoutParams) holder.mTextViewTxPower.getLayoutParams();
             params.height = this.mContext.getResources().getDimensionPixelSize(R.dimen.details_text_view_3_height);
-            holder.mTextView3.setLayoutParams(params);
+            holder.mTextViewTxPower.setLayoutParams(params);
         } else {
-            holder.mTextView3.setText("");
-            ViewGroup.LayoutParams params = (ViewGroup.LayoutParams) holder.mTextView3.getLayoutParams();
+            holder.mTextViewTxPower.setText("");
+            ViewGroup.LayoutParams params = (ViewGroup.LayoutParams) holder.mTextViewTxPower.getLayoutParams();
             params.height = this.mContext.getResources().getDimensionPixelSize(R.dimen.details_text_view_3_height_disabled);
-            holder.mTextView3.setLayoutParams(params);
+            holder.mTextViewTxPower.setLayoutParams(params);
         }
     }
 
@@ -485,24 +485,24 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public final TextView mTextView1;
-        public final TextView mTextView2;
-        public final TextView mTextView3;
+        public final TextView mTextViewMainText;
+        public final TextView mTextViewTransmissionRisk;
+        public final TextView mTextViewTxPower;
         public final LineChart mChartView;
         public Pair<DiagnosisKeysProtos.TemporaryExposureKey, MatchEntryContent.GroupedByDkMatchEntries> mMatchEntriesPair;
 
         public ViewHolder(View view) {
             super(view);
-            mTextView1 = view.findViewById(R.id.textView1);
-            mTextView2 = view.findViewById(R.id.textView2);
-            mTextView3 = view.findViewById(R.id.textView3);
+            mTextViewMainText = view.findViewById(R.id.textViewMainText);
+            mTextViewTransmissionRisk = view.findViewById(R.id.textViewTransmissionRisk);
+            mTextViewTxPower = view.findViewById(R.id.textViewTxPower);
             mChartView = view.findViewById(R.id.chart);
         }
 
         @Override
         @NonNull
         public String toString() {
-            return super.toString() + " '" + mTextView1.getText() + "'";
+            return super.toString() + " '" + mTextViewMainText.getText() + "'";
         }
     }
 

@@ -12,89 +12,94 @@
         tools:context=".MainActivity">
 
         <TextView
-            android:id="@+id/textView1"
-            android:layout_width="wrap_content"
+            android:id="@+id/textViewRpis"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             android:layout_marginTop="16dp"
             android:fontFamily="sans-serif-medium"
             android:text="@string/title_extracting_encounters"
             android:textAlignment="viewStart"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.github.mikephil.charting.charts.BarChart
-            android:id="@+id/chart1"
+            android:id="@+id/chartRpis"
             android:layout_width="match_parent"
             android:layout_height="160dip"
-            app:layout_constraintTop_toBottomOf="@+id/textView1" />
+            app:layout_constraintTop_toBottomOf="@+id/textViewRpis" />
 
         <ProgressBar
-            android:id="@+id/progressBar1"
+            android:id="@+id/progressBarRpis"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:indeterminate="true"
-            app:layout_constraintBottom_toBottomOf="@+id/chart1"
-            app:layout_constraintEnd_toEndOf="@+id/chart1"
+            app:layout_constraintBottom_toBottomOf="@+id/chartRpis"
+            app:layout_constraintEnd_toEndOf="@+id/chartRpis"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/chart1" />
+            app:layout_constraintTop_toTopOf="@+id/chartRpis" />
 
         <TextView
-            android:id="@+id/textView2"
-            android:layout_width="wrap_content"
+            android:id="@+id/textViewDks"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             android:layout_marginTop="16dp"
             android:fontFamily="sans-serif-medium"
-            android:text="@string/title_diagnosis_keys_downloading"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/chart1" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/chartRpis" />
 
         <com.github.mikephil.charting.charts.BarChart
-            android:id="@+id/chart2"
+            android:id="@+id/chartDks"
             android:layout_width="match_parent"
             android:layout_height="160dip"
-            app:layout_constraintTop_toBottomOf="@+id/textView2" />
+            app:layout_constraintTop_toBottomOf="@+id/textViewDks" />
 
         <ProgressBar
-            android:id="@+id/progressBar2"
+            android:id="@+id/progressBarDks"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:indeterminate="true"
-            app:layout_constraintBottom_toBottomOf="@+id/chart2"
-            app:layout_constraintEnd_toEndOf="@+id/chart2"
+            app:layout_constraintBottom_toBottomOf="@+id/chartDks"
+            app:layout_constraintEnd_toEndOf="@+id/chartDks"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/chart2" />
+            app:layout_constraintTop_toTopOf="@+id/chartDks" />
 
         <TextView
-            android:id="@+id/textView3"
-            android:layout_width="wrap_content"
+            android:id="@+id/textViewMatches"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             android:layout_marginTop="16dp"
             android:fontFamily="sans-serif-medium"
             android:text="@string/matching_soon"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/chart2" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/chartDks" />
 
         <com.github.mikephil.charting.charts.BarChart
-            android:id="@+id/chart3"
+            android:id="@+id/chartMatches"
             android:layout_width="match_parent"
             android:layout_height="160dip"
-            app:layout_constraintTop_toBottomOf="@+id/textView3" />
+            app:layout_constraintTop_toBottomOf="@+id/textViewMatches" />
 
         <ProgressBar
-            android:id="@+id/progressBar3"
+            android:id="@+id/progressBarMatches"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:indeterminate="true"
-            app:layout_constraintBottom_toBottomOf="@+id/chart3"
-            app:layout_constraintEnd_toEndOf="@+id/chart3"
+            app:layout_constraintBottom_toBottomOf="@+id/chartMatches"
+            app:layout_constraintEnd_toEndOf="@+id/chartMatches"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/chart3" />
+            app:layout_constraintTop_toTopOf="@+id/chartMatches" />
 
         <TextView
             android:id="@+id/textViewExtractionError"
@@ -105,10 +110,10 @@
             android:gravity="center"
             android:textColor="@android:color/holo_red_light"
             android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="@+id/chart1"
+            app:layout_constraintBottom_toBottomOf="@+id/chartRpis"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/textView1" />
+            app:layout_constraintTop_toTopOf="@+id/textViewRpis" />
 
         <TextView
             android:id="@+id/textViewDownloadError"
@@ -119,10 +124,10 @@
             android:gravity="center"
             android:textColor="@android:color/holo_red_light"
             android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="@+id/chart2"
+            app:layout_constraintBottom_toBottomOf="@+id/chartDks"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/textView2" />
+            app:layout_constraintTop_toTopOf="@+id/textViewDks" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
