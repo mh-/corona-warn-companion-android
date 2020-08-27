@@ -55,6 +55,7 @@ import org.tosl.coronawarncompanion.barcharts.CwcBarChart;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadCountry;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadGermany;
+import org.tosl.coronawarncompanion.dkdownload.DKDownloadPoland;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadSwitzerland;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadUtils;
 import org.tosl.coronawarncompanion.gmsreadout.ContactDbOnDisk;
@@ -117,7 +118,6 @@ public class MainActivity extends AppCompatActivity {
     private TextView textViewDownloadError;
 
     private Context context;
-    private RequestQueue queue;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -193,7 +193,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         this.context = this;
-        this.queue = Volley.newRequestQueue(this);
 
         SharedPreferences sharedPreferences = this.getPreferences(MODE_PRIVATE);
         int appModeOrdinal = sharedPreferences.getInt(getString(R.string.saved_app_mode), NORMAL_MODE.ordinal());
@@ -310,9 +309,11 @@ public class MainActivity extends AppCompatActivity {
         // 2nd Section: Diagnosis Keys
 
         if (CWCApplication.appMode == NORMAL_MODE || CWCApplication.appMode == RAMBLE_MODE) {
+            RequestQueue queue = Volley.newRequestQueue(this);
             List<DKDownloadCountry> dkDownloadCountries = new ArrayList<>();
             dkDownloadCountries.add(new DKDownloadGermany());
             dkDownloadCountries.add(new DKDownloadSwitzerland());
+            dkDownloadCountries.add(new DKDownloadPoland());
             DKDownloadUtils.getDKsForCountries(context, queue, minDate, dkDownloadCountries)
                     .subscribe(this::processDownloadedDiagnosisKeys, error -> {
                         Log.e(TAG, "Error downloading diagnosis keys: " + error);
