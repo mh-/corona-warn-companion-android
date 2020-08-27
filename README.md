@@ -29,10 +29,14 @@ This app helps you to better understand warnings of the official Corona-Warn-App
 **ATTENTION:** FOR FULL FUNCTIONALITY, THE APP REQUIRES ROOT PERMISSIONS. Without root permissions, the app cannot access your risk encounters, and only three features are available: 1. Test how many diagnosis keys can be downloaded from the server; 2. Use RaMBLE data; 3. Demo Mode.
 
 ### What the app does:
-1. The app reads the Rolling Proximity IDs recorded by your device from the Exposure Notifications database (this is only possible with root permissions, which is why ExposureNotification officials apps, such as Corona-Warn-App, cannot display these details).  
+1. The app reads the Rolling Proximity IDs recorded by your device from the Exposure Notifications database 
+   (this is only possible with root permissions, which is why official ExposureNotifications apps, such as Corona-Warn-App, 
+   cannot display these details).  
    ![-Example Recorded Encounters-](screenshots/rpis_en.png)
    Alternatively, the app can also read a database exported from RaMBLE (does not need root permissions).
-2. The app downloads the Diagnosis Keys from the official Corona-Warn-Server and the Swiss server. It downloads the keys published daily for the last few days, and the keys published every hour for today. Therefore, different information than in the official app might be displayed.  
+2. The app downloads the Diagnosis Keys from the official German Corona-Warn-Server and other countries' servers, as selected by you. 
+   It downloads the keys published daily for the last few days, and the keys published every hour for today. 
+   Therefore, different information than in the official apps might be displayed.  
    Only keys for the days found in step 1 are shown and counted.  
    ![-Example Diagnosis Keys-](screenshots/dks_en.png)
 3. The app compares both in order to find matches (risk encounters).  
@@ -60,10 +64,18 @@ In RaMBLE mode, the app will not read the Exposure Notification database, but in
 Note that the Exposure Notifications database contains `calibrated_rssi` ([see here](https://developers.google.com/android/exposure-notifications/ble-attenuation-overview#calibration_per-device_tx_power_and_per-device_rssi_correction)).
 RaMBLE however stores only `raw_rssi`, which means that the colors shown on the details screen are probably different from the case when the app reads the Exposure Notifications database.
 
+# Countries covered
+- Austria
+- Germany
+- Poland
+- Switzerland
+
+In the top right hand corner of the app is a menu button, 
+please use this to select the countries from which you want to download Diagnosis Keys.
+
+Please note that we mainly follow changes that happen in the German CWA setup; if you experience problems with another country, 
+please let us know via a GitHub issue.
+
 # Other
 - The app is used for private purposes only, it is not used for any business purposes.
 - The app is not a "hacking tool". It only reads data from the memory of your own device, which is stored there without additional encryption.
-
-# Regions covered
-- Germany
-- Switzerland
