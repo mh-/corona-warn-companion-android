@@ -131,5 +131,6 @@ public class CwcBarChart  {
     public void switchPleaseWaitAnimationOff() {
         progressBar.setVisibility(View.GONE);
         this.barChart.setNoDataText("");
+        this.barChart.invalidate();
     }
 }

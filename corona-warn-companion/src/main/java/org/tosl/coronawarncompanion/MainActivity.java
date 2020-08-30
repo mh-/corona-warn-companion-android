@@ -489,9 +489,11 @@ public class MainActivity extends AppCompatActivity {
         chartDks.setData(dataPoints2, normalBarColor,"DKs", false, this);
         chartDks.setFormatAndRefresh(this);
 
-        if ((rpiList != null) && (!rpiList.isEmpty())) {
+        if ((rpiList != null) && (!rpiList.isEmpty()) && (count > 0)) {
             textViewMatches.setText(getString(R.string.title_matching_not_done_yet));
             startMatching(diagnosisKeysList);
+        } else {
+            showMatchingNotPossible();
         }
     }
 

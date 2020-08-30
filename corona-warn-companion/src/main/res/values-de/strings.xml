@@ -8,7 +8,7 @@
     <string name="title_diagnosis_keys_download_failed">Keine Diagnoseschlüssel heruntergeladen.</string>
     <string name="title_matching_not_done_yet">Abgleich wird erstellt…</string>
     <string name="title_matching_not_done_yet_with_progress">Abgleich wird erstellt… %1$d%% (%2$d gefunden)</string>
-    <string name="title_matching_not_possible">Abgleich nicht möglich.</string>
+    <string name="title_matching_not_possible">Abgleich nicht möglich. (Dafür werden sowohl Begegnungen als auch Diagnoseschlüssel benötigt.)</string>
     <string name="title_no_matches_found">Keine Risiko-Begegnungen gefunden.</string>
     <plurals name="title_number_of_matches_found">
         <item quantity="one">%d Risiko-Begegnung. Tippe für Details…</item>
@@ -20,6 +20,7 @@
     </plurals>
     <string name="time">🕐</string>
     <string name="transmission_risk_level">Übertragungsrisiko</string>
+    <string name="days_since_onset_of_symptoms">Tage seit Beginn der Symptome</string>
     <string name="please_wait">Bitte warten…</string>
     <string name="matching_soon">Hier wird gleich der Abgleich erstellt…</string>
     <string name="report_type">Report-Typ</string>
