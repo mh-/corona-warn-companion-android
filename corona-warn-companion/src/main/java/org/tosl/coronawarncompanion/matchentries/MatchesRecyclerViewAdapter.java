@@ -105,6 +105,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         return new ViewHolder(view);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mMatchEntriesPair = mValues.get(position);
@@ -125,22 +126,28 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         boolean hasAustrianColorCode = false;
         String austrianColorCode = "";
         int transmissionRiskLevel = 0;
-        //noinspection deprecation
         if (dk.dk.hasTransmissionRiskLevel()) {
-            if (!dk.countryCode.equals(mContext.getString(R.string.country_code_austria))) {
-                //noinspection deprecation
-                transmissionRiskLevel = dk.dk.getTransmissionRiskLevel();
-                hasTransmissionRiskLevel = true;
-            } else {  // Austria
-                //noinspection deprecation
+            if (dk.countryCode.equals(mContext.getString(R.string.country_code_austria))) {
+                // Austria
                 if (dk.dk.getTransmissionRiskLevel() == 5) {
                     hasAustrianColorCode = true;
                     austrianColorCode = mContext.getString(R.string.austrian_color_code_yellow);
-                } else //noinspection deprecation
-                    if (dk.dk.getTransmissionRiskLevel() == 2) {
+                } else
+                if (dk.dk.getTransmissionRiskLevel() == 2) {
                     hasAustrianColorCode = true;
                     austrianColorCode = mContext.getString(R.string.austrian_color_code_red);
                 }
+            } else if (dk.countryCode.equals(mContext.getString(R.string.country_code_switzerland))) {
+                // Switzerland
+                transmissionRiskLevel = dk.dk.getTransmissionRiskLevel();
+                if (transmissionRiskLevel != 0) {
+                    hasTransmissionRiskLevel = true;
+                }
+                // note that TRL is usually 0 - then it is not shown
+            } else {
+                // all other countries
+                transmissionRiskLevel = dk.dk.getTransmissionRiskLevel();
+                hasTransmissionRiskLevel = true;
             }
         }
         boolean hasReportType = false;
