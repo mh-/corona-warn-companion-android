@@ -1,10 +1,14 @@
 package org.tosl.coronawarncompanion.dkdownload;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.util.Pair;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
+
+import org.tosl.coronawarncompanion.R;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -15,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.subjects.AsyncSubject;
@@ -98,26 +101,30 @@ public class DKDownloadGermany implements DKDownloadCountry {
         return dailyUrlSubject.first(new ArrayList<>());
     }
 
-    private static Single<List<URL>> getDailyAndHourlyUrls(RequestQueue queue, List<DateURL> dailyDateUrls) {
+    private Single<List<Pair<URL, String>>> getDailyAndHourlyUrls(Context context, RequestQueue queue, List<DateURL> dailyDateUrls) {
         if (dailyDateUrls.isEmpty()) {
             return Single.just(new ArrayList<>());
         }
-        List<URL> dailyAndHourlyUrls = dailyDateUrls.stream().map(DateURL::getUrl).collect(Collectors.toList());
+        List<Pair<URL, String>> dailyAndHourlyUrls = new ArrayList<>();
+        for (DateURL dailyDateUrl : dailyDateUrls) {
+            URL url = dailyDateUrl.getUrl();
+            dailyAndHourlyUrls.add(new Pair<>(url, getCountryCode(context)));
+        }
         Calendar c = Calendar.getInstance();
         c.setTime(dailyDateUrls.get(dailyDateUrls.size() - 1).getDate());
         c.add(Calendar.DATE, 1);
         Date currentDate = c.getTime();
-        Subject<List<URL>> dailyAndHourlyUrlSubject = AsyncSubject.create();
+        Subject<List<Pair<URL, String>>> dailyAndHourlyUrlSubject = AsyncSubject.create();
         StringRequest stringRequest = new StringRequest(
                 Request.Method.GET,
                 CWA_URL+"/"+getStringFromDate(currentDate)+"/"+"hour",
                 availableHoursStr -> {
                     String[] hourStringArray = parseCwsListResponse(availableHoursStr);
-                    List<URL> hourlyUrls = new ArrayList<>();
+                    List<Pair<URL, String>> hourlyUrls = new ArrayList<>();
                     for (String hour : hourStringArray) {
                         try {
                             URL hourlyUrl = new URL(CWA_URL+"/"+getStringFromDate(currentDate)+"/hour/"+hour);
-                            hourlyUrls.add(hourlyUrl);
+                            hourlyUrls.add(new Pair<>(hourlyUrl, getCountryCode(context)));
                         } catch (MalformedURLException e) {
                             e.printStackTrace();
                         }
@@ -133,8 +140,13 @@ public class DKDownloadGermany implements DKDownloadCountry {
     }
 
     @Override
-    public Single<List<URL>> getUrls(RequestQueue queue, Date minDate) {
+    public Single<List<Pair<URL, String>>> getUrls(Context context, RequestQueue queue, Date minDate) {
         return getDailyUrls(queue, minDate)
-                .flatMap(dailyDateUrls -> getDailyAndHourlyUrls(queue, dailyDateUrls));
+                .flatMap(dailyDateUrls -> getDailyAndHourlyUrls(context, queue, dailyDateUrls));
+    }
+
+    @Override
+    public String getCountryCode(Context context) {
+        return context.getResources().getString(R.string.country_code_germany);
     }
 }

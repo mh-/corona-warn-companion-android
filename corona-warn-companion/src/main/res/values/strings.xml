@@ -61,14 +61,16 @@
     <string name="menu_entry_countries_sub_menu">Countries</string>
     <string name="country_germany">🇩🇪 Germany</string>
     <string name="flag_germany" translatable="false">🇩🇪</string>
-    <string name="saved_germany_active" translatable="false">DE</string>
+    <string name="country_code_germany" translatable="false">DE</string>
     <string name="country_poland">🇵🇱 Poland</string>
     <string name="flag_poland" translatable="false">🇵🇱</string>
-    <string name="saved_poland_active" translatable="false">PL</string>
+    <string name="country_code_poland" translatable="false">PL</string>
     <string name="country_switzerland">🇨🇭 Switzerland</string>
     <string name="flag_switzerland" translatable="false">🇨🇭</string>
-    <string name="saved_switzerland_active" translatable="false">CH</string>
+    <string name="country_code_switzerland" translatable="false">CH</string>
     <string name="country_austria">🇦🇹 Austria</string>
     <string name="flag_austria" translatable="false">🇦🇹</string>
-    <string name="saved_austria_active" translatable="false">AT</string>
+    <string name="country_code_austria" translatable="false">AT</string>
+    <string name="austrian_color_code_yellow">yellow</string>
+    <string name="austrian_color_code_red">red</string>
 </resources>

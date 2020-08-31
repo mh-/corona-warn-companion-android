@@ -29,6 +29,7 @@ import org.tosl.coronawarncompanion.BuildConfig;
 import org.tosl.coronawarncompanion.R;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,8 +38,10 @@ public class DiagnosisKeysImport {
     private static final String TAG = "DiagnosisKeys";
 
     private DiagnosisKeysProtos.TemporaryExposureKeyExport dkImport = null;
+    private final String countryCode;
 
-    public DiagnosisKeysImport(byte[] exportDotBin, Context context) {
+    public DiagnosisKeysImport(Context context, byte[] exportDotBin, String countryCode) {
+        this.countryCode = countryCode;
         String header = "EK Export v1    ";
         byte[] headerBytes = header.getBytes(StandardCharsets.UTF_8);
         if (BuildConfig.DEBUG && headerBytes.length != 16) {
@@ -59,9 +62,14 @@ public class DiagnosisKeysImport {
         }
     }
 
-    public List<DiagnosisKeysProtos.TemporaryExposureKey> getDiagnosisKeys() {
+    public List<DiagnosisKey> getDiagnosisKeys() {
         if (dkImport != null) {
-            return dkImport.getKeysList();
+            List<DiagnosisKeysProtos.TemporaryExposureKey> keysList = dkImport.getKeysList();
+            List<DiagnosisKey> keysWithCountryCode = new ArrayList<>();
+            for (DiagnosisKeysProtos.TemporaryExposureKey tek : keysList) {
+                keysWithCountryCode.add(new DiagnosisKey(tek, this.countryCode));
+            }
+            return keysWithCountryCode;
         } else {
             return null;
         }

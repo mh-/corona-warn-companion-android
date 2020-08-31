@@ -7,13 +7,6 @@
     android:layout_marginBottom="10dp"
     android:background="@drawable/frame">
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.5" />
-
     <TextView
         android:id="@+id/textViewMainText"
         android:layout_width="match_parent"
@@ -29,15 +22,13 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textViewTransmissionRisk"
-        android:layout_width="0dp"
+        android:id="@+id/textViewRiskDetails"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="4dp"
-        android:background="?android:attr/colorBackgroundFloating"
+        android:textAlignment="textEnd"
         android:textColor="?android:attr/textColorPrimary"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="@+id/textViewMainText"
-        app:layout_constraintStart_toStartOf="@+id/guideline"
         app:layout_constraintTop_toTopOf="@+id/textViewMainText" />
 
     <com.github.mikephil.charting.charts.LineChart

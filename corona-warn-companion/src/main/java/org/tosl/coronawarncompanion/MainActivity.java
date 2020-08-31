@@ -52,7 +52,7 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
 import org.tosl.coronawarncompanion.barcharts.BarChartSync;
 import org.tosl.coronawarncompanion.barcharts.CwcBarChart;
-import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
+import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKey;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadAustria;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadCountry;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadGermany;
@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
                 CWCApplication.downloadKeysFromAustria = desiredNewState;
                 SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(getString(R.string.saved_austria_active), desiredNewState);
+                editor.putBoolean(getString(R.string.country_code_austria), desiredNewState);
                 editor.apply();
                 recreateMainActivityOnNextPossibleOccasion();
                 return true;
@@ -191,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
                 CWCApplication.downloadKeysFromGermany = desiredNewState;
                 SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(getString(R.string.saved_germany_active), desiredNewState);
+                editor.putBoolean(getString(R.string.country_code_germany), desiredNewState);
                 editor.apply();
                 recreateMainActivityOnNextPossibleOccasion();
                 return true;
@@ -205,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
                 CWCApplication.downloadKeysFromPoland = desiredNewState;
                 SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(getString(R.string.saved_poland_active), desiredNewState);
+                editor.putBoolean(getString(R.string.country_code_poland), desiredNewState);
                 editor.apply();
                 recreateMainActivityOnNextPossibleOccasion();
                 return true;
@@ -219,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
                 CWCApplication.downloadKeysFromSwitzerland = desiredNewState;
                 SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(getString(R.string.saved_switzerland_active), desiredNewState);
+                editor.putBoolean(getString(R.string.country_code_switzerland), desiredNewState);
                 editor.apply();
                 recreateMainActivityOnNextPossibleOccasion();
                 return true;
@@ -263,10 +263,10 @@ public class MainActivity extends AppCompatActivity {
         desiredAppMode = CWCApplication.appMode;
 
         // get the active countries from SharedPreferences
-        CWCApplication.downloadKeysFromAustria = sharedPreferences.getBoolean(getString(R.string.saved_austria_active), false);
-        CWCApplication.downloadKeysFromGermany = sharedPreferences.getBoolean(getString(R.string.saved_germany_active), true);
-        CWCApplication.downloadKeysFromPoland = sharedPreferences.getBoolean(getString(R.string.saved_poland_active), false);
-        CWCApplication.downloadKeysFromSwitzerland = sharedPreferences.getBoolean(getString(R.string.saved_switzerland_active), false);
+        CWCApplication.downloadKeysFromAustria = sharedPreferences.getBoolean(getString(R.string.country_code_austria), false);
+        CWCApplication.downloadKeysFromGermany = sharedPreferences.getBoolean(getString(R.string.country_code_germany), true);
+        CWCApplication.downloadKeysFromPoland = sharedPreferences.getBoolean(getString(R.string.country_code_poland), false);
+        CWCApplication.downloadKeysFromSwitzerland = sharedPreferences.getBoolean(getString(R.string.country_code_switzerland), false);
         if (CWCApplication.getNumberOfActiveCountries() < 1) {
             CWCApplication.downloadKeysFromGermany = true;
         }
@@ -403,7 +403,8 @@ public class MainActivity extends AppCompatActivity {
                 while ((bytesRead = inputStream.read(buffer)) != -1) {
                     output.write(buffer, 0, bytesRead);
                 }
-                processDownloadedDiagnosisKeys(DKDownloadUtils.parseBytesToTeks(context, output.toByteArray()));
+                processDownloadedDiagnosisKeys(DKDownloadUtils.parseBytesToTeks(context, output.toByteArray(),
+                        getString(R.string.country_code_germany)));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -448,7 +449,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void processDownloadedDiagnosisKeys(List<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList) {
+    private void processDownloadedDiagnosisKeys(List<DiagnosisKey> diagnosisKeysList) {
         // Count the downloaded Diagnosis Keys
         Log.d(TAG, "Number of keys that have been downloaded: " + diagnosisKeysList.size());
 
@@ -459,8 +460,8 @@ public class MainActivity extends AppCompatActivity {
             diagnosisKeyCountMap.put(ENIN, 0);
         }
         int count = 0;
-        for (DiagnosisKeysProtos.TemporaryExposureKey diagnosisKeyEntry : diagnosisKeysList) {
-            int ENIN = diagnosisKeyEntry.getRollingStartIntervalNumber();
+        for (DiagnosisKey diagnosisKeyEntry : diagnosisKeysList) {
+            int ENIN = diagnosisKeyEntry.dk.getRollingStartIntervalNumber();
             Integer bin = diagnosisKeyCountMap.floorKey(ENIN);
             if (bin != null) {
                 Integer binCount = diagnosisKeyCountMap.get(bin);
@@ -500,7 +501,7 @@ public class MainActivity extends AppCompatActivity {
     public Handler uiThreadHandler;
     public HandlerThread backgroundMatcher;
 
-    private void startMatching(List<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList) {
+    private void startMatching(List<DiagnosisKey> diagnosisKeysList) {
         backgroundThreadsRunning = true;  // required so that DEMO_MODE toggle can safely stop the background threads
         backgroundThreadsShouldStop = false;
 
@@ -520,10 +521,10 @@ public class MainActivity extends AppCompatActivity {
 
     private class BackgroundMatching implements Runnable {
         private final MainActivity mainActivity;
-        private final List<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList;
+        private final List<DiagnosisKey> diagnosisKeysList;
 
         BackgroundMatching(MainActivity theMainActivity,
-                           List<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList) {
+                           List<DiagnosisKey> diagnosisKeysList) {
             mainActivity = theMainActivity;
             this.diagnosisKeysList = diagnosisKeysList;
         }

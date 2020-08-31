@@ -24,7 +24,7 @@ import android.util.Pair;
 import androidx.core.util.Consumer;
 
 import org.tosl.coronawarncompanion.CWCApplication;
-import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
+import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKey;
 import org.tosl.coronawarncompanion.gmsreadout.ContactRecordsProtos;
 import org.tosl.coronawarncompanion.rpis.RpiList;
 import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
@@ -37,7 +37,6 @@ import static org.tosl.coronawarncompanion.matcher.Crypto.decryptAem;
 import static org.tosl.coronawarncompanion.matcher.Crypto.deriveAemKey;
 import static org.tosl.coronawarncompanion.matcher.Crypto.deriveRpiKey;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromSeconds;
-import static org.tosl.coronawarncompanion.tools.Utils.getDaysSinceEpochFromENIN;
 
 public class Matcher {
 
@@ -59,11 +58,11 @@ public class Matcher {
     }
 
     private final RpiList rpiList;
-    private final List<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeysList;
+    private final List<DiagnosisKey> diagnosisKeysList;
 
     final int timeZoneOffsetSeconds;
 
-    public Matcher(RpiList rpis, List<DiagnosisKeysProtos.TemporaryExposureKey> diagnosisKeys,
+    public Matcher(RpiList rpis, List<DiagnosisKey> diagnosisKeys,
                    MatchEntryContent matchEntryContent) {
         this.rpiList = rpis;
         this.diagnosisKeysList = diagnosisKeys;
@@ -79,7 +78,7 @@ public class Matcher {
         int currentProgress;
         int numMatches = 0;
         Crypto crypto = new Crypto();
-        for (DiagnosisKeysProtos.TemporaryExposureKey dk : diagnosisKeysList) {
+        for (DiagnosisKey dk : diagnosisKeysList) {
             if (backgroundThreadsShouldStop) {
                 break;
             }
@@ -91,18 +90,18 @@ public class Matcher {
                     progressCallback.accept(new Pair<>(currentProgress, numMatches));
                 }
             }
-            int dkIntervalNumber = dk.getRollingStartIntervalNumber();
-            ArrayList<Crypto.RpiWithInterval> dkRpisWithIntervals = crypto.createListOfRpisForIntervalRange(deriveRpiKey(dk.getKeyData().toByteArray()),
-                    dkIntervalNumber, dk.getRollingPeriod());
+            ArrayList<Crypto.RpiWithInterval> dkRpisWithIntervals =
+                    crypto.createListOfRpisForIntervalRange(deriveRpiKey(dk.dk.getKeyData().toByteArray()),
+                            dk.dk.getRollingStartIntervalNumber(), dk.dk.getRollingPeriod());
             for (Crypto.RpiWithInterval dkRpiWithInterval : dkRpisWithIntervals) {
                 if (backgroundThreadsShouldStop) {
                     break;
                 }
                 RpiList.RpiEntry rpiEntry =
-                        rpiList.searchForRpiOnDaySinceEpochUTCWith2HoursTolerance(dkRpiWithInterval, getDaysSinceEpochFromENIN(dkIntervalNumber));
+                        rpiList.searchForRpiOnDaySinceEpochUTCWith2HoursTolerance(dkRpiWithInterval);
                 if (rpiEntry != null) {
                     Log.d(TAG, "Match found!");
-                    byte[] aemKey = deriveAemKey(dk.getKeyData().toByteArray());
+                    byte[] aemKey = deriveAemKey(dk.dk.getKeyData().toByteArray());
                     byte[] zeroAem = {0x00, 0x00, 0x00, 0x00};
                     byte[] aemXorBytes = decryptAem(aemKey, zeroAem, rpiEntry.rpiBytes.getBytes());
 

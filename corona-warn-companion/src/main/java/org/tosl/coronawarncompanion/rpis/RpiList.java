@@ -18,6 +18,8 @@
 
 package org.tosl.coronawarncompanion.rpis;
 
+import android.util.Log;
+
 import org.tosl.coronawarncompanion.CWCApplication;
 import org.tosl.coronawarncompanion.gmsreadout.ContactRecordsProtos;
 import org.tosl.coronawarncompanion.matcher.Crypto;
@@ -25,7 +27,9 @@ import org.tosl.coronawarncompanion.matcher.Crypto;
 import java.util.*;
 
 import static java.lang.Math.abs;
+//import static org.tosl.coronawarncompanion.tools.Utils.getDateFromENIN;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromSeconds;
+import static org.tosl.coronawarncompanion.tools.Utils.getDaysSinceEpochFromENIN;
 import static org.tosl.coronawarncompanion.tools.Utils.getENINFromSeconds;
 import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromSeconds;
 
@@ -35,7 +39,8 @@ public class RpiList {
     private final Map<Integer, ListsPerDayUTC> mapOfDaysUTCAndListsOfRPIs;  // daysSinceEpochUTC, ListsPerDayUTC
     private final Map<Integer, Integer> mapOfDailyCountsLocalTZ;  // daysSinceEpochLocalTZ, numberOfEntries
 
-    final int timeZoneOffsetSeconds;
+    private final int timeZoneOffsetSeconds;
+    //private final Random rand;
 
     public static class ListsPerDayUTC {
         public final HashMap<RpiBytes, RpiEntry> rpiEntries = new HashMap<>(2048);     // RpiEntries
@@ -119,6 +124,7 @@ public class RpiList {
         mapOfDaysUTCAndListsOfRPIs = new HashMap<>();
         mapOfDailyCountsLocalTZ = new TreeMap<>();
         timeZoneOffsetSeconds = CWCApplication.getTimeZoneOffsetSeconds();
+        //rand = new Random();  // not very random, but sufficient for the use case here
     }
 
     public void addEntry(Integer daysSinceEpochUTC, byte[] rpiBytes, ContactRecordsProtos.ContactRecords contactRecords) {
@@ -179,8 +185,8 @@ public class RpiList {
      but also in the "late" entries (last 2 hours) of the previous day,
      and in the "early" entries (first 2 hours) of the next day.
      */
-    public RpiEntry searchForRpiOnDaySinceEpochUTCWith2HoursTolerance(Crypto.RpiWithInterval searchRpiWithInterval,
-                                                                      Integer daysSinceEpochUTC) {
+    public RpiEntry searchForRpiOnDaySinceEpochUTCWith2HoursTolerance(Crypto.RpiWithInterval searchRpiWithInterval) {
+        int daysSinceEpochUTC = getDaysSinceEpochFromENIN(searchRpiWithInterval.intervalNumber);
         RpiEntry matchingRpiEntry = null;
         if (searchRpiWithInterval != null) {
             RpiBytes rpiBytes = new RpiBytes(searchRpiWithInterval.rpiBytes);
@@ -198,7 +204,7 @@ public class RpiList {
                         listsPerDayUTC = mapOfDaysUTCAndListsOfRPIs.get(daysSinceEpochUTC + 1);
                         break;
                 }
-                if (listsPerDayUTC != null) {
+                if (listsPerDayUTC != null) {  // is null e.g. at the first available day - 1
                     RpiEntry rpiEntry = null;
                     switch (i) {
                         case 1:
@@ -219,16 +225,39 @@ public class RpiList {
                     }
                     if (rpiEntry != null && abs(searchRpiWithInterval.intervalNumber -
                             getENINFromSeconds(rpiEntry.startTimeStampUTC)) <= 6 * 2) {  // max diff: 2 hours
-                        //Log.d(TAG, "Match confirmed!");
+                        Log.d(TAG, "Match confirmed!");
                         //Log.d(TAG, "ENIN used for RPI generation: "+searchRpiWithInterval.intervalNumber+
                         //        " ("+getDateFromENIN(searchRpiWithInterval.intervalNumber)+")");
                         //Log.d(TAG, "ENIN when scan was recorded:  "+getENINFromSeconds(rpiEntry.startTimeStampUTC)+
                         //        " ("+getDateFromENIN(getENINFromSeconds(rpiEntry.startTimeStampUTC))+")");
+
                         matchingRpiEntry = rpiEntry;
-                        break;
+                        break;  // each RPI is assumed to be unique,
+                        // so once it is found, there's no need to search any further on the next day.
                     }
                 }
             }
+
+            /*
+            // Add some random matches, for test purposes only!
+            // TODO: THIS MUST NOT BE ACTIVE FOR RELEASES!
+            if (rand.nextInt(100000) >= 99995) {
+                ListsPerDayUTC listsPerDayUTC = mapOfDaysUTCAndListsOfRPIs.get(daysSinceEpochUTC);
+                if (listsPerDayUTC !=  null) {
+
+                    int numEntries = listsPerDayUTC.rpiEntries.size();
+                    int randomPos = rand.nextInt(numEntries)+1;
+                    // The following random selection process is not 100% correct, but sufficient.
+                    Iterator<RpiEntry> it = listsPerDayUTC.rpiEntries.values().iterator();
+                    while (it.hasNext() && randomPos > 0) {
+                        matchingRpiEntry = it.next();
+                        randomPos--;
+                    }
+                    Log.d(TAG, "Reporting fake match: matchingRpiEntry.startTimeStampUTC: " +
+                            matchingRpiEntry.startTimeStampUTC);
+                }
+            }
+            */
         }
         return matchingRpiEntry;
     }

@@ -18,7 +18,9 @@
 
 package org.tosl.coronawarncompanion.matchentries;
 
-import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
+//import android.util.Log;
+
+import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKey;
 import org.tosl.coronawarncompanion.matcher.Matcher;
 
 import java.util.ArrayList;
@@ -30,6 +32,8 @@ public class MatchEntryContent {
     // organized in a TreeMap indexed by days,
     // which contains HashMaps indexed by Diagnosis Keys,
     // which contain ArrayLists of MatchEntries.
+
+    //private static final String TAG = "MatchEntryContent";
 
     public final MatchEntries matchEntries = new MatchEntries();
 
@@ -50,7 +54,7 @@ public class MatchEntryContent {
             return map.get(daysSinceEpoch);
         }
 
-        public void add(Matcher.MatchEntry entry, DiagnosisKeysProtos.TemporaryExposureKey dk,
+        public void add(Matcher.MatchEntry entry, DiagnosisKey dk,
                         Integer daysSinceEpochLocalTZ) {
             if (!map.containsKey(daysSinceEpochLocalTZ)) {
                 map.put(daysSinceEpochLocalTZ, new DailyMatchEntries());
@@ -61,12 +65,17 @@ public class MatchEntryContent {
                 dailyMatchEntries.add(entry, dk);
                 totalRpiCount++;
                 totalMatchingDkCount += (dailyMatchEntries.getDailyMatchingDkCount() - previousMatchingDkCount);
+                // Log.d(TAG, "Added entry for day: " + daysSinceEpochLocalTZ +
+                //        ", startTimestampUTC: " + entry.startTimestampUTC +
+                //        ", previousMatchingDkCount: " + previousMatchingDkCount +
+                //        ", dailyMatchEntries.getDailyMatchingDkCount(): " + dailyMatchEntries.getDailyMatchingDkCount() +
+                //        ", totalMatchingDkCount: " + totalMatchingDkCount);
             }
         }
     }
 
     public static class DailyMatchEntries {
-        private final HashMap<DiagnosisKeysProtos.TemporaryExposureKey, GroupedByDkMatchEntries> map =
+        private final HashMap<DiagnosisKey, GroupedByDkMatchEntries> map =
                 new HashMap<>();
         private int dailyRpiCount = 0;
         private int dailyMatchingDkCount = 0;
@@ -79,11 +88,11 @@ public class MatchEntryContent {
             return dailyMatchingDkCount;
         }
 
-        public HashMap<DiagnosisKeysProtos.TemporaryExposureKey, GroupedByDkMatchEntries> getMap() {
+        public HashMap<DiagnosisKey, GroupedByDkMatchEntries> getMap() {
             return map;
         }
 
-        public void add(Matcher.MatchEntry entry, DiagnosisKeysProtos.TemporaryExposureKey dk) {
+        public void add(Matcher.MatchEntry entry, DiagnosisKey dk) {
             if (!map.containsKey(dk)) {
                 map.put(dk, new GroupedByDkMatchEntries());
                 dailyMatchingDkCount++;

@@ -44,6 +44,7 @@ import com.github.mikephil.charting.formatter.ValueFormatter;
 
 import org.tosl.coronawarncompanion.CWCApplication;
 import org.tosl.coronawarncompanion.R;
+import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKey;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
 import org.tosl.coronawarncompanion.gmsreadout.ContactRecordsProtos;
 import org.tosl.coronawarncompanion.matchentries.MatchEntryContent.DailyMatchEntries;
@@ -69,7 +70,7 @@ import static org.tosl.coronawarncompanion.tools.Utils.xorTwoByteArrays;
  */
 public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecyclerViewAdapter.ViewHolder> {
 
-    private static final String TAG = "CRRecyclerViewAdapter";
+    private static final String TAG = "MatchesRVAdapter";
     private final int lineColor;
     private static final int redColor = Color.parseColor("#FF0000");
     private static final int orangeColor = Color.parseColor("#FFA500");
@@ -77,7 +78,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
     private static final int greenColor = Color.parseColor("#00FF00");
     private final float textScalingFactor;
 
-    private final ArrayList<Pair<DiagnosisKeysProtos.TemporaryExposureKey, MatchEntryContent.GroupedByDkMatchEntries>> mValues;
+    private final ArrayList<Pair<DiagnosisKey, MatchEntryContent.GroupedByDkMatchEntries>> mValues;
     private final Context mContext;
 
     private boolean showAllScans = false;
@@ -85,9 +86,8 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
     public MatchesRecyclerViewAdapter(DailyMatchEntries dailyMatchEntries, Context context) {
         this.mContext = context;
         this.mValues = new ArrayList<>();
-        TreeMap<Integer, Pair<DiagnosisKeysProtos.TemporaryExposureKey,
-                MatchEntryContent.GroupedByDkMatchEntries>> treeMap = new TreeMap<>();
-        for (Map.Entry<DiagnosisKeysProtos.TemporaryExposureKey, MatchEntryContent.GroupedByDkMatchEntries> entry :
+        TreeMap<Integer, Pair<DiagnosisKey, MatchEntryContent.GroupedByDkMatchEntries>> treeMap = new TreeMap<>();
+        for (Map.Entry<DiagnosisKey, MatchEntryContent.GroupedByDkMatchEntries> entry :
                 dailyMatchEntries.getMap().entrySet()) {
             treeMap.put(entry.getValue().getList().get(0).startTimestampUTC, new Pair<>(entry.getKey(), entry.getValue()));
         }
@@ -108,12 +108,12 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mMatchEntriesPair = mValues.get(position);
-        DiagnosisKeysProtos.TemporaryExposureKey dk = holder.mMatchEntriesPair.first;
+        DiagnosisKey dk = holder.mMatchEntriesPair.first;
         MatchEntryContent.GroupedByDkMatchEntries groupedByDkMatchEntries = holder.mMatchEntriesPair.second;
 
         ArrayList<Matcher.MatchEntry> list = groupedByDkMatchEntries.getList();
 
-        // Text View:
+        // Text Views:
 
         // set date label formatter
         String deviceDateFormat = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "Hm");
@@ -122,20 +122,38 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         // UTC because we don't want DateFormat to do additional time zone compensation
 
         boolean hasTransmissionRiskLevel = false;
+        boolean hasAustrianColorCode = false;
+        String austrianColorCode = "";
         int transmissionRiskLevel = 0;
         //noinspection deprecation
-        if (dk.hasTransmissionRiskLevel()) {
-            //noinspection deprecation
-            transmissionRiskLevel = dk.getTransmissionRiskLevel();
-            hasTransmissionRiskLevel = true;
+        if (dk.dk.hasTransmissionRiskLevel()) {
+            if (!dk.countryCode.equals(mContext.getString(R.string.country_code_austria))) {
+                //noinspection deprecation
+                transmissionRiskLevel = dk.dk.getTransmissionRiskLevel();
+                hasTransmissionRiskLevel = true;
+            } else {  // Austria
+                //noinspection deprecation
+                if (dk.dk.getTransmissionRiskLevel() == 5) {
+                    hasAustrianColorCode = true;
+                    austrianColorCode = mContext.getString(R.string.austrian_color_code_yellow);
+                } else //noinspection deprecation
+                    if (dk.dk.getTransmissionRiskLevel() == 2) {
+                    hasAustrianColorCode = true;
+                    austrianColorCode = mContext.getString(R.string.austrian_color_code_red);
+                }
+            }
         }
         boolean hasReportType = false;
         DiagnosisKeysProtos.TemporaryExposureKey.ReportType reportType = DiagnosisKeysProtos.TemporaryExposureKey.ReportType.UNKNOWN;
-        if (dk.hasReportType()) {
-            //noinspection UnusedAssignment
-            reportType = dk.getReportType();
-            //noinspection UnusedAssignment
+        if (dk.dk.hasReportType()) {
+            reportType = dk.dk.getReportType();
             hasReportType = true;
+        }
+        boolean hasDaysSinceOnsetOfSymptoms = false;
+        int daysSinceOnsetOfSymptoms = 0;
+        if (dk.dk.hasDaysSinceOnsetOfSymptoms()) {
+            daysSinceOnsetOfSymptoms = dk.dk.getDaysSinceOnsetOfSymptoms();
+            hasDaysSinceOnsetOfSymptoms = true;
         }
 
         MatchEntryDetails matchEntryDetails = getMatchEntryDetails(list, CWCApplication.getTimeZoneOffsetSeconds());
@@ -147,34 +165,52 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         String startDateStr = dateFormat.format(startDate);
         String endDateStr = dateFormat.format(endDate);
 
-        String text = this.mContext.getResources().getString(R.string.time);
-        text += " ";
-        if (startDateStr.equals(endDateStr)) {
-            text += startDateStr;
-        } else {
-            text += startDateStr+"-"+endDateStr;
+        StringBuilder sb;
+
+        // text in the upper right corner
+        sb = new StringBuilder();
+        sb.append("\n");
+        int numLinesDetails = 1;
+        if (hasReportType) {
+            sb.append(this.mContext.getResources().getString(R.string.report_type)).append(": ").append(getReportTypeStr(reportType)).append("\n");
+            numLinesDetails++;
         }
-        text += "\n";
-
-        text += "\n";
-        //if (hasReportType) {
-        //    text += CWCApplication.getAppContext().getResources().getString(R.string.report_type) + ": " + getReportTypeStr(reportType) + "\n";
-        //}
-        // text += CWCApplication.getAppContext().getResources().getString(R.string.min_attenuation)+": "+minAttenuation+"dB\n";
-        // text += "("+byteArrayToHex(dk.getKeyData().toByteArray())+")";
-        text += this.mContext.getResources().getString(R.string.distance_shown_as_attenuation)+":";
-        holder.mTextViewMainText.setText(text);
-
-        text = "";
         if (hasTransmissionRiskLevel) {
-            text = this.mContext.getResources().getString(R.string.transmission_risk_level) + ": " + transmissionRiskLevel;
+            sb.append(this.mContext.getResources().getString(R.string.transmission_risk_level)).append(": ").append(transmissionRiskLevel).append("\n");
+            numLinesDetails++;
         }
-        holder.mTextViewTransmissionRisk.setText(text);
+        if (hasAustrianColorCode) {
+            sb.append(this.mContext.getResources().getString(R.string.transmission_risk_level)).append(": ").append(austrianColorCode).append("\n");
+            numLinesDetails++;
+        }
+        if (hasDaysSinceOnsetOfSymptoms) {
+            sb.append(this.mContext.getResources().getString(R.string.days_since_onset_of_symptoms)).append(": ").append(daysSinceOnsetOfSymptoms).append("\n");
+            numLinesDetails++;
+        }
+        holder.mTextViewRiskDetails.setText(sb.toString());
+
+        // main text
+        sb = new StringBuilder();
+        sb.append(this.mContext.getResources().getString(R.string.time)).append(" ");
+        if (startDateStr.equals(endDateStr)) {
+            sb.append(startDateStr).append("\n");
+        } else {
+            sb.append(startDateStr).append("-").append(endDateStr).append("\n");
+        }
+        // text += "("+byteArrayToHexString(dk.getKeyData().toByteArray())+")\n";
+        for (int i = 1; i < numLinesDetails; i++) {
+            sb.append("\n");
+        }
+        sb.append("\n").append(this.mContext.getResources().getString(R.string.distance_shown_as_attenuation)).append(":");
+        holder.mTextViewMainText.setText(sb.toString());
 
         // Graph:
-        configureDetailsChart(holder.mChartView, matchEntryDetails.dataPointsMinAttenuation, matchEntryDetails.dotColorsMinAttenuation,
+        configureDetailsChart(holder.mChartView, matchEntryDetails.dataPointsMinAttenuation,
+                matchEntryDetails.dotColorsMinAttenuation,
                 matchEntryDetails.dataPoints, matchEntryDetails.dotColors,
-                minTimestampLocalTZDay0, maxTimestampLocalTZDay0, mContext);
+                minTimestampLocalTZDay0, maxTimestampLocalTZDay0,
+                matchEntryDetails.minAttenuation, matchEntryDetails.maxAttenuation,
+                mContext);
         holder.mChartView.getLineData().getDataSetByIndex(1).setVisible(this.showAllScans);
 
         if (this.showAllScans) {
@@ -203,6 +239,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         public ArrayList<Entry> dataPointsMinAttenuation;
         public ArrayList<Integer> dotColorsMinAttenuation;
         public int minAttenuation;
+        public int maxAttenuation;
         public byte minTxPower;
         public byte maxTxPower;
         public int minTimestampLocalTZDay0;
@@ -226,6 +263,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         result.dataPointsMinAttenuation = new ArrayList<>();
         result.dotColorsMinAttenuation = new ArrayList<>();
         result.minAttenuation = Integer.MAX_VALUE;
+        result.maxAttenuation = Integer.MIN_VALUE;
         result.minTxPower = Byte.MAX_VALUE;
         result.maxTxPower = Byte.MIN_VALUE;
 
@@ -261,6 +299,9 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
                 }
                 if (result.minAttenuation > attenuation) {
                     result.minAttenuation = attenuation;
+                }
+                if (result.maxAttenuation < attenuation) {
+                    result.maxAttenuation = attenuation;
                 }
                 if (result.minTimestampLocalTZDay0 > timestampLocalTZDay0) {
                     result.minTimestampLocalTZDay0 = timestampLocalTZDay0;
@@ -372,7 +413,9 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
 
     private void configureDetailsChart(LineChart chartView, List<Entry> dataPointsMinAttenuation, ArrayList<Integer> dotColorsMinAttenuation,
                                        List<Entry> dataPoints, ArrayList<Integer> dotColors,
-                                       int minTimestampLocalTZDay0, int maxTimestampLocalTZDay0, Context context) {
+                                       int minTimestampLocalTZDay0, int maxTimestampLocalTZDay0,
+                                       int minAttenuation, int maxAttenuation,
+                                       Context context) {
         LineDataSet dataSetMin = new LineDataSet(dataPointsMinAttenuation, "Minimum Attenuation"); // add entries to dataSetMin
         dataSetMin.setAxisDependency(YAxis.AxisDependency.LEFT);
         dataSetMin.setCircleColors(dotColorsMinAttenuation);
@@ -433,10 +476,23 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         xAxis.setTextColor(resolveColorAttr(android.R.attr.textColorPrimary, context));
         chartView.setExtraBottomOffset(3.0f);
 
+        float axisMinimum;
+        if (minAttenuation < 0) {
+            axisMinimum = (float) minAttenuation;  // should not happen in real life, only during a relay attack?
+        } else {
+            axisMinimum = 0.0f;
+        }
+        float axisMaximum;
+        if (maxAttenuation > 0) {
+            axisMaximum = (float) maxAttenuation;
+        } else {
+            axisMaximum = 0.0f;
+        }
         YAxis yAxis = chartView.getAxisLeft();
         yAxis.setGranularity(1.0f); // minimum axis-step (interval) is 1
         yAxis.setGranularityEnabled(true);
-        yAxis.setAxisMinimum(0.0f);
+        yAxis.setAxisMinimum(axisMinimum);
+        yAxis.setAxisMaximum(axisMaximum);
         yAxis.setGridColor(ContextCompat.getColor(context, R.color.colorGridLines));
         yAxis.setGridLineWidth(1.0f);
         yAxis.setDrawGridLines(true);
@@ -444,7 +500,8 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         yAxis.setInverted(true);
         yAxis.setTextColor(resolveColorAttr(android.R.attr.textColorPrimary, context));
 
-        chartView.getAxisRight().setAxisMinimum(0.0f);
+        chartView.getAxisRight().setAxisMinimum(axisMinimum);
+        chartView.getAxisRight().setAxisMaximum(axisMaximum);
         chartView.getAxisRight().setDrawLabels(false);
         chartView.getAxisRight().setDrawGridLines(false);
         chartView.getLegend().setEnabled(false);
@@ -486,15 +543,15 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public final TextView mTextViewMainText;
-        public final TextView mTextViewTransmissionRisk;
+        public final TextView mTextViewRiskDetails;
         public final TextView mTextViewTxPower;
         public final LineChart mChartView;
-        public Pair<DiagnosisKeysProtos.TemporaryExposureKey, MatchEntryContent.GroupedByDkMatchEntries> mMatchEntriesPair;
+        public Pair<DiagnosisKey, MatchEntryContent.GroupedByDkMatchEntries> mMatchEntriesPair;
 
         public ViewHolder(View view) {
             super(view);
             mTextViewMainText = view.findViewById(R.id.textViewMainText);
-            mTextViewTransmissionRisk = view.findViewById(R.id.textViewTransmissionRisk);
+            mTextViewRiskDetails = view.findViewById(R.id.textViewRiskDetails);
             mTextViewTxPower = view.findViewById(R.id.textViewTxPower);
             mChartView = view.findViewById(R.id.chart);
         }

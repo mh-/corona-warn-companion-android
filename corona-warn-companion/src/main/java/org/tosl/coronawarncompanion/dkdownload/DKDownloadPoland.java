@@ -1,8 +1,13 @@
 package org.tosl.coronawarncompanion.dkdownload;
 
+import android.content.Context;
+import android.util.Pair;
+
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
+
+import org.tosl.coronawarncompanion.R;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -19,18 +24,18 @@ public class DKDownloadPoland implements DKDownloadCountry {
     private static final String DK_URL = "https://exp.safesafe.app/";
 
     @Override
-    public Single<List<URL>> getUrls(RequestQueue queue, Date minDate) {
-        Subject<List<URL>> availableUrlsSubject = AsyncSubject.create();
+    public Single<List<Pair<URL, String>>> getUrls(Context context, RequestQueue queue, Date minDate) {
+        Subject<List<Pair<URL, String>>> availableUrlsSubject = AsyncSubject.create();
         StringRequest stringRequest = new StringRequest(
                 Request.Method.GET,
                 DK_URL + "/index.txt",
                 availableFilesStr -> {
                     String[] availableFiles = availableFilesStr.split("\n");
-                    List<URL> availableUrls = new ArrayList<>();
+                    List<Pair<URL, String>> availableUrls = new ArrayList<>();
                     for (String availableFile : availableFiles) {
                         try {
                             URL url = new URL(DK_URL + availableFile);
-                            availableUrls.add(url);
+                            availableUrls.add(new Pair<>(url, getCountryCode(context)));
                         } catch (MalformedURLException e) {
                             e.printStackTrace();
                         }
@@ -42,5 +47,10 @@ public class DKDownloadPoland implements DKDownloadCountry {
         );
         queue.add(stringRequest);
         return availableUrlsSubject.first(new ArrayList<>());
+    }
+
+    @Override
+    public String getCountryCode(Context context) {
+        return context.getResources().getString(R.string.country_code_poland);
     }
 }

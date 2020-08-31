@@ -2,19 +2,19 @@ package org.tosl.coronawarncompanion.dkdownload;
 
 import android.content.Context;
 import android.util.Log;
+import android.util.Pair;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 
+import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKey;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysImport;
-import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.subjects.ReplaySubject;
@@ -26,19 +26,25 @@ public class DKDownloadUtils {
 
     private static final String TAG = "DKDownloadUtils";
 
-    public static Single<List<DiagnosisKeysProtos.TemporaryExposureKey>> getDKsForCountries(Context context, RequestQueue queue, Date minDate, List<DKDownloadCountry> countries) {
-        List<Single<List<URL>>> singleList = countries.stream().map(dkDownloadCountry -> dkDownloadCountry.getUrls(queue, minDate)).collect(Collectors.toList());
+    public static Single<List<DiagnosisKey>>
+    getDKsForCountries(Context context, RequestQueue queue, Date minDate, List<DKDownloadCountry> countries) {
+        List<Single<List<Pair<URL, String>>>> singleList = new ArrayList<>();
+        for (DKDownloadCountry dkDownloadCountry : countries) {
+            Single<List<Pair<URL, String>>> dkDownloadCountryUrls = dkDownloadCountry.getUrls(context, queue, minDate);
+            singleList.add(dkDownloadCountryUrls);
+        }
         return Single.zip(singleList, results -> {
-            List<URL> urlList = new ArrayList<>();
+            List<Pair<URL, String>> urlList = new ArrayList<>();
             for (Object result : results) {
                 //noinspection unchecked
-                urlList.addAll((List<URL>) result);
+                urlList.addAll((List<Pair<URL, String>>) result);
             }
             return urlList;
-        }).flatMap(urls -> processUrlList(context, queue, urls));
+        }).flatMap(urlsWithCountryCode -> processUrlList(context, queue, urlsWithCountryCode));
     }
 
-    public static List<DiagnosisKeysProtos.TemporaryExposureKey> parseBytesToTeks(Context context, byte[] fileBytes) {
+    public static List<DiagnosisKey>
+    parseBytesToTeks(Context context, byte[] fileBytes, String countryCode) {
         byte[] exportDotBinBytes = {};
         try {
             exportDotBinBytes = getUnzippedBytesFromZipFileBytes(fileBytes, "export.bin");
@@ -46,8 +52,8 @@ public class DKDownloadUtils {
             e.printStackTrace();
         }
 
-        DiagnosisKeysImport diagnosisKeysImport = new DiagnosisKeysImport(exportDotBinBytes, context);
-        List<DiagnosisKeysProtos.TemporaryExposureKey> dkList = diagnosisKeysImport.getDiagnosisKeys();
+        DiagnosisKeysImport diagnosisKeysImport = new DiagnosisKeysImport(context, exportDotBinBytes, countryCode);
+        List<DiagnosisKey> dkList = diagnosisKeysImport.getDiagnosisKeys();
         if (dkList != null) {
             Log.d(TAG, "Number of keys in this file: " + dkList.size());
             return dkList;
@@ -55,27 +61,28 @@ public class DKDownloadUtils {
         return new ArrayList<>();
     }
 
-    private static Single<List<DiagnosisKeysProtos.TemporaryExposureKey>> processUrlList(Context context, RequestQueue queue, List<URL> diagnosisKeysUrls) {
-        Subject<List<DiagnosisKeysProtos.TemporaryExposureKey>> diagnosisKeysSubject = ReplaySubject.create();
+    private static Single<List<DiagnosisKey>>
+    processUrlList(Context context, RequestQueue queue, List<Pair<URL, String>> diagnosisKeysUrlsWithCountryCode) {
+        Subject<List<DiagnosisKey>> diagnosisKeysSubject = ReplaySubject.create();
 
-        for (URL url: diagnosisKeysUrls) {
-            Log.d(TAG, "Going to download: " + url);
+        for (Pair<URL, String> urlWithCountryCode: diagnosisKeysUrlsWithCountryCode) {
+            Log.d(TAG, "Going to download: " + urlWithCountryCode);
             ByteArrayRequest byteArrayRequest = new ByteArrayRequest(
                     Request.Method.GET,
-                    url.toString(),
+                    urlWithCountryCode.first.toString(),
                     fileBytes -> {
                         if (fileBytes.length == 0) {
-                            Log.d(TAG, "Download resulted in 0 bytes: " + url);
+                            Log.d(TAG, "Download resulted in 0 bytes: " + urlWithCountryCode);
                             diagnosisKeysSubject.onNext(new ArrayList<>());
                         } else {
-                            Log.d(TAG, "Download complete: " + url);
-                            diagnosisKeysSubject.onNext(parseBytesToTeks(context, fileBytes));
+                            Log.d(TAG, "Download complete: " + urlWithCountryCode);
+                            diagnosisKeysSubject.onNext(parseBytesToTeks(context, fileBytes, urlWithCountryCode.second));
                         }
                     },
                     diagnosisKeysSubject::onError);
             queue.add(byteArrayRequest);
         }
-        return diagnosisKeysSubject.take(diagnosisKeysUrls.size()).doFinally(diagnosisKeysSubject::onComplete).reduce(new ArrayList<>(), (accumulated, current) -> {
+        return diagnosisKeysSubject.take(diagnosisKeysUrlsWithCountryCode.size()).doFinally(diagnosisKeysSubject::onComplete).reduce(new ArrayList<>(), (accumulated, current) -> {
             accumulated.addAll(current);
             return accumulated;
         });
