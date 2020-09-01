@@ -105,9 +105,14 @@ public class MatchEntryContent {
     public static class GroupedByDkMatchEntries {
         private final ArrayList<Matcher.MatchEntry> list = new ArrayList<>();
         private int groupedByDkRpiCount = 0;
+        private Integer minStartTimeStampUTC = Integer.MAX_VALUE;
 
         public int getGroupedByDkRpiCount() {
             return groupedByDkRpiCount;
+        }
+
+        public Integer getMinStartTimeStampUTC() {
+            return minStartTimeStampUTC;
         }
 
         public ArrayList<Matcher.MatchEntry> getList() {
@@ -117,6 +122,9 @@ public class MatchEntryContent {
         public void add(Matcher.MatchEntry entry) {
             list.add(entry);
             groupedByDkRpiCount++;
+            if (minStartTimeStampUTC > entry.startTimestampUTC) {
+                minStartTimeStampUTC = entry.startTimestampUTC;
+            }
         }
     }
 }

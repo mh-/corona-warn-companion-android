@@ -27,7 +27,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,12 +52,12 @@ import org.tosl.coronawarncompanion.matcher.Matcher;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.TreeMap;
 
 import static org.tosl.coronawarncompanion.tools.Utils.byteArrayToHexString;
 import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromSeconds;
@@ -78,7 +77,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
     private static final int greenColor = Color.parseColor("#00FF00");
     private final float textScalingFactor;
 
-    private final ArrayList<Pair<DiagnosisKey, MatchEntryContent.GroupedByDkMatchEntries>> mValues;
+    private final ArrayList<DkAndMatchEntries> mValues;
     private final Context mContext;
 
     private boolean showAllScans = false;
@@ -86,13 +85,11 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
     public MatchesRecyclerViewAdapter(DailyMatchEntries dailyMatchEntries, Context context) {
         this.mContext = context;
         this.mValues = new ArrayList<>();
-        TreeMap<Integer, Pair<DiagnosisKey, MatchEntryContent.GroupedByDkMatchEntries>> treeMap = new TreeMap<>();
-        // Sorted TreeMap <startTimestampUTC of the first entry, Pair <DK, matchEntries> >
         for (Map.Entry<DiagnosisKey, MatchEntryContent.GroupedByDkMatchEntries> entry :
                 dailyMatchEntries.getMap().entrySet()) {
-            treeMap.put(entry.getValue().getList().get(0).startTimestampUTC, new Pair<>(entry.getKey(), entry.getValue()));
+            mValues.add(new DkAndMatchEntries(entry.getKey(), entry.getValue()));
         }
-        mValues.addAll(treeMap.values());
+        Collections.sort(mValues);
         DisplayMetrics metrics = this.mContext.getResources().getDisplayMetrics();
         this.textScalingFactor = metrics.scaledDensity/metrics.density;
         this.lineColor = resolveColorAttr(android.R.attr.textColorSecondary, context);
@@ -109,9 +106,9 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
     @SuppressWarnings("deprecation")
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.mMatchEntriesPair = mValues.get(position);
-        DiagnosisKey dk = holder.mMatchEntriesPair.first;
-        MatchEntryContent.GroupedByDkMatchEntries groupedByDkMatchEntries = holder.mMatchEntriesPair.second;
+        holder.mDkAndMatchEntries = mValues.get(position);
+        DiagnosisKey dk = holder.mDkAndMatchEntries.dk;
+        MatchEntryContent.GroupedByDkMatchEntries groupedByDkMatchEntries = holder.mDkAndMatchEntries.matchEntries;
 
         ArrayList<Matcher.MatchEntry> list = groupedByDkMatchEntries.getList();
 
@@ -277,9 +274,24 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         result.minTxPower = Byte.MAX_VALUE;
         result.maxTxPower = Byte.MIN_VALUE;
 
-        TreeMap<Integer, Integer> dataPointsInterimMap = new TreeMap<>();
+        class InterimDataPoint implements Comparable<InterimDataPoint> {
+            public final Integer timestampLocalTZ;
+            public final Integer attenuation;
 
-        // First step: Create a "flat" sorted list (TreeMap) from all scan records from all matchEntries
+            private InterimDataPoint(int timestampLocalTZ, int attenuation) {
+                this.timestampLocalTZ = timestampLocalTZ;
+                this.attenuation = attenuation;
+            }
+
+            @Override
+            public int compareTo(InterimDataPoint o) {
+                return timestampLocalTZ.compareTo(o.timestampLocalTZ);
+            }
+        }
+
+        ArrayList<InterimDataPoint> dataPointsInterimList = new ArrayList<>();
+
+        // First step: Create a "flat" sorted list from all scan records from all matchEntries
         for (Matcher.MatchEntry matchEntry : list) {  // process each matchEntry separately
             for (ContactRecordsProtos.ScanRecord scanRecord : matchEntry.contactRecords.getRecordList()) {
                 byte[] aem = xorTwoByteArrays(scanRecord.getAem().toByteArray(), matchEntry.aemXorBytes);
@@ -296,7 +308,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
                 int timestampLocalTZ = scanRecord.getTimestamp() + timeZoneOffset;
 
                 // store to temporary buffers:
-                dataPointsInterimMap.put(timestampLocalTZ, attenuation);
+                dataPointsInterimList.add(new InterimDataPoint(timestampLocalTZ, attenuation));
 
                 // if found, store max/min values
                 if (result.minTxPower > txPower) {
@@ -319,6 +331,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
                 }
             }
         }
+        Collections.sort(dataPointsInterimList);
 
         // reduce timestamp to "day0", to improve resolution within the float x value of the graph:
         int timestampMinOffset= (minTimestampLocalTZ / (24*3600)) * (24*3600);
@@ -331,12 +344,12 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         int lastTimestampLocalTZDay0 = 0;
         int localMinAttenuation = Integer.MAX_VALUE;
 
-        int numLastScanRecord = dataPointsInterimMap.size() - 1;
+        int numLastScanRecord = dataPointsInterimList.size() - 1;
         int i = 0;
-        for(Map.Entry<Integer, Integer> mapEntry : dataPointsInterimMap.entrySet()) {
-            // iterate over sorted TreeMap
-            int timestampLocalTZDay0 = mapEntry.getKey() - timestampMinOffset;
-            int attenuation = mapEntry.getValue();
+        for (InterimDataPoint interimDataPoint : dataPointsInterimList) {
+            // iterate over sorted ArrayList
+            int timestampLocalTZDay0 = interimDataPoint.timestampLocalTZ - timestampMinOffset;
+            int attenuation = interimDataPoint.attenuation;
 
             // Second step: look for a break (>= pauseThresholdSeconds)
             // suppress break detection at the very first entry
@@ -559,7 +572,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         public final TextView mTextViewRiskDetails;
         public final TextView mTextViewTxPower;
         public final LineChart mChartView;
-        public Pair<DiagnosisKey, MatchEntryContent.GroupedByDkMatchEntries> mMatchEntriesPair;
+        public DkAndMatchEntries mDkAndMatchEntries;
 
         public ViewHolder(View view) {
             super(view);

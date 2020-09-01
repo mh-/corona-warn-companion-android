@@ -36,11 +36,14 @@ import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromSeconds;
 public class RpiList {
     private static final String TAG = "RpiList";
 
+    @SuppressWarnings("FieldCanBeLocal")
+    private final boolean addFakeMatches = false;  // TODO: ONLY FOR TESTING, MUST BE SET TO FALSE FOR RELEASES!
+
     private final Map<Integer, ListsPerDayUTC> mapOfDaysUTCAndListsOfRPIs;  // daysSinceEpochUTC, ListsPerDayUTC
     private final Map<Integer, Integer> mapOfDailyCountsLocalTZ;  // daysSinceEpochLocalTZ, numberOfEntries
 
     private final int timeZoneOffsetSeconds;
-    //private final Random rand;
+    private final Random rand;
 
     public static class ListsPerDayUTC {
         public final HashMap<RpiBytes, RpiEntry> rpiEntries = new HashMap<>(2048);     // RpiEntries
@@ -124,7 +127,7 @@ public class RpiList {
         mapOfDaysUTCAndListsOfRPIs = new HashMap<>();
         mapOfDailyCountsLocalTZ = new TreeMap<>();
         timeZoneOffsetSeconds = CWCApplication.getTimeZoneOffsetSeconds();
-        //rand = new Random();  // not very random, but sufficient for the use case here
+        rand = new Random();  // not very random, but sufficient for the use case here
     }
 
     public void addEntry(Integer daysSinceEpochUTC, byte[] rpiBytes, ContactRecordsProtos.ContactRecords contactRecords) {
@@ -188,6 +191,7 @@ public class RpiList {
     public RpiEntry searchForRpiOnDaySinceEpochUTCWith2HoursTolerance(Crypto.RpiWithInterval searchRpiWithInterval) {
         int daysSinceEpochUTC = getDaysSinceEpochFromENIN(searchRpiWithInterval.intervalNumber);
         RpiEntry matchingRpiEntry = null;
+        //noinspection ConstantConditions
         if (searchRpiWithInterval != null) {
             RpiBytes rpiBytes = new RpiBytes(searchRpiWithInterval.rpiBytes);
 
@@ -238,26 +242,28 @@ public class RpiList {
                 }
             }
 
-            /*
-            // Add some random matches, for test purposes only!
-            // TODO: THIS MUST NOT BE ACTIVE FOR RELEASES!
-            if (rand.nextInt(100000) >= 99995) {
-                ListsPerDayUTC listsPerDayUTC = mapOfDaysUTCAndListsOfRPIs.get(daysSinceEpochUTC);
-                if (listsPerDayUTC !=  null) {
+            if (addFakeMatches) {
+                // Add some random matches, for test purposes only!
+                // TODO: THIS MUST NOT BE ACTIVE FOR RELEASES!
+                if (rand.nextInt(100000) >= 99955) {
+                    ListsPerDayUTC listsPerDayUTC = mapOfDaysUTCAndListsOfRPIs.get(daysSinceEpochUTC);
+                    if (listsPerDayUTC != null) {
 
-                    int numEntries = listsPerDayUTC.rpiEntries.size();
-                    int randomPos = rand.nextInt(numEntries)+1;
-                    // The following random selection process is not 100% correct, but sufficient.
-                    Iterator<RpiEntry> it = listsPerDayUTC.rpiEntries.values().iterator();
-                    while (it.hasNext() && randomPos > 0) {
-                        matchingRpiEntry = it.next();
-                        randomPos--;
+                        int numEntries = listsPerDayUTC.rpiEntries.size();
+                        int randomPos = rand.nextInt(numEntries) + 1;
+                        // The following random selection process is not 100% correct, but sufficient.
+                        Iterator<RpiEntry> it = listsPerDayUTC.rpiEntries.values().iterator();
+                        while (it.hasNext() && randomPos > 0) {
+                            matchingRpiEntry = it.next();
+                            randomPos--;
+                        }
+                        if (matchingRpiEntry != null) {
+                            Log.d(TAG, "Reporting fake match: matchingRpiEntry.startTimeStampUTC: " +
+                                    matchingRpiEntry.startTimeStampUTC);
+                        }
                     }
-                    Log.d(TAG, "Reporting fake match: matchingRpiEntry.startTimeStampUTC: " +
-                            matchingRpiEntry.startTimeStampUTC);
                 }
             }
-            */
         }
         return matchingRpiEntry;
     }
