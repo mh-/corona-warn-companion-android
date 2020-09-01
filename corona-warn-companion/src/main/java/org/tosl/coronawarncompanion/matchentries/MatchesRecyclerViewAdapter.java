@@ -87,6 +87,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         this.mContext = context;
         this.mValues = new ArrayList<>();
         TreeMap<Integer, Pair<DiagnosisKey, MatchEntryContent.GroupedByDkMatchEntries>> treeMap = new TreeMap<>();
+        // Sorted TreeMap <startTimestampUTC of the first entry, Pair <DK, matchEntries> >
         for (Map.Entry<DiagnosisKey, MatchEntryContent.GroupedByDkMatchEntries> entry :
                 dailyMatchEntries.getMap().entrySet()) {
             treeMap.put(entry.getValue().getList().get(0).startTimestampUTC, new Pair<>(entry.getKey(), entry.getValue()));
@@ -259,12 +260,14 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
 
     public static MatchEntryDetails getMatchEntryDetails(ArrayList<Matcher.MatchEntry> list,
                                                          int timeZoneOffset) {
+        // Get the details for one risk encounter.
+
         // Threshold value for break detection:
         final int pauseThresholdSeconds = 10;
 
         MatchEntryDetails result = new MatchEntryDetails();
-        result.minTimestampLocalTZDay0 = Integer.MAX_VALUE;
-        result.maxTimestampLocalTZDay0 = Integer.MIN_VALUE;
+        int minTimestampLocalTZ = Integer.MAX_VALUE;
+        int maxTimestampLocalTZ = Integer.MIN_VALUE;
         result.dataPoints = new ArrayList<>();
         result.dotColors = new ArrayList<>();
         result.dataPointsMinAttenuation = new ArrayList<>();
@@ -291,11 +294,9 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
                 //Log.d(TAG, "Attenuation: "+attenuation+" dB");
 
                 int timestampLocalTZ = scanRecord.getTimestamp() + timeZoneOffset;
-                // reduce to "day0", to improve resolution within the float x value:
-                int timestampLocalTZDay0 = timestampLocalTZ % (24*3600);
 
                 // store to temporary buffers:
-                dataPointsInterimMap.put(timestampLocalTZDay0, attenuation);
+                dataPointsInterimMap.put(timestampLocalTZ, attenuation);
 
                 // if found, store max/min values
                 if (result.minTxPower > txPower) {
@@ -310,14 +311,19 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
                 if (result.maxAttenuation < attenuation) {
                     result.maxAttenuation = attenuation;
                 }
-                if (result.minTimestampLocalTZDay0 > timestampLocalTZDay0) {
-                    result.minTimestampLocalTZDay0 = timestampLocalTZDay0;
+                if (minTimestampLocalTZ > timestampLocalTZ) {
+                    minTimestampLocalTZ = timestampLocalTZ;
                 }
-                if (result.maxTimestampLocalTZDay0 < timestampLocalTZDay0) {
-                    result.maxTimestampLocalTZDay0 = timestampLocalTZDay0;
+                if (maxTimestampLocalTZ < timestampLocalTZ) {
+                    maxTimestampLocalTZ = timestampLocalTZ;
                 }
             }
         }
+
+        // reduce timestamp to "day0", to improve resolution within the float x value of the graph:
+        int timestampMinOffset= (minTimestampLocalTZ / (24*3600)) * (24*3600);
+        result.minTimestampLocalTZDay0 = minTimestampLocalTZ - timestampMinOffset;
+        result.maxTimestampLocalTZDay0 = maxTimestampLocalTZ - timestampMinOffset;
 
         // Second step: Process each scan record, group them, find the minimum attenuation in each group
         ArrayList<Entry> dataPointsBuffer = new ArrayList<>();
@@ -329,7 +335,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         int i = 0;
         for(Map.Entry<Integer, Integer> mapEntry : dataPointsInterimMap.entrySet()) {
             // iterate over sorted TreeMap
-            int timestampLocalTZDay0 = mapEntry.getKey();
+            int timestampLocalTZDay0 = mapEntry.getKey() - timestampMinOffset;
             int attenuation = mapEntry.getValue();
 
             // Second step: look for a break (>= pauseThresholdSeconds)
