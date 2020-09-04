@@ -33,7 +33,7 @@ This app helps you to better understand warnings of the official Corona-Warn-App
    (this is only possible with root permissions, which is why official Exposure Notifications apps, such as Corona-Warn-App,
    cannot display these details).  
    ![-Example Recorded Encounters-](screenshots/rpis_en.png)
-   Alternatively, the app can also read a database exported from RaMBLE (does not need root permissions).
+   Alternatively, the app can also read a database exported from the [RaMBLE - Bluetooth LE Mapper app](https://play.google.com/store/apps/details?id=com.contextis.android.BLEScanner) (does not need root permissions).
 2. The app downloads the Diagnosis Keys from the official German Corona-Warn-Server and other countries' servers, as selected by you.
    For Germany, it downloads the keys published daily for the last few days, and the keys published every hour for today. Therefore, different information than in the official app might be displayed.
    Only keys for the days found in step 1 are shown and counted.  
@@ -59,6 +59,8 @@ Note that 1 means a low and 8 means a high transmission risk.
 The source code of the app is published at https://github.com/mh-/corona-warn-companion-android, so you can check the source code, build the app yourself, and you are also welcome to contribute to improvements.
 
 # RaMBLE mode - works without root permissions
+This mode requires the installation of the [RamBLE - Bluetooth LE Mapper app](https://play.google.com/store/apps/details?id=com.contextis.android.BLEScanner).
+
 In RaMBLE mode, the app will not read the Exposure Notification database, but instead read the most recent RaMBLE database export stored in the `Download` folder.
 Note that the Exposure Notifications database contains `calibrated_rssi` ([see here](https://developers.google.com/android/exposure-notifications/ble-attenuation-overview#calibration_per-device_tx_power_and_per-device_rssi_correction)).
 RaMBLE however stores only `raw_rssi`, which means that the colors shown on the details screen are probably different from the case when the app reads the Exposure Notifications database.
