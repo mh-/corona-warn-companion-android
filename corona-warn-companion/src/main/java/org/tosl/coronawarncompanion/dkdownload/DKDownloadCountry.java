@@ -9,9 +9,11 @@ import java.net.URL;
 import java.util.Date;
 import java.util.List;
 
-import io.reactivex.rxjava3.core.Single;
+import io.reactivex.Flowable;
+import io.reactivex.Observable;
+
 
 public interface DKDownloadCountry {
-    Single<List<Pair<URL, String>>> getUrls(Context context, RequestQueue queue, Date minDate);
+    Observable<Pair<byte[], String>> getDKBytes(Context context, Date minDate);
     String getCountryCode(Context context);
 }

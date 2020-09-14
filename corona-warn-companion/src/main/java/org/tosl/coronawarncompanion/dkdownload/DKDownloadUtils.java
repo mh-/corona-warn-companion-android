@@ -2,23 +2,19 @@ package org.tosl.coronawarncompanion.dkdownload;
 
 import android.content.Context;
 import android.util.Log;
-import android.util.Pair;
-
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKey;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysImport;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import io.reactivex.rxjava3.core.Single;
-import io.reactivex.rxjava3.subjects.ReplaySubject;
-import io.reactivex.rxjava3.subjects.Subject;
+import io.reactivex.Flowable;
+import io.reactivex.Observable;
+import io.reactivex.Single;
 
 import static org.tosl.coronawarncompanion.dkdownload.Unzip.getUnzippedBytesFromZipFileBytes;
 
@@ -27,20 +23,20 @@ public class DKDownloadUtils {
     private static final String TAG = "DKDownloadUtils";
 
     public static Single<List<DiagnosisKey>>
-    getDKsForCountries(Context context, RequestQueue queue, Date minDate, List<DKDownloadCountry> countries) {
-        List<Single<List<Pair<URL, String>>>> singleList = new ArrayList<>();
-        for (DKDownloadCountry dkDownloadCountry : countries) {
-            Single<List<Pair<URL, String>>> dkDownloadCountryUrls = dkDownloadCountry.getUrls(context, queue, minDate);
-            singleList.add(dkDownloadCountryUrls);
-        }
-        return Single.zip(singleList, results -> {
-            List<Pair<URL, String>> urlList = new ArrayList<>();
-            for (Object result : results) {
-                //noinspection unchecked
-                urlList.addAll((List<Pair<URL, String>>) result);
-            }
-            return urlList;
-        }).flatMap(urlsWithCountryCode -> processUrlList(context, queue, urlsWithCountryCode));
+    getDKsForCountries(Context context, Date minDate, List<DKDownloadCountry> countries) {
+        return Observable
+                .concat(
+                countries
+                        .stream()
+                        .map(dkDownloadCountry -> dkDownloadCountry.getDKBytes(context, minDate))
+                        .collect(Collectors.toList()))
+                .map(bytesCountryPair -> parseBytesToTeks(
+                        context, bytesCountryPair.first, bytesCountryPair.second))
+                .toList()
+                .map(dkListList -> dkListList
+                        .stream()
+                        .flatMap(List::stream)
+                        .collect(Collectors.toList()));
     }
 
     public static List<DiagnosisKey>
@@ -59,32 +55,5 @@ public class DKDownloadUtils {
             return dkList;
         }
         return new ArrayList<>();
-    }
-
-    private static Single<List<DiagnosisKey>>
-    processUrlList(Context context, RequestQueue queue, List<Pair<URL, String>> diagnosisKeysUrlsWithCountryCode) {
-        Subject<List<DiagnosisKey>> diagnosisKeysSubject = ReplaySubject.create();
-
-        for (Pair<URL, String> urlWithCountryCode: diagnosisKeysUrlsWithCountryCode) {
-            Log.d(TAG, "Going to download: " + urlWithCountryCode);
-            ByteArrayRequest byteArrayRequest = new ByteArrayRequest(
-                    Request.Method.GET,
-                    urlWithCountryCode.first.toString(),
-                    fileBytes -> {
-                        if (fileBytes.length == 0) {
-                            Log.d(TAG, "Download resulted in 0 bytes: " + urlWithCountryCode);
-                            diagnosisKeysSubject.onNext(new ArrayList<>());
-                        } else {
-                            Log.d(TAG, "Download complete: " + urlWithCountryCode);
-                            diagnosisKeysSubject.onNext(parseBytesToTeks(context, fileBytes, urlWithCountryCode.second));
-                        }
-                    },
-                    diagnosisKeysSubject::onError);
-            queue.add(byteArrayRequest);
-        }
-        return diagnosisKeysSubject.take(diagnosisKeysUrlsWithCountryCode.size()).doFinally(diagnosisKeysSubject::onComplete).reduce(new ArrayList<>(), (accumulated, current) -> {
-            accumulated.addAll(current);
-            return accumulated;
-        });
     }
 }

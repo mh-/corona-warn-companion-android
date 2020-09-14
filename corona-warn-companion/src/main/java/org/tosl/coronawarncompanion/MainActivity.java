@@ -23,6 +23,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -53,10 +54,8 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import org.tosl.coronawarncompanion.barcharts.BarChartSync;
 import org.tosl.coronawarncompanion.barcharts.CwcBarChart;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKey;
-import org.tosl.coronawarncompanion.dkdownload.DKDownloadAustria;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadCountry;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadGermany;
-import org.tosl.coronawarncompanion.dkdownload.DKDownloadPoland;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadSwitzerland;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadUtils;
 import org.tosl.coronawarncompanion.gmsreadout.ContactDbOnDisk;
@@ -245,6 +244,7 @@ public class MainActivity extends AppCompatActivity {
         recreate();
     }
 
+    @SuppressLint("CheckResult")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -382,13 +382,13 @@ public class MainActivity extends AppCompatActivity {
             RequestQueue queue = Volley.newRequestQueue(this);
             List<DKDownloadCountry> dkDownloadCountries = new ArrayList<>();
 
-            if (CWCApplication.downloadKeysFromAustria) dkDownloadCountries.add(new DKDownloadAustria());
+            //if (CWCApplication.downloadKeysFromAustria) dkDownloadCountries.add(new DKDownloadAustria());
             if (CWCApplication.downloadKeysFromGermany) dkDownloadCountries.add(new DKDownloadGermany());
-            if (CWCApplication.downloadKeysFromPoland) dkDownloadCountries.add(new DKDownloadPoland());
+            //if (CWCApplication.downloadKeysFromPoland) dkDownloadCountries.add(new DKDownloadPoland());
             if (CWCApplication.downloadKeysFromSwitzerland) dkDownloadCountries.add(new DKDownloadSwitzerland());
 
             //noinspection ResultOfMethodCallIgnored
-            DKDownloadUtils.getDKsForCountries(context, queue, minDate, dkDownloadCountries)
+            DKDownloadUtils.getDKsForCountries(context, minDate, dkDownloadCountries)
                     .subscribe(this::processDownloadedDiagnosisKeys, error -> {
                         Log.e(TAG, "Error downloading diagnosis keys: " + error);
                         showDownloadError();
