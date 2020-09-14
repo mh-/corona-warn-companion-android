@@ -36,9 +36,7 @@ public class DKDownloadSwitzerland implements DKDownloadCountry {
         api = retrofit.create(Api.class);
     }
 
-    @Override
-    public Observable<Pair<byte[], String>> getDKBytes(Context context, Date minDate) {
-
+    private static List<String> createTimestamps(Date minDate) {
         long millisInDay = TimeUnit.HOURS.toMillis(24);
 
         long minDay = minDate.getTime() / millisInDay;
@@ -50,7 +48,13 @@ public class DKDownloadSwitzerland implements DKDownloadCountry {
             timestamps.add(String.valueOf(day * millisInDay));
         }
 
-        return Observable.fromIterable(timestamps)
+        return timestamps;
+    }
+
+    @Override
+    public Observable<Pair<byte[], String>> getDKBytes(Context context, Date minDate) {
+
+        return Observable.fromIterable(createTimestamps(minDate))
                 .flatMapMaybe(timestamp -> DKDownloadUtils.wrapRetrofit(context, api.getBytes(timestamp)))
                 .map(responseBody -> new Pair<>(responseBody.bytes(), getCountryCode(context)));
     }
