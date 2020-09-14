@@ -76,6 +76,9 @@ import java.util.Locale;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
 
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.DEMO_MODE;
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.NORMAL_MODE;
@@ -114,6 +117,11 @@ public class MainActivity extends AppCompatActivity {
     private TextView textViewDownloadError;
 
     private Context context;
+
+    private static final OkHttpClient OK_HTTP_CLIENT = new OkHttpClient.Builder()
+            .connectTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .build();
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -387,7 +395,7 @@ public class MainActivity extends AppCompatActivity {
             if (CWCApplication.downloadKeysFromSwitzerland) dkDownloadCountries.add(new DKDownloadSwitzerland());
 
             //noinspection ResultOfMethodCallIgnored
-            DKDownloadUtils.getDKsForCountries(context, minDate, dkDownloadCountries)
+            DKDownloadUtils.getDKsForCountries(context, OK_HTTP_CLIENT, minDate, dkDownloadCountries)
                     .subscribe(this::processDownloadedDiagnosisKeys, error -> {
                         Log.e(TAG, "Error downloading diagnosis keys: " + error);
                         showDownloadError();

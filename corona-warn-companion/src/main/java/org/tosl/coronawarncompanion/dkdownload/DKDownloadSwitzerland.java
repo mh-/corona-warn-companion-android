@@ -1,7 +1,8 @@
 package org.tosl.coronawarncompanion.dkdownload;
 
 import android.content.Context;
-import android.util.Pair;
+import android.util.Log;
+
 import org.tosl.coronawarncompanion.R;
 import java.util.ArrayList;
 import java.util.Date;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
+import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
@@ -16,6 +18,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Path;
 
 public class DKDownloadSwitzerland implements DKDownloadCountry {
+    private static final String TAG = "DKDownloadSwitzerland";
 
     private static final String DK_URL = "https://www.pt.bfs.admin.ch/v1/gaen/exposed/";
 
@@ -24,15 +27,6 @@ public class DKDownloadSwitzerland implements DKDownloadCountry {
         Maybe<ResponseBody> getBytes(@Path("timestamp") String timestamp);
     }
 
-    private static final Api api;
-
-    static {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(DK_URL)
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .build();
-        api = retrofit.create(Api.class);
-    }
 
     private static List<String> createTimestamps(Date minDate) {
         long millisInDay = TimeUnit.HOURS.toMillis(24);
@@ -50,10 +44,18 @@ public class DKDownloadSwitzerland implements DKDownloadCountry {
     }
 
     @Override
-    public Observable<byte[]> getDKBytes(Context context, Date minDate) {
+    public Observable<byte[]> getDKBytes(Context context, OkHttpClient okHttpClient, Date minDate) {
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(DK_URL)
+                .client(okHttpClient)
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .build();
+        Api api = retrofit.create(Api.class);
 
         return Observable.fromIterable(createTimestamps(minDate))
-                .flatMapMaybe(timestamp -> DKDownloadUtils.wrapRetrofit(context, api.getBytes(timestamp)))
+                .flatMapMaybe(timestamp -> DKDownloadUtils.wrapRetrofit(context, api.getBytes(timestamp))
+                        .doOnSuccess(responseBody -> Log.d(TAG, "Downloaded timestamp: " + timestamp)))
                 .map(ResponseBody::bytes);
     }
 

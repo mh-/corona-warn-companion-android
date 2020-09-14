@@ -16,6 +16,7 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.OkHttpClient;
 
 import static org.tosl.coronawarncompanion.dkdownload.Unzip.getUnzippedBytesFromZipFileBytes;
 
@@ -36,12 +37,12 @@ public class DKDownloadUtils {
     }
 
     public static Single<List<DiagnosisKey>>
-    getDKsForCountries(Context context, Date minDate, List<DKDownloadCountry> countries) {
+    getDKsForCountries(Context context, OkHttpClient okHttpClient, Date minDate, List<DKDownloadCountry> countries) {
         return Observable
                 .concat(countries
                         .stream()
                         .map(dkDownloadCountry -> dkDownloadCountry
-                                .getDKBytes(context, minDate)
+                                .getDKBytes(context, okHttpClient, minDate)
                                 .map(bytes -> new Pair<>(bytes, dkDownloadCountry.getCountryCode(context))))
                         .collect(Collectors.toList()))
                 .map(bytesCountryPair -> parseBytesToTeks(
