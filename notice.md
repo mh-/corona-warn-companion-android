@@ -110,15 +110,15 @@ This program also uses libraries from other sources, e.g.
         See the License for the specific language governing permissions and
         limitations under the License.
 
-  * RxJava – Reactive Extensions for the JVM - io.reactivex.rxjava3:rxjava - [link](https://github.com/ReactiveX/RxJava)
+  * RxAndroid – RxJava bindings for Android - io.reactivex.rxjava2:rxandroid - [link](https://github.com/ReactiveX/RxAndroid)
 
-        Copyright (c) 2016-present, RxJava Contributors.
+        Copyright 2015 The RxAndroid authors
 
         Licensed under the Apache License, Version 2.0 (the "License");
         you may not use this file except in compliance with the License.
         You may obtain a copy of the License at
 
-        http://www.apache.org/licenses/LICENSE-2.0
+            http://www.apache.org/licenses/LICENSE-2.0
 
         Unless required by applicable law or agreed to in writing, software
         distributed under the License is distributed on an "AS IS" BASIS,
@@ -126,15 +126,15 @@ This program also uses libraries from other sources, e.g.
         See the License for the specific language governing permissions and
         limitations under the License.
 
-  * Volley - com.android.volley:volley - [link](https://github.com/google/volley)
+  * Retrofit - com.squareup.retrofit2:* - [link](https://square.github.io/retrofit/)
 
-        Copyright (C) 2011 The Android Open Source Project
+        Copyright 2013 Square, Inc.
 
         Licensed under the Apache License, Version 2.0 (the "License");
         you may not use this file except in compliance with the License.
         You may obtain a copy of the License at
 
-             http://www.apache.org/licenses/LICENSE-2.0
+           http://www.apache.org/licenses/LICENSE-2.0
 
         Unless required by applicable law or agreed to in writing, software
         distributed under the License is distributed on an "AS IS" BASIS,
