@@ -2,6 +2,8 @@ package org.tosl.coronawarncompanion.dkdownload;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
+
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKey;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysImport;
 import java.io.IOException;
@@ -22,11 +24,15 @@ public class DKDownloadUtils {
 
     private static final String TAG = "DKDownloadUtils";
 
-    public static <T> Maybe<T> wrapRetrofit(Maybe<T> request) {
+    public static <T> Maybe<T> wrapRetrofit(Context context, Maybe<T> request) {
         return request
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnError(Throwable::printStackTrace)
+                .doOnError(error -> {
+                    error.printStackTrace();
+                    Toast toast = Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG);
+                    toast.show();
+                })
                 .onErrorComplete();
     }
 

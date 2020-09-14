@@ -84,21 +84,21 @@ public class DKDownloadGermany implements DKDownloadCountry {
     @Override
     public Observable<Pair<byte[], String>> getDKBytes(Context context, Date minDate) {
 
-        return DKDownloadUtils.wrapRetrofit(api.listDates())
+        return DKDownloadUtils.wrapRetrofit(context, api.listDates())
                 .map(datesListString -> Arrays.asList(parseCwsListResponse(datesListString)))
                 .map(datesList -> new Pair<>(datesList, currentDate(datesList)))
                 .flatMapObservable(datesListCurrentDatePair -> Observable.fromIterable(datesListCurrentDatePair.first)
                         .map(dateFormatter::parse)
                         .filter(date -> date.compareTo(minDate) > 0)
                         .flatMapMaybe(date -> DKDownloadUtils.wrapRetrofit(
-                                api.getDKsForDate(getStringFromDate(date))))
+                                context, api.getDKsForDate(getStringFromDate(date))))
                         .concatWith(
                                 DKDownloadUtils.wrapRetrofit(
-                                        api.listHours(datesListCurrentDatePair.second))
+                                        context, api.listHours(datesListCurrentDatePair.second))
                                         .flatMapObservable(hoursListString -> Observable
                                                 .fromIterable(Arrays.asList(parseCwsListResponse(hoursListString))))
                                         .flatMapMaybe(hour -> DKDownloadUtils.wrapRetrofit(
-                                                api.getDKsForDateAndHour(datesListCurrentDatePair.second, hour)))))
+                                                context, api.getDKsForDateAndHour(datesListCurrentDatePair.second, hour)))))
                 .map(responseBody -> new Pair<>(responseBody.bytes(), getCountryCode(context)));
     }
 
