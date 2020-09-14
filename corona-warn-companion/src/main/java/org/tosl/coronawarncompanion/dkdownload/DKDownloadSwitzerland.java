@@ -1,45 +1,62 @@
 package org.tosl.coronawarncompanion.dkdownload;
 
 import android.content.Context;
-import android.util.Pair;
-
-import com.android.volley.RequestQueue;
+import android.util.Log;
 
 import org.tosl.coronawarncompanion.R;
-
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import io.reactivex.rxjava3.core.Single;
+import io.reactivex.Maybe;
+import io.reactivex.Observable;
+import okhttp3.OkHttpClient;
+import okhttp3.ResponseBody;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import retrofit2.http.GET;
+import retrofit2.http.Path;
 
 public class DKDownloadSwitzerland implements DKDownloadCountry {
+    private static final String TAG = "DKDownloadSwitzerland";
 
     private static final String DK_URL = "https://www.pt.bfs.admin.ch/v1/gaen/exposed/";
 
-    @Override
-    public Single<List<Pair<URL, String>>> getUrls(Context context, RequestQueue queue, Date minDate) {
+    interface Api {
+        @GET("{timestamp}")
+        Maybe<ResponseBody> getBytes(@Path("timestamp") String timestamp);
+    }
 
+
+    private static List<String> createTimestamps(Date minDate) {
         long millisInDay = TimeUnit.HOURS.toMillis(24);
 
         long minDay = minDate.getTime() / millisInDay;
         long maxDay = System.currentTimeMillis() / millisInDay;
 
-        List<Pair<URL, String>> urlList = new ArrayList<>();
+        List<String> timestamps = new ArrayList<>();
 
         for (long day = minDay; day <= maxDay; day++) {
-            try {
-                URL url = new URL(DK_URL + day * millisInDay);
-                urlList.add(new Pair<>(url, getCountryCode(context)));
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
+            timestamps.add(String.valueOf(day * millisInDay));
         }
 
-        return Single.just(urlList);
+        return timestamps;
+    }
+
+    @Override
+    public Observable<byte[]> getDKBytes(Context context, OkHttpClient okHttpClient, Date minDate) {
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(DK_URL)
+                .client(okHttpClient)
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .build();
+        Api api = retrofit.create(Api.class);
+
+        return Observable.fromIterable(createTimestamps(minDate))
+                .flatMapMaybe(timestamp -> DKDownloadUtils.wrapRetrofit(context, api.getBytes(timestamp))
+                        .doOnSuccess(responseBody -> Log.d(TAG, "Downloaded timestamp: " + timestamp)))
+                .map(ResponseBody::bytes);
     }
 
     @Override

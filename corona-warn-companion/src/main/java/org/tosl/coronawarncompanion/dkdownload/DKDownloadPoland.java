@@ -1,52 +1,53 @@
 package org.tosl.coronawarncompanion.dkdownload;
 
 import android.content.Context;
-import android.util.Pair;
-
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.StringRequest;
+import android.util.Log;
 
 import org.tosl.coronawarncompanion.R;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-
-import io.reactivex.rxjava3.core.Single;
-import io.reactivex.rxjava3.subjects.AsyncSubject;
-import io.reactivex.rxjava3.subjects.Subject;
+import io.reactivex.Maybe;
+import io.reactivex.Observable;
+import okhttp3.OkHttpClient;
+import okhttp3.ResponseBody;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
+import retrofit2.http.GET;
+import retrofit2.http.Url;
 
 public class DKDownloadPoland implements DKDownloadCountry {
+    private static final String TAG = "DKDownloadPoland";
 
     private static final String DK_URL = "https://exp.safesafe.app/";
 
+    interface Api {
+        @GET
+        Maybe<String> getIndex(@Url String uri);
+
+        @GET
+        Maybe<ResponseBody> getFile(@Url String uri);
+    }
+
+
     @Override
-    public Single<List<Pair<URL, String>>> getUrls(Context context, RequestQueue queue, Date minDate) {
-        Subject<List<Pair<URL, String>>> availableUrlsSubject = AsyncSubject.create();
-        StringRequest stringRequest = new StringRequest(
-                Request.Method.GET,
-                DK_URL + "/index.txt",
-                availableFilesStr -> {
-                    String[] availableFiles = availableFilesStr.split("\n");
-                    List<Pair<URL, String>> availableUrls = new ArrayList<>();
-                    for (String availableFile : availableFiles) {
-                        try {
-                            URL url = new URL(DK_URL + availableFile);
-                            availableUrls.add(new Pair<>(url, getCountryCode(context)));
-                        } catch (MalformedURLException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    availableUrlsSubject.onNext(availableUrls);
-                    availableUrlsSubject.onComplete();
-                },
-                availableUrlsSubject::onError
-        );
-        queue.add(stringRequest);
-        return availableUrlsSubject.first(new ArrayList<>());
+    public Observable<byte[]> getDKBytes(Context context, OkHttpClient okHttpClient, Date minDate) {
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(DK_URL)
+                .client(okHttpClient)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .build();
+
+        Api api = retrofit.create(Api.class);
+
+        return DKDownloadUtils.wrapRetrofit(context, api.getIndex(DK_URL + "/index.txt"))
+                .doOnSuccess(indexString -> Log.d(TAG, "Downloaded index"))
+                .flatMapObservable(indexString -> Observable.fromArray(indexString.split("\n")))
+                .flatMapMaybe(availableFile -> DKDownloadUtils.wrapRetrofit(context, api.getFile(DK_URL + availableFile))
+                        .doOnSuccess(responseBody -> Log.d(TAG, "Downloaded file: " + availableFile)))
+                .map(ResponseBody::bytes);
+
     }
 
     @Override
