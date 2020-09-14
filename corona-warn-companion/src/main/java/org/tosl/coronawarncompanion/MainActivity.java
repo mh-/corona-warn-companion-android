@@ -480,7 +480,17 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        textViewDks.setText(getString(R.string.title_diagnosis_keys_downloaded, count, CWCApplication.getFlagsString(context)));
+        StringBuilder sb = new StringBuilder();
+        sb.append(getString(R.string.title_diagnosis_keys_downloaded, count, CWCApplication.getFlagsString(context)));
+
+        int errorCount = DKDownloadUtils.getErrorCount();
+        if (errorCount != 0) {
+            sb.append(" ");
+            sb.append(getResources().getQuantityString(R.plurals.title_diagnosis_keys_downloaded_warning,
+                    errorCount, errorCount));
+        }
+
+        textViewDks.setText(sb.toString());
 
         List<BarEntry> dataPoints2 = new ArrayList<>();
 
