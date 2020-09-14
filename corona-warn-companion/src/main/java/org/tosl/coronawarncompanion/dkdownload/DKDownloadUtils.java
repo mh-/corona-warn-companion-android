@@ -2,19 +2,19 @@ package org.tosl.coronawarncompanion.dkdownload;
 
 import android.content.Context;
 import android.util.Log;
-
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKey;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysImport;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import io.reactivex.Flowable;
+import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 import static org.tosl.coronawarncompanion.dkdownload.Unzip.getUnzippedBytesFromZipFileBytes;
 
@@ -22,11 +22,18 @@ public class DKDownloadUtils {
 
     private static final String TAG = "DKDownloadUtils";
 
+    public static <T> Maybe<T> wrapRetrofit(Maybe<T> request) {
+        return request
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnError(Throwable::printStackTrace)
+                .onErrorComplete();
+    }
+
     public static Single<List<DiagnosisKey>>
     getDKsForCountries(Context context, Date minDate, List<DKDownloadCountry> countries) {
         return Observable
-                .concat(
-                countries
+                .concat(countries
                         .stream()
                         .map(dkDownloadCountry -> dkDownloadCountry.getDKBytes(context, minDate))
                         .collect(Collectors.toList()))

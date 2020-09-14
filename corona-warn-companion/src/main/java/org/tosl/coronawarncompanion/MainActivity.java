@@ -44,8 +44,6 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.Volley;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.highlight.Highlight;
@@ -54,8 +52,10 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import org.tosl.coronawarncompanion.barcharts.BarChartSync;
 import org.tosl.coronawarncompanion.barcharts.CwcBarChart;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKey;
+import org.tosl.coronawarncompanion.dkdownload.DKDownloadAustria;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadCountry;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadGermany;
+import org.tosl.coronawarncompanion.dkdownload.DKDownloadPoland;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadSwitzerland;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadUtils;
 import org.tosl.coronawarncompanion.gmsreadout.ContactDbOnDisk;
@@ -379,12 +379,11 @@ public class MainActivity extends AppCompatActivity {
 
         textViewDks.setText(getString(R.string.title_diagnosis_keys_downloading, CWCApplication.getFlagsString(context)));
         if (CWCApplication.appMode == NORMAL_MODE || CWCApplication.appMode == RAMBLE_MODE) {
-            RequestQueue queue = Volley.newRequestQueue(this);
             List<DKDownloadCountry> dkDownloadCountries = new ArrayList<>();
 
-            //if (CWCApplication.downloadKeysFromAustria) dkDownloadCountries.add(new DKDownloadAustria());
+            if (CWCApplication.downloadKeysFromAustria) dkDownloadCountries.add(new DKDownloadAustria());
             if (CWCApplication.downloadKeysFromGermany) dkDownloadCountries.add(new DKDownloadGermany());
-            //if (CWCApplication.downloadKeysFromPoland) dkDownloadCountries.add(new DKDownloadPoland());
+            if (CWCApplication.downloadKeysFromPoland) dkDownloadCountries.add(new DKDownloadPoland());
             if (CWCApplication.downloadKeysFromSwitzerland) dkDownloadCountries.add(new DKDownloadSwitzerland());
 
             //noinspection ResultOfMethodCallIgnored

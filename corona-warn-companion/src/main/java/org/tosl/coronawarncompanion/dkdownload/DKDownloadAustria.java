@@ -2,54 +2,71 @@ package org.tosl.coronawarncompanion.dkdownload;
 
 import android.content.Context;
 import android.util.Pair;
-
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.JsonObjectRequest;
-
-import org.json.JSONArray;
-import org.json.JSONException;
+import com.google.gson.annotations.SerializedName;
 import org.tosl.coronawarncompanion.R;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import io.reactivex.Maybe;
+import io.reactivex.Observable;
+import okhttp3.ResponseBody;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.GET;
+import retrofit2.http.Path;
 
-//public class DKDownloadAustria implements DKDownloadCountry {
-//
-//    private static final String DK_URL = "https://cdn.prod-rca-coronaapp-fd.net";
-//
-//    @Override
-//    public Single<List<Pair<URL, String>>> getUrls(Context context, RequestQueue queue, Date minDate) {
-//        Subject<List<Pair<URL, String>>> availableUrlsSubject = AsyncSubject.create();
-//        JsonObjectRequest jsonRequest = new JsonObjectRequest(
-//                Request.Method.GET,
-//                DK_URL + "/exposures/at/index.json",
-//                null,
-//                json -> {
-//                    List<Pair<URL, String>> urlList = new ArrayList<>();
-//                    try {
-//                        JSONArray paths = json.getJSONObject("full_14_batch").getJSONArray("batch_file_paths");
-//                        for (int i=0; i<paths.length(); i++) {
-//                            URL url = new URL(DK_URL + paths.getString(i).replace("\\", "/"));
-//                            urlList.add(new Pair<>(url, getCountryCode(context)));
-//                        }
-//                        availableUrlsSubject.onNext(urlList);
-//                    } catch (JSONException | MalformedURLException e) {
-//                        availableUrlsSubject.onError(e);
-//                    }
-//                    availableUrlsSubject.onComplete();
-//                },
-//                availableUrlsSubject::onError
-//        );
-//        queue.add(jsonRequest);
-//        return availableUrlsSubject.first(new ArrayList<>());
-//    }
-//
-//    @Override
-//    public String getCountryCode(Context context) {
-//        return context.getResources().getString(R.string.country_code_austria);
-//    }
-//}
+public class DKDownloadAustria implements DKDownloadCountry {
+
+    private static final String DK_URL = "https://cdn.prod-rca-coronaapp-fd.net/";
+
+    interface Api {
+        @GET("exposures/at/index.json")
+        Maybe<Index> getIndex();
+
+        @GET("{path}")
+        Maybe<ResponseBody> getFile(@Path("path") String path);
+    }
+
+    private final static Api api;
+
+    static {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(DK_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .build();
+        api = retrofit.create(Api.class);
+    }
+
+    static class Full14Batch {
+        @SerializedName("batch_file_paths")
+        List<String> batchFilePaths;
+
+        public List<String> getBatchFilePaths() {
+            return batchFilePaths;
+        }
+    }
+
+    static class Index {
+        @SerializedName("full_14_batch")
+        Full14Batch full14Batch;
+
+        public Full14Batch getFull14Batch() {
+            return full14Batch;
+        }
+    }
+
+    @Override
+    public Observable<Pair<byte[], String>> getDKBytes(Context context, Date minDate) {
+
+        return DKDownloadUtils.wrapRetrofit(api.getIndex())
+                .flatMapObservable(index -> Observable.fromIterable(index.getFull14Batch().getBatchFilePaths()))
+                .flatMapMaybe(path -> DKDownloadUtils.wrapRetrofit(api.getFile(path)))
+                .map(responseBody -> new Pair<>(responseBody.bytes(), getCountryCode(context)));
+    }
+
+    @Override
+    public String getCountryCode(Context context) {
+        return context.getResources().getString(R.string.country_code_austria);
+    }
+}

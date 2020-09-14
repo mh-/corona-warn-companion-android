@@ -51,12 +51,7 @@ public class DKDownloadSwitzerland implements DKDownloadCountry {
         }
 
         return Observable.fromIterable(timestamps)
-                .flatMapMaybe(timestamp -> api
-                        .getBytes(timestamp)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .onErrorComplete()
-                )
+                .flatMapMaybe(timestamp -> DKDownloadUtils.wrapRetrofit(api.getBytes(timestamp)))
                 .map(responseBody -> new Pair<>(responseBody.bytes(), getCountryCode(context)));
     }
 

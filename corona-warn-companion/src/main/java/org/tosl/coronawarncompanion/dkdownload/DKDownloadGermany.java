@@ -5,14 +5,15 @@ import android.content.Context;
 import android.util.Pair;
 import org.tosl.coronawarncompanion.R;
 import java.text.FieldPosition;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
@@ -64,44 +65,40 @@ public class DKDownloadGermany implements DKDownloadCountry {
         return dateFormatter.format(date, stringBuffer, new FieldPosition(0)).toString();
     }
 
+    private static String currentDate(List<String> datesList) throws ParseException {
+        if (datesList.size() == 0) {
+            throw new RuntimeException("Germany: No dates to download");
+        }
+        String lastDateString = datesList.get(datesList.size()-1);
+        Date lastDate = dateFormatter.parse(lastDateString);
+        Calendar c = Calendar.getInstance();
+        if (lastDate == null) {
+            throw new RuntimeException("Germany: Could not parse date: " + lastDateString);
+        }
+        c.setTime(lastDate);
+        c.add(Calendar.DATE, 1);
+        Date currentDate = c.getTime();
+        return getStringFromDate(currentDate);
+    }
+
+    @Override
     public Observable<Pair<byte[], String>> getDKBytes(Context context, Date minDate) {
 
-        return api.listDates()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .onErrorComplete()
+        return DKDownloadUtils.wrapRetrofit(api.listDates())
                 .map(datesListString -> Arrays.asList(parseCwsListResponse(datesListString)))
-                .flatMapObservable(datesList -> {
-                    Observable<ResponseBody> responsesForDays = Observable.fromIterable(datesList)
-                            .map(dateFormatter::parse)
-                            .filter(date -> date.compareTo(minDate) > 0)
-                            .flatMapMaybe(date -> api.getDKsForDate(getStringFromDate(date))
-                                    .subscribeOn(Schedulers.io())
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .onErrorComplete()
-                            );
-                    Date lastDate = dateFormatter.parse(datesList.get(datesList.size()-1));
-                    Calendar c = Calendar.getInstance();
-                    if (lastDate == null) {
-                        return responsesForDays;
-                    }
-                    c.setTime(lastDate);
-                    c.add(Calendar.DATE, 1);
-                    Date currentDate = c.getTime();
-                    String currentDateString = getStringFromDate(currentDate);
-                    Observable<ResponseBody> responseForHours = api.listHours(currentDateString)
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .onErrorComplete()
-                            .flatMapObservable(hoursListString -> Observable
-                                    .fromIterable(Arrays.asList(parseCwsListResponse(hoursListString))))
-                            .flatMapMaybe(hour -> api.getDKsForDateAndHour(currentDateString, hour)
-                                    .subscribeOn(Schedulers.io())
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .onErrorComplete()
-                            );
-                    return responsesForDays.concatWith(responseForHours);
-                })
+                .map(datesList -> new Pair<>(datesList, currentDate(datesList)))
+                .flatMapObservable(datesListCurrentDatePair -> Observable.fromIterable(datesListCurrentDatePair.first)
+                        .map(dateFormatter::parse)
+                        .filter(date -> date.compareTo(minDate) > 0)
+                        .flatMapMaybe(date -> DKDownloadUtils.wrapRetrofit(
+                                api.getDKsForDate(getStringFromDate(date))))
+                        .concatWith(
+                                DKDownloadUtils.wrapRetrofit(
+                                        api.listHours(datesListCurrentDatePair.second))
+                                        .flatMapObservable(hoursListString -> Observable
+                                                .fromIterable(Arrays.asList(parseCwsListResponse(hoursListString))))
+                                        .flatMapMaybe(hour -> DKDownloadUtils.wrapRetrofit(
+                                                api.getDKsForDateAndHour(datesListCurrentDatePair.second, hour)))))
                 .map(responseBody -> new Pair<>(responseBody.bytes(), getCountryCode(context)));
     }
 
