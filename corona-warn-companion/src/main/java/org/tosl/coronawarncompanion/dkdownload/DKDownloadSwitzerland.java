@@ -55,6 +55,7 @@ public class DKDownloadSwitzerland implements DKDownloadCountry {
                         .getBytes(timestamp)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
+                        .onErrorComplete()
                 )
                 .map(responseBody -> new Pair<>(responseBody.bytes(), getCountryCode(context)));
     }
