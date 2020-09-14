@@ -2,6 +2,7 @@ package org.tosl.coronawarncompanion.dkdownload;
 
 import android.content.Context;
 import android.util.Log;
+import android.util.Pair;
 import android.widget.Toast;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKey;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysImport;
@@ -39,7 +40,9 @@ public class DKDownloadUtils {
         return Observable
                 .concat(countries
                         .stream()
-                        .map(dkDownloadCountry -> dkDownloadCountry.getDKBytes(context, minDate))
+                        .map(dkDownloadCountry -> dkDownloadCountry
+                                .getDKBytes(context, minDate)
+                                .map(bytes -> new Pair<>(bytes, dkDownloadCountry.getCountryCode(context))))
                         .collect(Collectors.toList()))
                 .map(bytesCountryPair -> parseBytesToTeks(
                         context, bytesCountryPair.first, bytesCountryPair.second))

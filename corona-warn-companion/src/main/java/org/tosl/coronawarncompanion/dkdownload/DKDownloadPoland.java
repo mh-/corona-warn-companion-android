@@ -38,12 +38,12 @@ public class DKDownloadPoland implements DKDownloadCountry {
     }
 
     @Override
-    public Observable<Pair<byte[], String>> getDKBytes(Context context, Date minDate) {
+    public Observable<byte[]> getDKBytes(Context context, Date minDate) {
 
         return DKDownloadUtils.wrapRetrofit(context, api.getIndex(DK_URL + "/index.txt"))
                 .flatMapObservable(indexString -> Observable.fromArray(indexString.split("\n")))
                 .flatMapMaybe(availableFile -> DKDownloadUtils.wrapRetrofit(context, api.getFile(DK_URL + availableFile)))
-                .map(responseBody -> new Pair<>(responseBody.bytes(), getCountryCode(context)));
+                .map(ResponseBody::bytes);
 
     }
 
