@@ -3,7 +3,6 @@ package org.tosl.coronawarncompanion.dkdownload;
 import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
-
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKey;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysImport;
 import java.io.IOException;
@@ -11,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;

@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
