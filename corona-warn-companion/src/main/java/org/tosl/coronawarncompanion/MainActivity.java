@@ -336,7 +336,9 @@ public class MainActivity extends AppCompatActivity {
             rpiList = contactDbOnDisk.getRpisFromContactDB();
         } else if (CWCApplication.appMode == RAMBLE_MODE) {
             RambleDbOnDisk rambleDbOnDisk = new RambleDbOnDisk(this);
-            rpiList = rambleDbOnDisk.getRpisFromContactDB(this);
+            // limit RaMBLE encounters to the last 14 days
+            rpiList = rambleDbOnDisk.getRpisFromContactDB(this,
+                    getDaysFromMillis(System.currentTimeMillis()) - 14);
         } else {
             throw new IllegalStateException();
         }
