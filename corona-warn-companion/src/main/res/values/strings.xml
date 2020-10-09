@@ -5,6 +5,10 @@
     <string name="title_no_rpis_extracted">No encounters found.</string>
     <string name="title_diagnosis_keys_downloading">Downloading diagnosis keys… (%s)</string>
     <string name="title_diagnosis_keys_downloaded" tools:ignore="PluralsCandidate">%d diagnosis keys downloaded (%s)."</string>
+    <plurals name="title_diagnosis_keys_downloaded_warning">
+        <item quantity="one">(⚠️Warning: %d error during download!️)</item>
+        <item quantity="other">(⚠️Warning: ️%d errors during download!)</item>
+    </plurals>
     <string name="title_diagnosis_keys_download_failed">Download failed.</string>
     <string name="title_matching_not_done_yet">Matching in progress…</string>
     <string name="title_matching_not_done_yet_with_progress" tools:ignore="PluralsCandidate">Matching in progress… %1$d%% (%2$d found)</string>
@@ -76,4 +80,5 @@
     <string name="country_netherlands">🇳🇱 Netherlands</string>
     <string name="flag_netherlands" translatable="false">🇳🇱</string>
     <string name="country_code_netherlands" translatable="false">NL</string>
+    <string name="toast_download_error">Error during download: %s</string>
 </resources>

@@ -34,7 +34,7 @@ public class RambleDbOnDisk {
         this.context = context;
     }
 
-    public RpiList getRpisFromContactDB(Activity activity) {
+    public RpiList getRpisFromContactDB(Activity activity, Integer minDaysSinceEpochUTC) {
         RpiList rpiList = null;
 
         // get live permission to access files
@@ -83,37 +83,39 @@ public class RambleDbOnDisk {
                             int firstSeenTimestamp = Integer.parseInt(firstSeenStr);
                             String lastSeenStr = cursor.getString(2);
                             int lastSeenTimestamp = Integer.parseInt(lastSeenStr);
-                            String idStr = cursor.getString(3);
-                            // Log.d(TAG, "Device seen: " + byteArrayToHexString(rpiBytes) + " " + byteArrayToHexString(aemBytes) +
-                            //        " " + firstSeenTimestamp + "-" + lastSeenTimestamp + " " + idStr);
+                            if (getDaysFromSeconds(lastSeenTimestamp) >= minDaysSinceEpochUTC) {
+                                String idStr = cursor.getString(3);
+                                // Log.d(TAG, "Device seen: " + byteArrayToHexString(rpiBytes) + " " + byteArrayToHexString(aemBytes) +
+                                //        " " + firstSeenTimestamp + "-" + lastSeenTimestamp + " " + idStr);
 
-                            // get Scan Records from table "locations"
-                            ContactRecordsProtos.ContactRecords.Builder contactRecordsBuilder =
-                                    ContactRecordsProtos.ContactRecords.newBuilder();
-                            Cursor cursor2 = rambleDb.rawQuery("SELECT timestamp, rssi "+
-                                    "FROM locations WHERE device_id="+idStr, null);
-                            while(cursor2.moveToNext()) {
-                                String timestampStr = cursor2.getString(0);
-                                int timestamp = Integer.parseInt(timestampStr);
-                                String rssiStr = cursor2.getString(1);
-                                int rssi = Integer.parseInt(rssiStr);
-                                //Log.d(TAG, "Scan events: " + timestamp + " " + rssi);
+                                // get Scan Records from table "locations"
+                                ContactRecordsProtos.ContactRecords.Builder contactRecordsBuilder =
+                                        ContactRecordsProtos.ContactRecords.newBuilder();
+                                Cursor cursor2 = rambleDb.rawQuery("SELECT timestamp, rssi " +
+                                        "FROM locations WHERE device_id=" + idStr, null);
+                                while (cursor2.moveToNext()) {
+                                    String timestampStr = cursor2.getString(0);
+                                    int timestamp = Integer.parseInt(timestampStr);
+                                    String rssiStr = cursor2.getString(1);
+                                    int rssi = Integer.parseInt(rssiStr);
+                                    //Log.d(TAG, "Scan events: " + timestamp + " " + rssi);
 
-                                // add scanRecord to contactRecords
-                                ContactRecordsProtos.ScanRecord scanRecord = ContactRecordsProtos.ScanRecord.newBuilder()
-                                        .setTimestamp(timestamp)
-                                        .setRssi(rssi)
-                                        .setAem(ByteString.copyFrom(aemBytes))
-                                        .build();
-                                contactRecordsBuilder.addRecord(scanRecord);
-                            }
-                            cursor2.close();
+                                    // add scanRecord to contactRecords
+                                    ContactRecordsProtos.ScanRecord scanRecord = ContactRecordsProtos.ScanRecord.newBuilder()
+                                            .setTimestamp(timestamp)
+                                            .setRssi(rssi)
+                                            .setAem(ByteString.copyFrom(aemBytes))
+                                            .build();
+                                    contactRecordsBuilder.addRecord(scanRecord);
+                                }
+                                cursor2.close();
 
-                            // store entry (incl. contactRecords) in rpiList
-                            int daysSinceEpochUTC = getDaysFromSeconds(firstSeenTimestamp);
-                            rpiList.addEntry(daysSinceEpochUTC, rpiBytes, contactRecordsBuilder.build());
-                            if (getDaysFromSeconds(lastSeenTimestamp) != daysSinceEpochUTC) {  // extremely unlikely
-                                rpiList.addEntry(daysSinceEpochUTC+1, rpiBytes, contactRecordsBuilder.build());
+                                // store entry (incl. contactRecords) in rpiList
+                                int daysSinceEpochUTC = getDaysFromSeconds(firstSeenTimestamp);
+                                rpiList.addEntry(daysSinceEpochUTC, rpiBytes, contactRecordsBuilder.build());
+                                if (getDaysFromSeconds(lastSeenTimestamp) != daysSinceEpochUTC) {  // extremely unlikely
+                                    rpiList.addEntry(daysSinceEpochUTC + 1, rpiBytes, contactRecordsBuilder.build());
+                                }
                             }
                         }
                         cursor.close();

@@ -5,6 +5,10 @@
     <string name="title_no_rpis_extracted">Keine Begegnungen gefunden.</string>
     <string name="title_diagnosis_keys_downloading">Diagnoseschlüssel herunterladen… (%s)</string>
     <string name="title_diagnosis_keys_downloaded">%d Diagnoseschlüssel heruntergeladen (%s).</string>
+    <plurals name="title_diagnosis_keys_downloaded_warning">
+        <item quantity="one">(⚠️Warnung: ️%d Fehler während des Downloads!️)</item>
+        <item quantity="other">(⚠️Warnung: ️%d Fehler während des Downloads!️)</item>
+    </plurals>
     <string name="title_diagnosis_keys_download_failed">Keine Diagnoseschlüssel heruntergeladen.</string>
     <string name="title_matching_not_done_yet">Abgleich wird erstellt…</string>
     <string name="title_matching_not_done_yet_with_progress">Abgleich wird erstellt… %1$d%% (%2$d gefunden)</string>
@@ -65,4 +69,5 @@
     <string name="austrian_color_code_yellow">gelb</string>
     <string name="austrian_color_code_red">rot</string>
     <string name="country_netherlands"> Niederlande</string>
+    <string name="toast_download_error">Fehler während Download: %s</string>
 </resources>

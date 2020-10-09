@@ -4,6 +4,8 @@ import android.content.Context;
 import android.util.Log;
 import android.util.Pair;
 import android.widget.Toast;
+
+import org.tosl.coronawarncompanion.R;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKey;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysImport;
 import java.io.IOException;
@@ -24,13 +26,17 @@ public class DKDownloadUtils {
 
     private static final String TAG = "DKDownloadUtils";
 
+    static private int errorCount = 0;
+
     public static <T> Maybe<T> wrapRetrofit(Context context, Maybe<T> request) {
         return request
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnError(error -> {
+                    errorCount++;
                     error.printStackTrace();
-                    Toast toast = Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG);
+                    Toast toast = Toast.makeText(context,
+                            context.getResources().getString(R.string.toast_download_error, error.getMessage()), Toast.LENGTH_LONG);
                     toast.show();
                 })
                 .onErrorComplete();
@@ -38,6 +44,7 @@ public class DKDownloadUtils {
 
     public static Single<List<DiagnosisKey>>
     getDKsForCountries(Context context, OkHttpClient okHttpClient, Date minDate, List<DKDownloadCountry> countries) {
+        errorCount = 0;
         return Observable
                 .concat(countries
                         .stream()
@@ -70,5 +77,9 @@ public class DKDownloadUtils {
             return dkList;
         }
         return new ArrayList<>();
+    }
+
+    public static int getErrorCount() {
+        return errorCount;
     }
 }

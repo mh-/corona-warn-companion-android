@@ -353,7 +353,9 @@ public class MainActivity extends AppCompatActivity {
             rpiList = contactDbOnDisk.getRpisFromContactDB();
         } else if (CWCApplication.appMode == RAMBLE_MODE) {
             RambleDbOnDisk rambleDbOnDisk = new RambleDbOnDisk(this);
-            rpiList = rambleDbOnDisk.getRpisFromContactDB(this);
+            // limit RaMBLE encounters to the last 14 days
+            rpiList = rambleDbOnDisk.getRpisFromContactDB(this,
+                    getDaysFromMillis(System.currentTimeMillis()) - 14);
         } else {
             throw new IllegalStateException();
         }
@@ -498,7 +500,17 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        textViewDks.setText(getString(R.string.title_diagnosis_keys_downloaded, count, CWCApplication.getFlagsString(context)));
+        StringBuilder sb = new StringBuilder();
+        sb.append(getString(R.string.title_diagnosis_keys_downloaded, count, CWCApplication.getFlagsString(context)));
+
+        int errorCount = DKDownloadUtils.getErrorCount();
+        if (errorCount != 0) {
+            sb.append(" ");
+            sb.append(getResources().getQuantityString(R.plurals.title_diagnosis_keys_downloaded_warning,
+                    errorCount, errorCount));
+        }
+
+        textViewDks.setText(sb.toString());
 
         List<BarEntry> dataPoints2 = new ArrayList<>();
 
