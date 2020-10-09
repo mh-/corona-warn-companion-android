@@ -64,4 +64,5 @@
     <string name="country_austria">🇦🇹 Österreich</string>
     <string name="austrian_color_code_yellow">gelb</string>
     <string name="austrian_color_code_red">rot</string>
+    <string name="country_netherlands"> Niederlande</string>
 </resources>

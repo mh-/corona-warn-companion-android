@@ -44,12 +44,14 @@ public class CWCApplication extends Application {
 
     public static boolean downloadKeysFromAustria;
     public static boolean downloadKeysFromGermany;
+    public static boolean downloadKeysFromNetherlands;
     public static boolean downloadKeysFromPoland;
     public static boolean downloadKeysFromSwitzerland;
     public static int getNumberOfActiveCountries() {
         int num = 0;
         if (downloadKeysFromAustria) num++;
         if (downloadKeysFromGermany) num++;
+        if (downloadKeysFromNetherlands) num++;
         if (downloadKeysFromPoland) num++;
         if (downloadKeysFromSwitzerland) num++;
         return num;
@@ -58,6 +60,7 @@ public class CWCApplication extends Application {
         StringBuilder sb = new StringBuilder();
         if (downloadKeysFromAustria) {sb.append(context.getResources().getString(R.string.flag_austria));}
         if (downloadKeysFromGermany) {sb.append(context.getResources().getString(R.string.flag_germany));}
+        if (downloadKeysFromNetherlands) {sb.append(context.getResources().getString(R.string.flag_netherlands));}
         if (downloadKeysFromPoland) {sb.append(context.getResources().getString(R.string.flag_poland));}
         if (downloadKeysFromSwitzerland) {sb.append(context.getResources().getString(R.string.flag_switzerland));}
         return sb.toString();
