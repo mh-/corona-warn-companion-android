@@ -20,6 +20,8 @@
                     android:title="@string/country_austria" />
                 <item android:id="@+id/germany"
                     android:title="@string/country_germany" />
+                <item android:id="@+id/netherlands"
+                    android:title="@string/country_netherlands" />
                 <item android:id="@+id/poland"
                     android:title="@string/country_poland" />
                 <item android:id="@+id/switzerland"

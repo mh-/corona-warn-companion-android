@@ -68,5 +68,6 @@
     <string name="country_austria">🇦🇹 Österreich</string>
     <string name="austrian_color_code_yellow">gelb</string>
     <string name="austrian_color_code_red">rot</string>
+    <string name="country_netherlands">🇳🇱 Niederlande</string>
     <string name="toast_download_error">Fehler während Download: %s</string>
 </resources>

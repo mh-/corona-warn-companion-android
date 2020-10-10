@@ -77,5 +77,8 @@
     <string name="country_code_austria" translatable="false">AT</string>
     <string name="austrian_color_code_yellow">yellow</string>
     <string name="austrian_color_code_red">red</string>
+    <string name="country_netherlands">🇳🇱 Netherlands</string>
+    <string name="flag_netherlands" translatable="false">🇳🇱</string>
+    <string name="country_code_netherlands" translatable="false">NL</string>
     <string name="toast_download_error">Error during download: %s</string>
 </resources>

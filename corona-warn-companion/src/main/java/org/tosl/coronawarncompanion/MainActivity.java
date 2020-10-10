@@ -55,6 +55,7 @@ import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKey;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadAustria;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadCountry;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadGermany;
+import org.tosl.coronawarncompanion.dkdownload.DKDownloadNetherlands;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadPoland;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadSwitzerland;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadUtils;
@@ -136,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
         }
         if (CWCApplication.downloadKeysFromAustria) menu.findItem(R.id.austria).setChecked(true);
         if (CWCApplication.downloadKeysFromGermany) menu.findItem(R.id.germany).setChecked(true);
+        if (CWCApplication.downloadKeysFromNetherlands) menu.findItem(R.id.netherlands).setChecked(true);
         if (CWCApplication.downloadKeysFromPoland) menu.findItem(R.id.poland).setChecked(true);
         if (CWCApplication.downloadKeysFromSwitzerland) menu.findItem(R.id.switzerland).setChecked(true);
         return true;
@@ -199,6 +201,20 @@ public class MainActivity extends AppCompatActivity {
                 SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putBoolean(getString(R.string.country_code_germany), desiredNewState);
+                editor.apply();
+                recreateMainActivityOnNextPossibleOccasion();
+                return true;
+            }
+            return false;
+        } else if (item.getItemId() == R.id.netherlands) {
+            boolean desiredNewState = !CWCApplication.downloadKeysFromNetherlands;
+            //noinspection PointlessBooleanExpression
+            if (desiredNewState==true || CWCApplication.getNumberOfActiveCountries() > 1) {
+                item.setChecked(desiredNewState);
+                CWCApplication.downloadKeysFromNetherlands = desiredNewState;
+                SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(getString(R.string.country_code_netherlands), desiredNewState);
                 editor.apply();
                 recreateMainActivityOnNextPossibleOccasion();
                 return true;
@@ -273,6 +289,7 @@ public class MainActivity extends AppCompatActivity {
         // get the active countries from SharedPreferences
         CWCApplication.downloadKeysFromAustria = sharedPreferences.getBoolean(getString(R.string.country_code_austria), false);
         CWCApplication.downloadKeysFromGermany = sharedPreferences.getBoolean(getString(R.string.country_code_germany), true);
+        CWCApplication.downloadKeysFromNetherlands = sharedPreferences.getBoolean(getString(R.string.country_code_netherlands), false);
         CWCApplication.downloadKeysFromPoland = sharedPreferences.getBoolean(getString(R.string.country_code_poland), false);
         CWCApplication.downloadKeysFromSwitzerland = sharedPreferences.getBoolean(getString(R.string.country_code_switzerland), false);
         if (CWCApplication.getNumberOfActiveCountries() < 1) {
@@ -393,6 +410,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (CWCApplication.downloadKeysFromAustria) dkDownloadCountries.add(new DKDownloadAustria());
             if (CWCApplication.downloadKeysFromGermany) dkDownloadCountries.add(new DKDownloadGermany());
+            if (CWCApplication.downloadKeysFromNetherlands) dkDownloadCountries.add(new DKDownloadNetherlands());
             if (CWCApplication.downloadKeysFromPoland) dkDownloadCountries.add(new DKDownloadPoland());
             if (CWCApplication.downloadKeysFromSwitzerland) dkDownloadCountries.add(new DKDownloadSwitzerland());
 
