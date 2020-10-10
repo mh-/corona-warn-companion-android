@@ -22,6 +22,9 @@ import java.io.FileFilter;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
+import io.reactivex.Maybe;
+import io.reactivex.Single;
+
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromSeconds;
 import static org.tosl.coronawarncompanion.tools.Utils.hexStringToByteArray;
 
@@ -34,8 +37,8 @@ public class RambleDbOnDisk {
         this.context = context;
     }
 
-    public RpiList getRpisFromContactDB(Activity activity, Integer minDaysSinceEpochUTC) {
-        RpiList rpiList = null;
+    public Single<RpiList> getRpisFromContactDB(Activity activity, Integer minDaysSinceEpochUTC) {
+        RpiList rpiList = new RpiList();
 
         // get live permission to access files
         boolean grantedAll = ContextCompat.checkSelfPermission(this.context,
@@ -125,6 +128,6 @@ public class RambleDbOnDisk {
                 }
             }
         }
-        return rpiList;
+        return Single.just(rpiList);
     }
 }

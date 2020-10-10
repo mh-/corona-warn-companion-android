@@ -8,6 +8,8 @@
             android:title="@string/menu_entry_switch_to_normal_mode" />
         <item android:id="@+id/ramblemode"
             android:title="@string/menu_entry_switch_to_ramble_mode" />
+        <item android:id="@+id/raspberrymode"
+            android:title="@string/menu_entry_switch_to_raspberry_mode" />
         <item android:id="@+id/demomode"
             android:title="@string/menu_entry_switch_to_demo_mode" />
     </group>

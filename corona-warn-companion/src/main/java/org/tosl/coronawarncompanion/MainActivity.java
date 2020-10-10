@@ -79,11 +79,14 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Maybe;
+import io.reactivex.Single;
 import okhttp3.OkHttpClient;
 
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.DEMO_MODE;
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.NORMAL_MODE;
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.RAMBLE_MODE;
+import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.RASPBERRY_MODE;
 import static org.tosl.coronawarncompanion.CWCApplication.backgroundThreadsShouldStop;
 import static org.tosl.coronawarncompanion.CWCApplication.backgroundThreadsRunning;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysSinceEpochFromENIN;
@@ -132,8 +135,10 @@ public class MainActivity extends AppCompatActivity {
             menu.findItem(R.id.normalmode).setChecked(true);
         } else if (CWCApplication.appMode == DEMO_MODE) {
             menu.findItem(R.id.demomode).setChecked(true);
-        } if (CWCApplication.appMode == RAMBLE_MODE) {
+        } else if (CWCApplication.appMode == RAMBLE_MODE) {
             menu.findItem(R.id.ramblemode).setChecked(true);
+        } else if (CWCApplication.appMode == RASPBERRY_MODE) {
+            menu.findItem(R.id.raspberrymode).setChecked(true);
         }
         if (CWCApplication.downloadKeysFromAustria) menu.findItem(R.id.austria).setChecked(true);
         if (CWCApplication.downloadKeysFromGermany) menu.findItem(R.id.germany).setChecked(true);
@@ -150,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(this, AboutActivity.class));
             return true;
         } else if (item.getItemId() == R.id.normalmode || item.getItemId() == R.id.demomode ||
-                item.getItemId() == R.id.ramblemode) {
+                item.getItemId() == R.id.ramblemode || item.getItemId() == R.id.raspberrymode) {
             if (backgroundThreadsShouldStop) {
                 // user has to wait a little bit longer
                 CharSequence text = getString(R.string.error_app_mode_switching_not_possible);
@@ -164,8 +169,10 @@ public class MainActivity extends AppCompatActivity {
                 desiredAppMode = NORMAL_MODE;
             } else if (item.getItemId() == R.id.demomode) {
                 desiredAppMode = DEMO_MODE;
-            } else {
+            } else if (item.getItemId() == R.id.ramblemode) {
                 desiredAppMode = RAMBLE_MODE;
+            } else {
+                desiredAppMode = RASPBERRY_MODE;
             }
             if (desiredAppMode != CWCApplication.appMode) {
                 SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
@@ -304,6 +311,8 @@ public class MainActivity extends AppCompatActivity {
                 actionBar.setTitle(getString(R.string.title_activity_main_demo_prefix) + getString(R.string.title_activity_main));
             } else if (CWCApplication.appMode == RAMBLE_MODE) {
                 actionBar.setTitle(getString(R.string.title_activity_main_ramble_version));
+            } else if (CWCApplication.appMode == RASPBERRY_MODE) {
+                actionBar.setTitle(getString(R.string.title_activity_main_raspberry_version));
             } else {
                 throw new IllegalStateException();
             }
@@ -313,6 +322,8 @@ public class MainActivity extends AppCompatActivity {
             Log.i(TAG, "--- DEMO MODE ---");
         } else if (CWCApplication.appMode == RAMBLE_MODE) {
             Log.i(TAG, "--- RAMBLE MODE ---");
+        } else if (CWCApplication.appMode == RASPBERRY_MODE) {
+            Log.i(TAG, "--- RASPBERRY MODE ---");
         }
 
         if(backgroundThreadsRunning) {
@@ -348,64 +359,80 @@ public class MainActivity extends AppCompatActivity {
 
         // 1st Section: Get RPIs from database (requires root), or from demo database, or from RaMBLE
 
-        if (CWCApplication.appMode == NORMAL_MODE || CWCApplication.appMode == DEMO_MODE) {
+        Single<RpiList> rpiListSingle;
+        if (CWCApplication.appMode == NORMAL_MODE || CWCApplication.appMode == DEMO_MODE || CWCApplication.appMode == RASPBERRY_MODE) {
             ContactDbOnDisk contactDbOnDisk = new ContactDbOnDisk(this);
-            rpiList = contactDbOnDisk.getRpisFromContactDB();
+            rpiListSingle = contactDbOnDisk.getRpisFromContactDB();
         } else if (CWCApplication.appMode == RAMBLE_MODE) {
             RambleDbOnDisk rambleDbOnDisk = new RambleDbOnDisk(this);
             // limit RaMBLE encounters to the last 14 days
-            rpiList = rambleDbOnDisk.getRpisFromContactDB(this,
+            rpiListSingle = rambleDbOnDisk.getRpisFromContactDB(this,
                     getDaysFromMillis(System.currentTimeMillis()) - 14);
         } else {
             throw new IllegalStateException();
         }
 
-        if ((rpiList != null) && (!rpiList.isEmpty())) {  // check that getting the RPIs didn't fail, e.g. because we didn't get root rights
-            SortedSet<Integer> rpiListDaysSinceEpochLocalTZ = rpiList.getAvailableDaysSinceEpochLocalTZ();
-            List<BarEntry> dataPoints1 = new ArrayList<>();
-
-            int count = 0;
-            for (Integer daysSinceEpochLocalTZ : rpiListDaysSinceEpochLocalTZ) {
-                int numEntries = rpiList.getRpiCountForDaysSinceEpochLocalTZ(daysSinceEpochLocalTZ);
-                //Log.d(TAG, "Datapoint: " + daysSinceEpochLocalTZ + ": " + numEntries);
-                dataPoints1.add(new BarEntry(daysSinceEpochLocalTZ, numEntries));
-                count += numEntries;
+        rpiListSingle.subscribe(rpiListResult -> {
+            rpiList = rpiListResult;
+            if (rpiList.isEmpty()) {
+                actionWhenNoRPIs(timeZoneOffsetSeconds);
+            } else {
+                processRPIs();
             }
+        });
 
-            // set date label formatter
-            String deviceDateFormat = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "dM");
-            DateFormat dateFormat = new SimpleDateFormat(deviceDateFormat, Locale.getDefault());
-            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-            // UTC because we don't want DateFormat to do additional time zone compensation
+    }
 
-            minDate = new Date(getMillisFromDays(rpiListDaysSinceEpochLocalTZ.first()));
-            String minDateStr = dateFormat.format(minDate);
-            maxDate = new Date(getMillisFromDays(rpiListDaysSinceEpochLocalTZ.last()));
-            String maxDateStr = dateFormat.format(maxDate);
+    private void actionWhenNoRPIs(int timeZoneOffsetSeconds) {
+        List<BarEntry> dataPoints1 = new ArrayList<>();
+        long currentTimeMillis = System.currentTimeMillis();
+        int currentTimestampLocalTZ = (int) (currentTimeMillis / 1000) + timeZoneOffsetSeconds;
+        int daysSinceEpochLocalTZ = currentTimestampLocalTZ / (3600*24);
+        for (int day = daysSinceEpochLocalTZ-13; day <= daysSinceEpochLocalTZ; day++) {
+            dataPoints1.add(new BarEntry(day, 0));
+        }
+        chartRpis.setData(dataPoints1, normalBarColor, "RPIs", false, this);
+        chartRpis.setFormatAndRefresh(this);
+        showExtractionError();
+        showMatchingNotPossible();
 
-            textViewRpis.setText(getString(R.string.title_rpis_extracted, count, minDateStr, maxDateStr));
+        downloadDiagnosisKeys();
+    }
 
-            chartRpis.setData(dataPoints1, normalBarColor, "RPIs", false, this);
-            chartRpis.setFormatAndRefresh(this);
+    private void processRPIs() {
+        SortedSet<Integer> rpiListDaysSinceEpochLocalTZ = rpiList.getAvailableDaysSinceEpochLocalTZ();
+        List<BarEntry> dataPoints1 = new ArrayList<>();
 
-        } else {  // getting the RPIs failed, e.g. because we didn't get root rights
-            List<BarEntry> dataPoints1 = new ArrayList<>();
-            long currentTimeMillis = System.currentTimeMillis();
-            int currentTimestampLocalTZ = (int) (currentTimeMillis / 1000) + timeZoneOffsetSeconds;
-            int daysSinceEpochLocalTZ = currentTimestampLocalTZ / (3600*24);
-            for (int day = daysSinceEpochLocalTZ-13; day <= daysSinceEpochLocalTZ; day++) {
-                dataPoints1.add(new BarEntry(day, 0));
-            }
-            chartRpis.setData(dataPoints1, normalBarColor, "RPIs", false, this);
-            chartRpis.setFormatAndRefresh(this);
-            showExtractionError();
-            showMatchingNotPossible();
+        int count = 0;
+        for (Integer daysSinceEpochLocalTZ : rpiListDaysSinceEpochLocalTZ) {
+            int numEntries = rpiList.getRpiCountForDaysSinceEpochLocalTZ(daysSinceEpochLocalTZ);
+            //Log.d(TAG, "Datapoint: " + daysSinceEpochLocalTZ + ": " + numEntries);
+            dataPoints1.add(new BarEntry(daysSinceEpochLocalTZ, numEntries));
+            count += numEntries;
         }
 
-        // 2nd Section: Diagnosis Keys
+        // set date label formatter
+        String deviceDateFormat = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "dM");
+        DateFormat dateFormat = new SimpleDateFormat(deviceDateFormat, Locale.getDefault());
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        // UTC because we don't want DateFormat to do additional time zone compensation
 
+        minDate = new Date(getMillisFromDays(rpiListDaysSinceEpochLocalTZ.first()));
+        String minDateStr = dateFormat.format(minDate);
+        maxDate = new Date(getMillisFromDays(rpiListDaysSinceEpochLocalTZ.last()));
+        String maxDateStr = dateFormat.format(maxDate);
+
+        textViewRpis.setText(getString(R.string.title_rpis_extracted, count, minDateStr, maxDateStr));
+
+        chartRpis.setData(dataPoints1, normalBarColor, "RPIs", false, this);
+        chartRpis.setFormatAndRefresh(this);
+
+        downloadDiagnosisKeys();
+    }
+
+    private void downloadDiagnosisKeys() {
         textViewDks.setText(getString(R.string.title_diagnosis_keys_downloading, CWCApplication.getFlagsString(context)));
-        if (CWCApplication.appMode == NORMAL_MODE || CWCApplication.appMode == RAMBLE_MODE) {
+        if (CWCApplication.appMode == NORMAL_MODE || CWCApplication.appMode == RAMBLE_MODE || CWCApplication.appMode == RASPBERRY_MODE) {
             List<DKDownloadCountry> dkDownloadCountries = new ArrayList<>();
 
             if (CWCApplication.downloadKeysFromAustria) dkDownloadCountries.add(new DKDownloadAustria());
@@ -438,6 +465,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             throw new IllegalStateException();
         }
+
     }
 
     private void showExtractionError() {
@@ -445,6 +473,8 @@ public class MainActivity extends AppCompatActivity {
             textViewExtractionError.setText(R.string.error_no_rpis_normal_mode);
         } else if (CWCApplication.appMode == RAMBLE_MODE) {
             textViewExtractionError.setText(R.string.error_no_rpis_ramble_mode);
+        } else if (CWCApplication.appMode == RASPBERRY_MODE) {
+            textViewExtractionError.setText(R.string.error_no_rpis_raspberry_mode);
         } else {
             throw new IllegalStateException();
         }
