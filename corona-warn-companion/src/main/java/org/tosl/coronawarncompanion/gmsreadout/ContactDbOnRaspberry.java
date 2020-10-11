@@ -52,12 +52,7 @@ public class ContactDbOnRaspberry {
                 .onErrorComplete()
                 .flatMapSingle(response -> {
                     RpiList rpiList = new RpiList();
-                    ContactRecordsProtos.RpiDb rpiDb;
-                    try {
-                        rpiDb = ContactRecordsProtos.RpiDb.parseFrom(response.bytes());
-                    } catch (InvalidProtocolBufferException e) {
-                        return Single.error(e);
-                    }
+                    ContactRecordsProtos.RpiDb rpiDb = ContactRecordsProtos.RpiDb.parseFrom(response.bytes());
                     for (ContactRecordsProtos.RpiDbEntry rpiDbEntry : rpiDb.getEntryList()) {
                         byte[] rpiBytes = new byte[16];
                         ByteBuffer keyBuf = rpiDbEntry.getKey().asReadOnlyByteBuffer();
