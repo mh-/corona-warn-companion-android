@@ -67,6 +67,9 @@
     <string name="saved_app_mode" translatable="false">APP_MODE</string>
     <string name="tx_power">TX Power reported by sender: %s dB</string>
     <string name="menu_entry_countries_sub_menu">Countries</string>
+    <string name="country_canada">🇨🇦 Canada</string>
+    <string name="flag_canada" translatable="false">🇨🇦</string>
+    <string name="country_code_canada" translatable="false">CA</string>
     <string name="country_germany">🇩🇪 Germany</string>
     <string name="flag_germany" translatable="false">🇩🇪</string>
     <string name="country_code_germany" translatable="false">DE</string>
