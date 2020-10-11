@@ -329,8 +329,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }, error -> {
             Log.e(TAG, "Error downloading RPIs: " + error);
-            showDownloadError();
-            showMatchingNotPossible();
+            actionWhenNoRPIs(timeZoneOffsetSeconds);
         });
 
     }
