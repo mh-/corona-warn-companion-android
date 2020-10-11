@@ -32,3 +32,12 @@ message ScanRecord {
 message ContactRecords {
   repeated ScanRecord record = 1;
 }
+
+message RpiDbEntry {
+  optional bytes key = 1;
+  optional ContactRecords value = 2;
+}
+
+message RpiDb {
+  repeated RpiDbEntry entry = 1;
+}

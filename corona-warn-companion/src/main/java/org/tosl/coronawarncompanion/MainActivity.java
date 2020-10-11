@@ -56,6 +56,7 @@ import org.tosl.coronawarncompanion.dkdownload.DKDownloadCountry;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadUtils;
 import org.tosl.coronawarncompanion.gmsreadout.ContactDbOnDisk;
 import org.tosl.coronawarncompanion.ramblereadout.RambleDbOnDisk;
+import org.tosl.coronawarncompanion.gmsreadout.ContactDbOnRaspberry;
 import org.tosl.coronawarncompanion.rpis.RpiList;
 import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
 import org.tosl.coronawarncompanion.matcher.Matcher;
@@ -74,7 +75,6 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
-import io.reactivex.Maybe;
 import io.reactivex.Single;
 import okhttp3.OkHttpClient;
 
@@ -306,9 +306,11 @@ public class MainActivity extends AppCompatActivity {
         // 1st Section: Get RPIs from database (requires root), or from demo database, or from RaMBLE
 
         Single<RpiList> rpiListSingle;
-        if (CWCApplication.appMode == NORMAL_MODE || CWCApplication.appMode == DEMO_MODE || CWCApplication.appMode == RASPBERRY_MODE) {
+        if (CWCApplication.appMode == NORMAL_MODE || CWCApplication.appMode == DEMO_MODE) {
             ContactDbOnDisk contactDbOnDisk = new ContactDbOnDisk(this);
             rpiListSingle = contactDbOnDisk.getRpisFromContactDB();
+        } else if (CWCApplication.appMode == RASPBERRY_MODE) {
+            rpiListSingle = ContactDbOnRaspberry.get(context, OK_HTTP_CLIENT);
         } else if (CWCApplication.appMode == RAMBLE_MODE) {
             RambleDbOnDisk rambleDbOnDisk = new RambleDbOnDisk(this);
             // limit RaMBLE encounters to the last 14 days
@@ -325,6 +327,10 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 processRPIs();
             }
+        }, error -> {
+            Log.e(TAG, "Error downloading RPIs: " + error);
+            showDownloadError();
+            showMatchingNotPossible();
         });
 
     }
