@@ -52,12 +52,7 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import org.tosl.coronawarncompanion.barcharts.BarChartSync;
 import org.tosl.coronawarncompanion.barcharts.CwcBarChart;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKey;
-import org.tosl.coronawarncompanion.dkdownload.DKDownloadAustria;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadCountry;
-import org.tosl.coronawarncompanion.dkdownload.DKDownloadGermany;
-import org.tosl.coronawarncompanion.dkdownload.DKDownloadNetherlands;
-import org.tosl.coronawarncompanion.dkdownload.DKDownloadPoland;
-import org.tosl.coronawarncompanion.dkdownload.DKDownloadSwitzerland;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadUtils;
 import org.tosl.coronawarncompanion.gmsreadout.ContactDbOnDisk;
 import org.tosl.coronawarncompanion.ramblereadout.RambleDbOnDisk;
@@ -135,17 +130,21 @@ public class MainActivity extends AppCompatActivity {
         } if (CWCApplication.appMode == RAMBLE_MODE) {
             menu.findItem(R.id.ramblemode).setChecked(true);
         }
-        if (CWCApplication.downloadKeysFromAustria) menu.findItem(R.id.austria).setChecked(true);
-        if (CWCApplication.downloadKeysFromGermany) menu.findItem(R.id.germany).setChecked(true);
-        if (CWCApplication.downloadKeysFromNetherlands) menu.findItem(R.id.netherlands).setChecked(true);
-        if (CWCApplication.downloadKeysFromPoland) menu.findItem(R.id.poland).setChecked(true);
-        if (CWCApplication.downloadKeysFromSwitzerland) menu.findItem(R.id.switzerland).setChecked(true);
+        for (Country country : Country.values()) {
+            if (country.isDownloadKeysFrom()) {
+                menu.findItem(country.getId()).setChecked(true);
+            }
+        }
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
+        List<Integer> countryIds = new ArrayList<>();
+        for (Country country : Country.values()) {
+            countryIds.add(country.getId());
+        }
         if (item.getItemId() == R.id.about) {
             startActivity(new Intent(this, AboutActivity.class));
             return true;
@@ -178,74 +177,23 @@ public class MainActivity extends AppCompatActivity {
         } else if (item.getItemId() == R.id.osslicenses) {
             startActivity(new Intent(this, DisplayLicensesActivity.class));
             return true;
-        } else if (item.getItemId() == R.id.austria) {
-            boolean desiredNewState = !CWCApplication.downloadKeysFromAustria;
-            //noinspection PointlessBooleanExpression
-            if (desiredNewState==true || CWCApplication.getNumberOfActiveCountries() > 1) {
-                item.setChecked(desiredNewState);
-                CWCApplication.downloadKeysFromAustria = desiredNewState;
-                SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(getString(R.string.country_code_austria), desiredNewState);
-                editor.apply();
-                recreateMainActivityOnNextPossibleOccasion();
-                return true;
-            }
-            return false;
-        } else if (item.getItemId() == R.id.germany) {
-            boolean desiredNewState = !CWCApplication.downloadKeysFromGermany;
-            //noinspection PointlessBooleanExpression
-            if (desiredNewState==true || CWCApplication.getNumberOfActiveCountries() > 1) {
-                item.setChecked(desiredNewState);
-                CWCApplication.downloadKeysFromGermany = desiredNewState;
-                SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(getString(R.string.country_code_germany), desiredNewState);
-                editor.apply();
-                recreateMainActivityOnNextPossibleOccasion();
-                return true;
-            }
-            return false;
-        } else if (item.getItemId() == R.id.netherlands) {
-            boolean desiredNewState = !CWCApplication.downloadKeysFromNetherlands;
-            //noinspection PointlessBooleanExpression
-            if (desiredNewState==true || CWCApplication.getNumberOfActiveCountries() > 1) {
-                item.setChecked(desiredNewState);
-                CWCApplication.downloadKeysFromNetherlands = desiredNewState;
-                SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(getString(R.string.country_code_netherlands), desiredNewState);
-                editor.apply();
-                recreateMainActivityOnNextPossibleOccasion();
-                return true;
-            }
-            return false;
-        } else if (item.getItemId() == R.id.poland) {
-            boolean desiredNewState = !CWCApplication.downloadKeysFromPoland;
-            //noinspection PointlessBooleanExpression
-            if (desiredNewState==true || CWCApplication.getNumberOfActiveCountries() > 1) {
-                item.setChecked(desiredNewState);
-                CWCApplication.downloadKeysFromPoland = desiredNewState;
-                SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(getString(R.string.country_code_poland), desiredNewState);
-                editor.apply();
-                recreateMainActivityOnNextPossibleOccasion();
-                return true;
-            }
-            return false;
-        } else if (item.getItemId() == R.id.switzerland) {
-            boolean desiredNewState = !CWCApplication.downloadKeysFromSwitzerland;
-            //noinspection PointlessBooleanExpression
-            if (desiredNewState==true || CWCApplication.getNumberOfActiveCountries() > 1) {
-                item.setChecked(desiredNewState);
-                CWCApplication.downloadKeysFromSwitzerland = desiredNewState;
-                SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(getString(R.string.country_code_switzerland), desiredNewState);
-                editor.apply();
-                recreateMainActivityOnNextPossibleOccasion();
-                return true;
+        } else if (countryIds.contains(item.getItemId())) {
+            for (Country country : Country.values()) {
+                if (item.getItemId() == country.getId()) {
+                    boolean desiredNewState = !country.isDownloadKeysFrom();
+                    //noinspection PointlessBooleanExpression
+                    if (desiredNewState==true || CWCApplication.getNumberOfActiveCountries() > 1) {
+                        item.setChecked(desiredNewState);
+                        country.setDownloadKeysFrom(desiredNewState);
+                        SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putBoolean(country.getCode(context), desiredNewState);
+                        editor.apply();
+                        recreateMainActivityOnNextPossibleOccasion();
+                        return true;
+                    }
+                    return false;
+                }
             }
             return false;
         } else {
@@ -287,13 +235,11 @@ public class MainActivity extends AppCompatActivity {
         desiredAppMode = CWCApplication.appMode;
 
         // get the active countries from SharedPreferences
-        CWCApplication.downloadKeysFromAustria = sharedPreferences.getBoolean(getString(R.string.country_code_austria), false);
-        CWCApplication.downloadKeysFromGermany = sharedPreferences.getBoolean(getString(R.string.country_code_germany), true);
-        CWCApplication.downloadKeysFromNetherlands = sharedPreferences.getBoolean(getString(R.string.country_code_netherlands), false);
-        CWCApplication.downloadKeysFromPoland = sharedPreferences.getBoolean(getString(R.string.country_code_poland), false);
-        CWCApplication.downloadKeysFromSwitzerland = sharedPreferences.getBoolean(getString(R.string.country_code_switzerland), false);
+        for (Country country : Country.values()) {
+            country.setDownloadKeysFrom(sharedPreferences.getBoolean(country.getCode(context), false));
+        }
         if (CWCApplication.getNumberOfActiveCountries() < 1) {
-            CWCApplication.downloadKeysFromGermany = true;
+            Country.Germany.setDownloadKeysFrom(true);
         }
 
         ActionBar actionBar = getSupportActionBar();
@@ -408,11 +354,11 @@ public class MainActivity extends AppCompatActivity {
         if (CWCApplication.appMode == NORMAL_MODE || CWCApplication.appMode == RAMBLE_MODE) {
             List<DKDownloadCountry> dkDownloadCountries = new ArrayList<>();
 
-            if (CWCApplication.downloadKeysFromAustria) dkDownloadCountries.add(new DKDownloadAustria());
-            if (CWCApplication.downloadKeysFromGermany) dkDownloadCountries.add(new DKDownloadGermany());
-            if (CWCApplication.downloadKeysFromNetherlands) dkDownloadCountries.add(new DKDownloadNetherlands());
-            if (CWCApplication.downloadKeysFromPoland) dkDownloadCountries.add(new DKDownloadPoland());
-            if (CWCApplication.downloadKeysFromSwitzerland) dkDownloadCountries.add(new DKDownloadSwitzerland());
+            for (Country country : Country.values()) {
+                if (country.isDownloadKeysFrom()) {
+                    dkDownloadCountries.add(country.getDkDownloadCountry());
+                }
+            }
 
             //noinspection ResultOfMethodCallIgnored
             DKDownloadUtils.getDKsForCountries(context, OK_HTTP_CLIENT, minDate, dkDownloadCountries)

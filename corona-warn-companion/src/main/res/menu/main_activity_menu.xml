@@ -18,6 +18,8 @@
                 android:checkableBehavior="all">
                 <item android:id="@+id/austria"
                     android:title="@string/country_austria" />
+                <item android:id="@+id/canada"
+                    android:title="@string/country_canada" />
                 <item android:id="@+id/germany"
                     android:title="@string/country_germany" />
                 <item android:id="@+id/netherlands"
