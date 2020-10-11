@@ -49,7 +49,6 @@ public class ContactDbOnRaspberry {
                             context.getResources().getString(R.string.toast_download_error, error.getMessage()), Toast.LENGTH_LONG);
                     toast.show();
                 })
-                .onErrorComplete()
                 .flatMapSingle(response -> {
                     RpiList rpiList = new RpiList();
                     ContactRecordsProtos.RpiDb rpiDb = ContactRecordsProtos.RpiDb.parseFrom(response.bytes());
