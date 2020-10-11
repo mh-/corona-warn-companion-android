@@ -23,6 +23,7 @@ import android.content.Context;
 
 import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
 
+import java.util.List;
 import java.util.TimeZone;
 
 public class CWCApplication extends Application {
@@ -42,27 +43,20 @@ public class CWCApplication extends Application {
     public static boolean backgroundThreadsRunning = false;
     public static boolean backgroundThreadsShouldStop = false;
 
-    public static boolean downloadKeysFromAustria;
-    public static boolean downloadKeysFromGermany;
-    public static boolean downloadKeysFromNetherlands;
-    public static boolean downloadKeysFromPoland;
-    public static boolean downloadKeysFromSwitzerland;
     public static int getNumberOfActiveCountries() {
         int num = 0;
-        if (downloadKeysFromAustria) num++;
-        if (downloadKeysFromGermany) num++;
-        if (downloadKeysFromNetherlands) num++;
-        if (downloadKeysFromPoland) num++;
-        if (downloadKeysFromSwitzerland) num++;
+        for (Country country : Country.values()) {
+            if (country.isDownloadKeysFrom()) num++;
+        }
         return num;
     }
     public static String getFlagsString(Context context) {
         StringBuilder sb = new StringBuilder();
-        if (downloadKeysFromAustria) {sb.append(context.getResources().getString(R.string.flag_austria));}
-        if (downloadKeysFromGermany) {sb.append(context.getResources().getString(R.string.flag_germany));}
-        if (downloadKeysFromNetherlands) {sb.append(context.getResources().getString(R.string.flag_netherlands));}
-        if (downloadKeysFromPoland) {sb.append(context.getResources().getString(R.string.flag_poland));}
-        if (downloadKeysFromSwitzerland) {sb.append(context.getResources().getString(R.string.flag_switzerland));}
+        for (Country country : Country.values()) {
+            if (country.isDownloadKeysFrom()) {
+                sb.append(country.getFlag(context));
+            }
+        }
         return sb.toString();
     }
 
