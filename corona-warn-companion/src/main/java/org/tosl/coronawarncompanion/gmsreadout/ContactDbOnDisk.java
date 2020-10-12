@@ -42,7 +42,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
-import io.reactivex.Completable;
 import io.reactivex.Single;
 
 import static org.tosl.coronawarncompanion.gmsreadout.Sudo.sudo;
@@ -182,13 +181,8 @@ public class ContactDbOnDisk {
         }
     }
 
-    public void close() {
-        try {
-            levelDBStore.close();
-        } catch (IOException e) {
-            Log.e(TAG, "IOException", e);
-            return;
-        }
+    public void close() throws IOException {
+        levelDBStore.close();
         Log.d(TAG, "Closed LevelDB.");
         levelDBStore = null;
     }
@@ -225,22 +219,21 @@ public class ContactDbOnDisk {
     }
 
     public Single<RpiList> getRpisFromContactDB() {
-        Completable copyDB;
-        // delete cache:
+        RpiList rpiList = new RpiList();
         try {
-            File dir = context.getExternalCacheDir();
-            deleteDir(dir);
-        } catch (Exception e) { e.printStackTrace();}
+            // delete cache:
+            try {
+                File dir = context.getExternalCacheDir();
+                deleteDir(dir);
+            } catch (Exception e) { e.printStackTrace();}
 
-        if (CWCApplication.appMode == CWCApplication.AppModeOptions.NORMAL_MODE) {
-            copyDB = Completable.fromRunnable(this::copyFromGMS);
-        } else if (CWCApplication.appMode == CWCApplication.AppModeOptions.DEMO_MODE) {
-            copyDB = Completable.fromRunnable(this::copyFromAssets);
-        } else {
-            throw new IllegalStateException();
-        }
-        Single<RpiList> rpiListSingle = Single.fromCallable(() -> {
-            RpiList rpiList = new RpiList();
+            if (CWCApplication.appMode == CWCApplication.AppModeOptions.NORMAL_MODE) {
+                copyFromGMS();
+            } else if (CWCApplication.appMode == CWCApplication.AppModeOptions.DEMO_MODE) {
+                copyFromAssets();
+            } else {
+                throw new IllegalStateException();
+            }
             open();
             if (levelDBStore != null) {
                 try {
@@ -255,8 +248,10 @@ public class ContactDbOnDisk {
                     close();
                 }
             }
-            return rpiList;
-        });
-        return copyDB.andThen(rpiListSingle);
+        } catch (IOException e) {
+            Log.e(TAG, "IOException", e);
+            e.printStackTrace();
+        }
+        return Single.just(rpiList);
     }
 }

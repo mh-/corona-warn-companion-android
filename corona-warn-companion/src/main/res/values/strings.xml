@@ -65,6 +65,9 @@
     <string name="about_version">Version\n%s (%d, %s)</string>
     <string name="error_download_invalid_key_file_header">ERROR!\nDownloaded Diagnosis Keys file starts with incorrect header!</string>
     <string name="saved_app_mode" translatable="false">APP_MODE</string>
+    <string name="raspberry_mode" translatable="false">RASPBERRY_MODE</string>
+    <string name="raspberry_mode_ip" translatable="false">RASPBERRY_MODE_IP</string>
+    <string name="ip_address">IP address</string>
     <string name="tx_power">TX Power reported by sender: %s dB</string>
     <string name="menu_entry_countries_sub_menu">Countries</string>
     <string name="country_canada">🇨🇦 Canada</string>
