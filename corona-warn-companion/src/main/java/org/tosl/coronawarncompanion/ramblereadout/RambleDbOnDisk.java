@@ -22,7 +22,6 @@ import java.io.FileFilter;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
-import io.reactivex.Maybe;
 import io.reactivex.Single;
 
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromSeconds;
