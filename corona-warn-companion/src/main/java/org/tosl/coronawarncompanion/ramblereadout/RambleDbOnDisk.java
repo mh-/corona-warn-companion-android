@@ -67,8 +67,8 @@ public class RambleDbOnDisk {
                     if (rambleDb != null) {
                         Log.d(TAG, "Opened RaMBLE Database: " + downloadDir + "/" + rambleDbFileName);
 
-                        Cursor cursor = rambleDb.rawQuery("SELECT service_data, first_seen, last_seen, id "+
-                                        "FROM devices WHERE service_uuids='fd6f'", null);
+                        Cursor cursor = rambleDb.rawQuery("SELECT service_data, last_seen, id "+
+                                "FROM devices WHERE service_uuids='fd6f'", null);
 
                         rpiList = new RpiList();
 
@@ -79,12 +79,11 @@ public class RambleDbOnDisk {
                             byte[] rpiBytes = hexStringToByteArray(rpiStr);
                             String aemStr = rpiAemStr.substring(16*2);
                             byte[] aemBytes = hexStringToByteArray(aemStr);
-                            String firstSeenStr = cursor.getString(1);
-                            int firstSeenTimestamp = Integer.parseInt(firstSeenStr);
-                            String lastSeenStr = cursor.getString(2);
+                            String lastSeenStr = cursor.getString(1);
                             int lastSeenTimestamp = Integer.parseInt(lastSeenStr);
+                            int firstSeenTimestamp = lastSeenTimestamp;
                             if (getDaysFromSeconds(lastSeenTimestamp) >= minDaysSinceEpochUTC) {
-                                String idStr = cursor.getString(3);
+                                String idStr = cursor.getString(2);
                                 // Log.d(TAG, "Device seen: " + byteArrayToHexString(rpiBytes) + " " + byteArrayToHexString(aemBytes) +
                                 //        " " + firstSeenTimestamp + "-" + lastSeenTimestamp + " " + idStr);
 
@@ -96,6 +95,12 @@ public class RambleDbOnDisk {
                                 while (cursor2.moveToNext()) {
                                     String timestampStr = cursor2.getString(0);
                                     int timestamp = Integer.parseInt(timestampStr);
+                                    if (getDaysFromSeconds(timestamp) < minDaysSinceEpochUTC) {
+                                        continue;
+                                    }
+                                    if (timestamp < firstSeenTimestamp) {
+                                        firstSeenTimestamp = timestamp;
+                                    }
                                     String rssiStr = cursor2.getString(1);
                                     int rssi = Integer.parseInt(rssiStr);
                                     //Log.d(TAG, "Scan events: " + timestamp + " " + rssi);
