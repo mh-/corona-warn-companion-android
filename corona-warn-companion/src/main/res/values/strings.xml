@@ -66,6 +66,9 @@
     <string name="country_canada">🇨🇦 Canada</string>
     <string name="flag_canada" translatable="false">🇨🇦</string>
     <string name="country_code_canada" translatable="false">CA</string>
+    <string name="country_czechia">🇨🇿 Czechia</string>
+    <string name="flag_czechia" translatable="false">🇨🇿</string>
+    <string name="country_code_czechia" translatable="false">CZ</string>
     <string name="country_germany">🇩🇪 Germany</string>
     <string name="flag_germany" translatable="false">🇩🇪</string>
     <string name="country_code_germany" translatable="false">DE</string>
