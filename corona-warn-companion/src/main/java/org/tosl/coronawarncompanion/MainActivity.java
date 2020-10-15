@@ -240,6 +240,9 @@ public class MainActivity extends AppCompatActivity {
         }
         if (CWCApplication.getNumberOfActiveCountries() < 1) {
             Country.Germany.setDownloadKeysFrom(true);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(Country.Germany.getCode(context), true);
+            editor.apply();
         }
 
         ActionBar actionBar = getSupportActionBar();
