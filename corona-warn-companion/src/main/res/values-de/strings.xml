@@ -39,6 +39,7 @@
     <string name="menu_entry_show_hide_all_scans">Alle Begegnungen zeigen/verbergen</string>
     <string name="menu_entry_switch_to_normal_mode">Normaler Modus</string>
     <string name="menu_entry_switch_to_ramble_mode">RaMBLE Modus</string>
+    <string name="menu_entry_switch_to_microg_mode">microG Modus</string>
     <string name="menu_entry_switch_to_demo_mode">Demo Modus</string>
     <string name="menu_entry_oss_licenses">Open Source Software Lizenzen</string>
     <string name="menu_entry_view_further_oss_licenses">Weitere Open Source Software Lizenzen</string>
@@ -48,10 +49,12 @@
     <string name="title_activity_main">@string/app_name</string>
     <string name="title_activity_main_demo_prefix">"DEMO "</string>
     <string name="title_activity_main_ramble_version">"RaMBLE-Warn-Companion"</string>
+    <string name="title_activity_main_microg_version">"microG-Warn-Companion"</string>
     <!--suppress AndroidDomInspection -->
     <string name="title_activity_details">@string/app_name</string>
     <string name="title_activity_details_demo">DEMO Beispiel-Details</string>
     <string name="title_activity_details_ramble">RaMBLE-basierte Details</string>
+    <string name="title_activity_details_microg">microG-basierte Details</string>
     <string name="title_activity_further_licenses">Weitere OSS Lizenzen</string>
     <string name="error_app_mode_switching_not_possible">Im Moment kann der Modus leider nicht gewechselt werden.\nBitte warte, bis alle Berechnungen abgeschlossen sind.</string>
     <string name="error_no_rpis_normal_mode">FEHLER!\nBegegnungen konnten nicht ausgelesen werden.\nSind Exposure Notifications eingeschaltet?\nHast Du dieser App ROOT-Rechte gegeben?</string>
