@@ -81,6 +81,9 @@
     <string name="country_austria">🇦🇹 Austria</string>
     <string name="flag_austria" translatable="false">🇦🇹</string>
     <string name="country_code_austria" translatable="false">AT</string>
+    <string name="country_belgium">🇧🇪 Belgium</string>
+    <string name="flag_belgium" translatable="false">🇧🇪</string>
+    <string name="country_code_belgium" translatable="false">BE</string>
     <string name="austrian_color_code_yellow">yellow</string>
     <string name="austrian_color_code_red">red</string>
     <string name="country_netherlands">🇳🇱 Netherlands</string>

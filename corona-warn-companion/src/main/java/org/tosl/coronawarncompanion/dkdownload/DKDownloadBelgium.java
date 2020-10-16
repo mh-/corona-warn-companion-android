@@ -4,11 +4,10 @@ import android.content.Context;
 
 import org.tosl.coronawarncompanion.R;
 
-public class DKDownloadGermany extends DKDownloadSAP {
+public class DKDownloadBelgium extends DKDownloadSAP {
+    private static final String DK_URL = "https://c19distcdn-prd.ixor.be/version/v1/diagnosis-keys/country/BE/";
 
-    private static final String DK_URL = "https://svc90.main.px.t-online.de/version/v1/diagnosis-keys/country/DE/";
-
-    public DKDownloadGermany() {
+    public DKDownloadBelgium() {
         super(DK_URL);
     }
 
