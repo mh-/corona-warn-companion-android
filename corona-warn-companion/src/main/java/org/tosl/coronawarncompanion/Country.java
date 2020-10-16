@@ -3,6 +3,7 @@ package org.tosl.coronawarncompanion;
 import android.content.Context;
 
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadAustria;
+import org.tosl.coronawarncompanion.dkdownload.DKDownloadBelgium;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadCanada;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadCountry;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadCzechia;
@@ -14,6 +15,7 @@ import org.tosl.coronawarncompanion.dkdownload.DKDownloadSwitzerland;
 public enum Country {
 
     Austria(R.id.austria, R.string.country_code_austria, R.string.flag_austria, new DKDownloadAustria()),
+    Belgium(R.id.belgium, R.string.country_code_belgium, R.string.flag_belgium, new DKDownloadBelgium()),
     Canada(R.id.canada, R.string.country_code_canada, R.string.flag_canada, new DKDownloadCanada()),
     Czechia(R.id.czechia, R.string.country_code_czechia, R.string.flag_czechia, new DKDownloadCzechia()),
     Germany(R.id.germany, R.string.country_code_germany, R.string.flag_germany, new DKDownloadGermany()),
