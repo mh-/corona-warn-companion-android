@@ -13,6 +13,6 @@ public class DKDownloadBelgium extends DKDownloadSAP {
 
     @Override
     public String getCountryCode(Context context) {
-        return context.getResources().getString(R.string.country_code_germany);
+        return context.getResources().getString(R.string.country_code_belgium);
     }
 }
