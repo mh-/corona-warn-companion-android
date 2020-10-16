@@ -56,6 +56,7 @@ import org.tosl.coronawarncompanion.dkdownload.DKDownloadCountry;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadUtils;
 import org.tosl.coronawarncompanion.gmsreadout.ContactDbOnDisk;
 import org.tosl.coronawarncompanion.ramblereadout.RambleDbOnDisk;
+import org.tosl.coronawarncompanion.microgreadout.MicroGDbOnDisk;
 import org.tosl.coronawarncompanion.rpis.RpiList;
 import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
 import org.tosl.coronawarncompanion.matcher.Matcher;
@@ -79,6 +80,7 @@ import okhttp3.OkHttpClient;
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.DEMO_MODE;
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.NORMAL_MODE;
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.RAMBLE_MODE;
+import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.MICROG_MODE;
 import static org.tosl.coronawarncompanion.CWCApplication.backgroundThreadsShouldStop;
 import static org.tosl.coronawarncompanion.CWCApplication.backgroundThreadsRunning;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysSinceEpochFromENIN;
@@ -129,6 +131,8 @@ public class MainActivity extends AppCompatActivity {
             menu.findItem(R.id.demomode).setChecked(true);
         } if (CWCApplication.appMode == RAMBLE_MODE) {
             menu.findItem(R.id.ramblemode).setChecked(true);
+        } if (CWCApplication.appMode == MICROG_MODE) {
+            menu.findItem(R.id.microgmode).setChecked(true);
         }
         for (Country country : Country.values()) {
             if (country.isDownloadKeysFrom()) {
@@ -149,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(this, AboutActivity.class));
             return true;
         } else if (item.getItemId() == R.id.normalmode || item.getItemId() == R.id.demomode ||
-                item.getItemId() == R.id.ramblemode) {
+                item.getItemId() == R.id.ramblemode || item.getItemId() == R.id.microgmode) {
             if (backgroundThreadsShouldStop) {
                 // user has to wait a little bit longer
                 CharSequence text = getString(R.string.error_app_mode_switching_not_possible);
@@ -163,6 +167,8 @@ public class MainActivity extends AppCompatActivity {
                 desiredAppMode = NORMAL_MODE;
             } else if (item.getItemId() == R.id.demomode) {
                 desiredAppMode = DEMO_MODE;
+            } else if (item.getItemId() == R.id.microgmode) {
+                desiredAppMode = MICROG_MODE;
             } else {
                 desiredAppMode = RAMBLE_MODE;
             }
@@ -253,6 +259,8 @@ public class MainActivity extends AppCompatActivity {
                 actionBar.setTitle(getString(R.string.title_activity_main_demo_prefix) + getString(R.string.title_activity_main));
             } else if (CWCApplication.appMode == RAMBLE_MODE) {
                 actionBar.setTitle(getString(R.string.title_activity_main_ramble_version));
+            } else if (CWCApplication.appMode == MICROG_MODE) {
+                actionBar.setTitle(getString(R.string.title_activity_main_microg_version));
             } else {
                 throw new IllegalStateException();
             }
@@ -305,6 +313,9 @@ public class MainActivity extends AppCompatActivity {
             // limit RaMBLE encounters to the last 14 days
             rpiList = rambleDbOnDisk.getRpisFromContactDB(this,
                     getDaysFromMillis(System.currentTimeMillis()) - 14);
+        } else if (CWCApplication.appMode == MICROG_MODE) {
+            MicroGDbOnDisk microGDbOnDisk = new MicroGDbOnDisk(this);
+            rpiList = microGDbOnDisk.getRpisFromContactDB(this);
         } else {
             throw new IllegalStateException();
         }
@@ -354,7 +365,8 @@ public class MainActivity extends AppCompatActivity {
         // 2nd Section: Diagnosis Keys
 
         textViewDks.setText(getString(R.string.title_diagnosis_keys_downloading, CWCApplication.getFlagsString(context)));
-        if (CWCApplication.appMode == NORMAL_MODE || CWCApplication.appMode == RAMBLE_MODE) {
+        if (CWCApplication.appMode == NORMAL_MODE || CWCApplication.appMode == RAMBLE_MODE ||
+                CWCApplication.appMode == MICROG_MODE) {
             List<DKDownloadCountry> dkDownloadCountries = new ArrayList<>();
 
             for (Country country : Country.values()) {

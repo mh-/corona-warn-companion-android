@@ -103,6 +103,8 @@ public class DisplayDetailsActivity extends AppCompatActivity {
                     actionBar.setTitle(R.string.title_activity_details_demo);
                 } else if (CWCApplication.appMode == CWCApplication.AppModeOptions.RAMBLE_MODE) {
                     actionBar.setTitle(R.string.title_activity_details_ramble);
+                } else if (CWCApplication.appMode == CWCApplication.AppModeOptions.MICROG_MODE) {
+                    actionBar.setTitle(R.string.title_activity_details_microg);
                 } else {
                     throw new IllegalStateException();
                 }
