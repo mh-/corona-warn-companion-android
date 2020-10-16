@@ -121,6 +121,10 @@ public class MicroGDbOnDisk {
                             Log.d(TAG, "Scan read: " + byteArrayToHexString(rpiBytes) + " " + byteArrayToHexString(aemBytes) +
                                     " RSSI: " + rssi + ", Timestamp: " + timestampMs + ", Duration: " + duration);
 
+                            // limit RSSI, which could be a very large number, because of this bug: https://github.com/microg/android_packages_apps_GmsCore/issues/1230
+                            if (rssi < -200L) rssi = -200L;
+                            if (rssi > +200L) rssi = +200L;
+
                             // add scanRecord to contactRecords
                             ContactRecordsProtos.ContactRecords.Builder contactRecordsBuilder =
                                     ContactRecordsProtos.ContactRecords.newBuilder();
