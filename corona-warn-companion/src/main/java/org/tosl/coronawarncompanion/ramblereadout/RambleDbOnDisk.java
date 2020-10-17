@@ -93,7 +93,14 @@ public class RambleDbOnDisk {
                                         Log.w(TAG, "Warning: Found lastSeenStr == null");
                                     } else {
                                         int lastSeenTimestamp = Integer.parseInt(lastSeenStr);
+                                        // only use entry if it's recent enough
                                         if (getDaysFromSeconds(lastSeenTimestamp) >= minDaysSinceEpochUTC) {
+                                            // firstSeenTimestamp might be too old, in case of BDADDR collisions
+                                            // see https://github.com/mh-/corona-warn-companion-android/issues/62
+                                            // Therefore we limit the interval to max. 30 minutes
+                                            if (firstSeenTimestamp < lastSeenTimestamp - 30*60) {
+                                                firstSeenTimestamp = lastSeenTimestamp - 30*60;
+                                            }
                                             String idStr = cursor.getString(3);
                                             if (idStr == null) {
                                                 Log.w(TAG, "Warning: Found idStr == null");
@@ -112,20 +119,23 @@ public class RambleDbOnDisk {
                                                         Log.w(TAG, "Warning: Found timestampStr == null");
                                                     } else {
                                                         int timestamp = Integer.parseInt(timestampStr);
-                                                        String rssiStr = cursor2.getString(1);
-                                                        if (rssiStr == null) {
-                                                            Log.w(TAG, "Warning: Found rssiStr == null");
-                                                        } else {
-                                                            int rssi = Integer.parseInt(rssiStr);
-                                                            //Log.d(TAG, "Scan events: " + timestamp + " " + rssi);
+                                                        // check if this belongs to the (potentially corrected) time interval:
+                                                        if (timestamp >= firstSeenTimestamp) {
+                                                            String rssiStr = cursor2.getString(1);
+                                                            if (rssiStr == null) {
+                                                                Log.w(TAG, "Warning: Found rssiStr == null");
+                                                            } else {
+                                                                int rssi = Integer.parseInt(rssiStr);
+                                                                //Log.d(TAG, "Scan events: " + timestamp + " " + rssi);
 
-                                                            // add scanRecord to contactRecords
-                                                            ContactRecordsProtos.ScanRecord scanRecord = ContactRecordsProtos.ScanRecord.newBuilder()
-                                                                    .setTimestamp(timestamp)
-                                                                    .setRssi(rssi)
-                                                                    .setAem(ByteString.copyFrom(aemBytes))
-                                                                    .build();
-                                                            contactRecordsBuilder.addRecord(scanRecord);
+                                                                // add scanRecord to contactRecords
+                                                                ContactRecordsProtos.ScanRecord scanRecord = ContactRecordsProtos.ScanRecord.newBuilder()
+                                                                        .setTimestamp(timestamp)
+                                                                        .setRssi(rssi)
+                                                                        .setAem(ByteString.copyFrom(aemBytes))
+                                                                        .build();
+                                                                contactRecordsBuilder.addRecord(scanRecord);
+                                                            }
                                                         }
                                                     }
                                                 }
