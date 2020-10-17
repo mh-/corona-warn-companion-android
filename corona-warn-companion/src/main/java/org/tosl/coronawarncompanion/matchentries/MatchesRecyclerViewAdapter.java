@@ -142,6 +142,9 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
                     hasTransmissionRiskLevel = true;
                 }
                 // note that TRL is usually 0 - then it is not shown
+            } else if (dk.countryCode.equals("CA")) {
+                // transmission risk level is always set to 1
+                hasTransmissionRiskLevel = false;
             } else {
                 // all other countries
                 transmissionRiskLevel = dk.dk.getTransmissionRiskLevel();
