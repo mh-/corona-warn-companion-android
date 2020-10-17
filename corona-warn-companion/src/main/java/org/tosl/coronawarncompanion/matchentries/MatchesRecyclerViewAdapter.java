@@ -42,6 +42,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 
 import org.tosl.coronawarncompanion.CWCApplication;
+import org.tosl.coronawarncompanion.Country;
 import org.tosl.coronawarncompanion.R;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKey;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKeysProtos;
@@ -125,7 +126,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         String austrianColorCode = "";
         int transmissionRiskLevel = 0;
         if (dk.dk.hasTransmissionRiskLevel()) {
-            if (dk.countryCode.equals(mContext.getString(R.string.country_code_austria))) {
+            if (dk.countryCode.equals(Country.Austria.getCode(mContext))) {
                 // Austria
                 if (dk.dk.getTransmissionRiskLevel() == 5) {
                     hasAustrianColorCode = true;
@@ -135,14 +136,14 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
                     hasAustrianColorCode = true;
                     austrianColorCode = mContext.getString(R.string.austrian_color_code_red);
                 }
-            } else if (dk.countryCode.equals(mContext.getString(R.string.country_code_switzerland))) {
+            } else if (dk.countryCode.equals(Country.Switzerland.getCode(mContext))) {
                 // Switzerland
                 transmissionRiskLevel = dk.dk.getTransmissionRiskLevel();
                 if (transmissionRiskLevel != 0) {
                     hasTransmissionRiskLevel = true;
                 }
                 // note that TRL is usually 0 - then it is not shown
-            } else if (dk.countryCode.equals("CA")) {
+            } else if (dk.countryCode.equals(Country.Canada.getCode(mContext))) {
                 // transmission risk level is always set to 1
                 hasTransmissionRiskLevel = false;
             } else {
@@ -230,12 +231,12 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
                         String.valueOf(matchEntryDetails.maxTxPower);
             }
             holder.mTextViewTxPower.setText(this.mContext.getResources().getString(R.string.tx_power, txPowerStr));
-            ViewGroup.LayoutParams params = (ViewGroup.LayoutParams) holder.mTextViewTxPower.getLayoutParams();
+            ViewGroup.LayoutParams params = holder.mTextViewTxPower.getLayoutParams();
             params.height = this.mContext.getResources().getDimensionPixelSize(R.dimen.details_text_view_3_height);
             holder.mTextViewTxPower.setLayoutParams(params);
         } else {
             holder.mTextViewTxPower.setText("");
-            ViewGroup.LayoutParams params = (ViewGroup.LayoutParams) holder.mTextViewTxPower.getLayoutParams();
+            ViewGroup.LayoutParams params = holder.mTextViewTxPower.getLayoutParams();
             params.height = this.mContext.getResources().getDimensionPixelSize(R.dimen.details_text_view_3_height_disabled);
             holder.mTextViewTxPower.setLayoutParams(params);
         }

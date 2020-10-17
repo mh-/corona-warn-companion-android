@@ -73,23 +73,36 @@ public class DKDownloadCanada implements DKDownloadCountry {
                 .build();
 
         DKDownloadCanada.Api api = retrofit.create(DKDownloadCanada.Api.class);
-        String hmac;
+        String hmac1;
+        String hmac2;
+        String currentDayPeriodStr;
 
         try {
-            String message = MCC_CODE + ":" + LAST_14_DAYS_PERIOD + ":" + System.currentTimeMillis() / 1000 / 3600;
+            String message1 = MCC_CODE + ":" + LAST_14_DAYS_PERIOD + ":" + System.currentTimeMillis() / 1000 / 3600;
 
             Mac mac = Mac.getInstance("HmacSHA256");
             SecretKeySpec secretKeySpec = new SecretKeySpec(hexToBytes(HMAC_KEY), "HmacSHA256");
             mac.init(secretKeySpec);
-            hmac = bytesToHex(mac.doFinal(message.getBytes()));
+            hmac1 = bytesToHex(mac.doFinal(message1.getBytes()));
+
+            long currentDayPeriod = System.currentTimeMillis() / 1000 / 3600 / 24;
+            currentDayPeriodStr = Long.toString(currentDayPeriod);
+            String message2 = MCC_CODE + ":" + currentDayPeriodStr + ":" + System.currentTimeMillis() / 1000 / 3600;
+            mac.init(secretKeySpec);
+            hmac2 = bytesToHex(mac.doFinal(message2.getBytes()));
+
         }
         catch (NoSuchAlgorithmException | InvalidKeyException e) {
             return Observable.error(e);
         }
 
-        return DKDownloadUtils.wrapRetrofit(context, api.getDKs(MCC_CODE, LAST_14_DAYS_PERIOD, hmac))
+        return DKDownloadUtils.wrapRetrofit(context, api.getDKs(MCC_CODE, LAST_14_DAYS_PERIOD, hmac1))
                 .doOnSuccess(response -> Log.d(TAG, "downloaded DKs"))
-                .flatMapObservable(response -> Observable.just(response.bytes()));
+                .flatMapObservable(response -> Observable.just(response.bytes()))
+                .concatWith(
+                        DKDownloadUtils.wrapRetrofit(context, api.getDKs(MCC_CODE, currentDayPeriodStr, hmac2))
+                                .doOnSuccess(response -> Log.d(TAG, "downloaded today's DKs"))
+                                .flatMapObservable(response -> Observable.just(response.bytes())));
     }
 
     @Override
