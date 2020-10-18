@@ -97,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_MESSAGE_COUNT = "org.tosl.coronawarncompanion.COUNT_MESSAGE";
     private static boolean mainActivityShouldBeRecreated = false;
     private static CWCApplication.AppModeOptions desiredAppMode;
+    private RambleDbOnDisk rambleDbOnDisk;
     private RpiList rpiList = null;
     private Date maxDate = null;
     private Date minDate = null;
@@ -309,7 +310,7 @@ public class MainActivity extends AppCompatActivity {
             ContactDbOnDisk contactDbOnDisk = new ContactDbOnDisk(this);
             rpiList = contactDbOnDisk.getRpisFromContactDB();
         } else if (CWCApplication.appMode == RAMBLE_MODE) {
-            RambleDbOnDisk rambleDbOnDisk = new RambleDbOnDisk(this);
+            rambleDbOnDisk = new RambleDbOnDisk(this);
             // limit RaMBLE encounters to the last 14 days
             rpiList = rambleDbOnDisk.getRpisFromContactDB(this,
                     getDaysFromMillis(System.currentTimeMillis()) - 14);
@@ -398,6 +399,15 @@ public class MainActivity extends AppCompatActivity {
             }
         } else {
             throw new IllegalStateException();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (CWCApplication.appMode == RAMBLE_MODE && rambleDbOnDisk.newExportFileAvailable(this)) {
+            recreateMainActivityOnNextPossibleOccasion();
         }
     }
 
