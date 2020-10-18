@@ -21,6 +21,8 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 
+import static org.tosl.coronawarncompanion.tools.Utils.getDaysSinceEpochFromDate;
+
 public abstract class DKDownloadSAP implements DKDownloadCountry {
     private final String TAG;
     private final String DK_URL;
@@ -76,7 +78,7 @@ public abstract class DKDownloadSAP implements DKDownloadCountry {
     }
 
     @Override
-    public Observable<byte[]> getDKBytes(Context context, OkHttpClient okHttpClient, Date minDate) {
+    public Observable<Pair<byte[], DownloadFileInfo>> getDKBytesAndFileInfo(Context context, OkHttpClient okHttpClient, Date minDate) {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(DK_URL)
@@ -95,18 +97,22 @@ public abstract class DKDownloadSAP implements DKDownloadCountry {
                         .map(dateFormatter::parse)
                         .filter(date -> date.compareTo(minDate) > 0)
                         .map(DKDownloadSAP::getStringFromDate)
-                        .flatMapMaybe(date -> DKDownloadUtils.wrapRetrofit(
-                                context, api.getDKsForDate(date))
-                                .doOnSuccess(responseBody -> Log.d(TAG, "Downloaded day: " + date)))
-                        .concatWith(
-                                DKDownloadUtils.wrapRetrofit(
-                                        context, api.listHours(datesListCurrentDatePair.second))
-                                        .doOnSuccess(list -> Log.d(TAG, "Downloaded hours list: " + list))
-                                        .flatMapObservable(hoursListString -> Observable
-                                                .fromIterable(Arrays.asList(parseCwsListResponse(hoursListString))))
-                                        .flatMapMaybe(hour -> DKDownloadUtils.wrapRetrofit(
-                                                context, api.getDKsForDateAndHour(datesListCurrentDatePair.second, hour))
-                                                .doOnSuccess(responseBody -> Log.d(TAG, "Downloaded hour: " + hour)))))
-                .map(ResponseBody::bytes);
+                        .flatMapMaybe(dateStringISO8601 -> DKDownloadUtils.wrapRetrofit(
+                                context, api.getDKsForDate(dateStringISO8601))
+                                .doOnSuccess(responseBody -> Log.d(TAG, "Downloaded day: " + dateStringISO8601))
+                                .map(responseBody -> new Pair<>(responseBody.bytes(),
+                                        new DownloadFileInfo(getCountryCode(context), dateStringISO8601,
+                                                getDaysSinceEpochFromDate(dateFormatter.parse(dateStringISO8601))))))
+                        .concatWith(DKDownloadUtils.wrapRetrofit(
+                                context, api.listHours(datesListCurrentDatePair.second))
+                                .doOnSuccess(list -> Log.d(TAG, "Downloaded hours list: " + list))
+                                .flatMapObservable(hoursListString -> Observable
+                                        .fromIterable(Arrays.asList(parseCwsListResponse(hoursListString))))
+                                .flatMapMaybe(hour -> DKDownloadUtils.wrapRetrofit(
+                                        context, api.getDKsForDateAndHour(datesListCurrentDatePair.second, hour))
+                                        .doOnSuccess(responseBody -> Log.d(TAG, "Downloaded hour: " + hour))
+                                        .map(responseBody -> new Pair<>(responseBody.bytes(),
+                                                new DownloadFileInfo(getCountryCode(context), datesListCurrentDatePair.second,
+                                                        getDaysSinceEpochFromDate(dateFormatter.parse(datesListCurrentDatePair.second))))))));
     }
 }

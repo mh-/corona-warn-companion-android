@@ -73,6 +73,10 @@ public class Utils {
         return ENIN/standardRollingPeriod;
     }
 
+    public static int getDaysSinceEpochFromDate(Date date) {
+        return getDaysSinceEpochFromENIN(getENINFromDate(date));
+    }
+
     public static byte[] xorTwoByteArrays(byte[] array1, byte[] array2) {
         byte[] result = new byte[array1.length];
         for (int i=0; i<array1.length; i++) {

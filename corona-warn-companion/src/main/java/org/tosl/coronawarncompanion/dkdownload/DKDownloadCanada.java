@@ -4,6 +4,7 @@ package org.tosl.coronawarncompanion.dkdownload;
 
 import android.content.Context;
 import android.util.Log;
+import android.util.Pair;
 
 import org.tosl.coronawarncompanion.R;
 
@@ -64,7 +65,7 @@ public class DKDownloadCanada implements DKDownloadCountry {
     }
 
     @Override
-    public Observable<byte[]> getDKBytes(Context context, OkHttpClient okHttpClient, Date minDate) {
+    public Observable<Pair<byte[], DownloadFileInfo>> getDKBytesAndFileInfo(Context context, OkHttpClient okHttpClient, Date minDate) {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(DK_URL)
@@ -98,11 +99,16 @@ public class DKDownloadCanada implements DKDownloadCountry {
 
         return DKDownloadUtils.wrapRetrofit(context, api.getDKs(MCC_CODE, LAST_14_DAYS_PERIOD, hmac1))
                 .doOnSuccess(response -> Log.d(TAG, "downloaded DKs"))
-                .flatMapObservable(response -> Observable.just(response.bytes()))
+                .flatMapObservable(response -> Observable.just(response.bytes())
+                .map(responseBytes -> new Pair<>(responseBytes,
+                        new DownloadFileInfo(getCountryCode(context), LAST_14_DAYS_PERIOD, 0))))
                 .concatWith(
                         DKDownloadUtils.wrapRetrofit(context, api.getDKs(MCC_CODE, currentDayPeriodStr, hmac2))
                                 .doOnSuccess(response -> Log.d(TAG, "downloaded today's DKs"))
-                                .flatMapObservable(response -> Observable.just(response.bytes())));
+                                .flatMapObservable(response -> Observable.just(response.bytes()))
+                                .map(responseBytes -> new Pair<>(responseBytes,
+                                        new DownloadFileInfo(getCountryCode(context), currentDayPeriodStr,
+                                                Integer.parseInt(currentDayPeriodStr)))));
     }
 
     @Override
