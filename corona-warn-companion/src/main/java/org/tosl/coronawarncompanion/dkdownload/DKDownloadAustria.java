@@ -2,6 +2,7 @@ package org.tosl.coronawarncompanion.dkdownload;
 
 import android.content.Context;
 import android.util.Log;
+import android.util.Pair;
 
 import com.google.gson.annotations.SerializedName;
 import org.tosl.coronawarncompanion.R;
@@ -49,7 +50,7 @@ public class DKDownloadAustria implements DKDownloadCountry {
     }
 
     @Override
-    public Observable<byte[]> getDKBytes(Context context, OkHttpClient okHttpClient, Date minDate) {
+    public Observable<Pair<byte[], DownloadFileInfo>> getDKBytesAndFileInfo(Context context, OkHttpClient okHttpClient, Date minDate) {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(DK_URL)
@@ -63,8 +64,9 @@ public class DKDownloadAustria implements DKDownloadCountry {
                 .doOnSuccess(index -> Log.d(TAG, "Downloaded index"))
                 .flatMapObservable(index -> Observable.fromIterable(index.getFull14Batch().getBatchFilePaths()))
                 .flatMapMaybe(path -> DKDownloadUtils.wrapRetrofit(context, api.getFile(path))
-                        .doOnSuccess(responseBody -> Log.d(TAG, "Downloaded file: " + path)))
-                .map(ResponseBody::bytes);
+                        .doOnSuccess(responseBody -> Log.d(TAG, "Downloaded file: " + path))
+                        .map(responseBody -> new Pair<>(responseBody.bytes(),
+                                new DownloadFileInfo(getCountryCode(context), path, 0))));
     }
 
     @Override

@@ -42,23 +42,30 @@ public class DKDownloadUtils {
                 .onErrorComplete();
     }
 
-    public static Single<List<DiagnosisKey>>
-    getDKsForCountries(Context context, OkHttpClient okHttpClient, Date minDate, List<DKDownloadCountry> countries) {
+    public static Single<Pair<List<DiagnosisKey>,List<DownloadFileInfo>>>
+    getDKsAndFileInfoListForCountries(Context context, OkHttpClient okHttpClient, Date minDate, List<DKDownloadCountry> countries) {
         errorCount = 0;
         return Observable
                 .concat(countries
                         .stream()
                         .map(dkDownloadCountry -> dkDownloadCountry
-                                .getDKBytes(context, okHttpClient, minDate)
-                                .map(bytes -> new Pair<>(bytes, dkDownloadCountry.getCountryCode(context))))
+                                .getDKBytesAndFileInfo(context, okHttpClient, minDate)
+                                .map(bytesFileInfoPair -> new Pair<>(bytesFileInfoPair, dkDownloadCountry.getCountryCode(context))))
                         .collect(Collectors.toList()))
-                .map(bytesCountryPair -> parseBytesToTeks(
-                        context, bytesCountryPair.first, bytesCountryPair.second))
+                .map(bytesFileInfoCountryPair -> new Pair<>(parseBytesToTeks(
+                        context, bytesFileInfoCountryPair.first.first, bytesFileInfoCountryPair.second),
+                        bytesFileInfoCountryPair.first.second))
                 .toList()
-                .map(dkListList -> dkListList
-                        .stream()
-                        .flatMap(List::stream)
-                        .collect(Collectors.toList()));
+                .map(listOfDkListsAndFileInfo -> new Pair<>(
+                        listOfDkListsAndFileInfo
+                                .stream()
+                                .map(pair -> pair.first)
+                                .flatMap(List::stream)
+                                .collect(Collectors.toList()),
+                        listOfDkListsAndFileInfo
+                                .stream()
+                                .map(pair -> pair.second)
+                                .collect(Collectors.toList())));
     }
 
     public static List<DiagnosisKey>

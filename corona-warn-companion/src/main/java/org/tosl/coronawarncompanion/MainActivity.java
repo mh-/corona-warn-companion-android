@@ -37,6 +37,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -54,6 +55,7 @@ import org.tosl.coronawarncompanion.barcharts.CwcBarChart;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKey;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadCountry;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadUtils;
+import org.tosl.coronawarncompanion.dkdownload.DownloadFileInfo;
 import org.tosl.coronawarncompanion.gmsreadout.ContactDbOnDisk;
 import org.tosl.coronawarncompanion.ramblereadout.RambleDbOnDisk;
 import org.tosl.coronawarncompanion.microgreadout.MicroGDbOnDisk;
@@ -376,7 +378,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             //noinspection ResultOfMethodCallIgnored
-            DKDownloadUtils.getDKsForCountries(context, OK_HTTP_CLIENT, minDate, dkDownloadCountries)
+            DKDownloadUtils.getDKsAndFileInfoListForCountries(context, OK_HTTP_CLIENT, minDate, dkDownloadCountries)
                     .subscribe(this::processDownloadedDiagnosisKeys, error -> {
                         Log.e(TAG, "Error downloading diagnosis keys: " + error);
                         showDownloadError();
@@ -391,8 +393,8 @@ public class MainActivity extends AppCompatActivity {
                 while ((bytesRead = inputStream.read(buffer)) != -1) {
                     output.write(buffer, 0, bytesRead);
                 }
-                processDownloadedDiagnosisKeys(DKDownloadUtils.parseBytesToTeks(context, output.toByteArray(),
-                        getString(R.string.country_code_germany)));
+                processDownloadedDiagnosisKeys(new Pair<>(DKDownloadUtils.parseBytesToTeks(context, output.toByteArray(), getString(R.string.country_code_germany)),
+                        null));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -437,9 +439,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void processDownloadedDiagnosisKeys(List<DiagnosisKey> diagnosisKeysList) {
+    private void processDownloadedDiagnosisKeys(Pair<List<DiagnosisKey>, List<DownloadFileInfo>> diagnosisKeysListAndFileInfoList) {
         // Count the downloaded Diagnosis Keys
-        Log.d(TAG, "Number of keys that have been downloaded: " + diagnosisKeysList.size());
+        Log.d(TAG, "Number of keys that have been downloaded: " + diagnosisKeysListAndFileInfoList.first.size());
+
+        if (diagnosisKeysListAndFileInfoList.second != null) {
+            for (DownloadFileInfo fileInfo : diagnosisKeysListAndFileInfoList.second) {
+                Log.d(TAG, "FileInfo: Country: " + fileInfo.countryCode + ", Name: " + fileInfo.filename +
+                        ", DaysSinceEpoch: " + fileInfo.maxDay);
+            }
+        }
 
         TreeMap<Integer, Integer> diagnosisKeyCountMap = new TreeMap<>();  // Key: ENIN (==date), Value: count
         int minENIN = getENINFromDate(minDate);
@@ -448,7 +457,7 @@ public class MainActivity extends AppCompatActivity {
             diagnosisKeyCountMap.put(ENIN, 0);
         }
         int count = 0;
-        for (DiagnosisKey diagnosisKeyEntry : diagnosisKeysList) {
+        for (DiagnosisKey diagnosisKeyEntry : diagnosisKeysListAndFileInfoList.first) {
             int ENIN = diagnosisKeyEntry.dk.getRollingStartIntervalNumber();
             Integer bin = diagnosisKeyCountMap.floorKey(ENIN);
             if (bin != null) {
@@ -490,7 +499,7 @@ public class MainActivity extends AppCompatActivity {
 
         if ((rpiList != null) && (!rpiList.isEmpty()) && (count > 0)) {
             textViewMatches.setText(getString(R.string.title_matching_not_done_yet));
-            startMatching(diagnosisKeysList);
+            startMatching(diagnosisKeysListAndFileInfoList.first);
         } else {
             showMatchingNotPossible();
         }

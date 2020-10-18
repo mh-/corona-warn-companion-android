@@ -16,6 +16,7 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import android.util.Log;
+import android.util.Pair;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
@@ -43,7 +44,7 @@ public class DKDownloadNetherlands implements DKDownloadCountry {
     }
 
     @Override
-    public Observable<byte[]> getDKBytes(Context context, OkHttpClient okHttpClient, Date minDate) {
+    public Observable<Pair<byte[], DownloadFileInfo>> getDKBytesAndFileInfo(Context context, OkHttpClient okHttpClient, Date minDate) {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(DK_URL)
@@ -56,13 +57,14 @@ public class DKDownloadNetherlands implements DKDownloadCountry {
         return DKDownloadUtils.wrapRetrofit(context, api.getManifest())
                 .doOnSuccess(response -> Log.d(TAG, "Downloaded manifest"))
                 .flatMapObservable(response -> {
-                    String manifestString = new String(Unzip.getUnzippedBytesFromZipFileBytes(response.bytes(), "content.bin"));
-                    Manifest manifest = new Gson().fromJson(manifestString, Manifest.class);
-                    return Observable.fromIterable(manifest.getIds());
-                })
+                                    String manifestString = new String(Unzip.getUnzippedBytesFromZipFileBytes(response.bytes(), "content.bin"));
+                                    Manifest manifest = new Gson().fromJson(manifestString, Manifest.class);
+                                    return Observable.fromIterable(manifest.getIds());
+                                })
                 .flatMapMaybe(id -> DKDownloadUtils.wrapRetrofit(context, api.getDKs(id))
-                        .doOnSuccess(responseBody -> Log.d(TAG, "Downloaded file: " + id)))
-                .map(ResponseBody::bytes);
+                        .doOnSuccess(responseBody -> Log.d(TAG, "Downloaded file: " + id))
+                        .map(responseBody -> new Pair<>(responseBody.bytes(),
+                                new DownloadFileInfo(getCountryCode(context), id, 0))));
     }
 
     @Override
