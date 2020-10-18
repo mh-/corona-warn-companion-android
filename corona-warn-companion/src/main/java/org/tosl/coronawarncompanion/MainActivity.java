@@ -246,10 +246,24 @@ public class MainActivity extends AppCompatActivity {
             country.setDownloadKeysFrom(sharedPreferences.getBoolean(country.getCode(context), false));
         }
         if (CWCApplication.getNumberOfActiveCountries() < 1) {
-            Country.Germany.setDownloadKeysFrom(true);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putBoolean(Country.Germany.getCode(context), true);
-            editor.apply();
+            String countryCode = Locale.getDefault().getCountry();
+            Log.i(TAG, "Country: " + countryCode);
+            SharedPreferences.Editor editor = null;
+            for (Country country : Country.values()) {
+                if (country.getCode(context).equals(countryCode)) {
+                    country.setDownloadKeysFrom(true);
+                    editor = sharedPreferences.edit();
+                    editor.putBoolean(country.getCode(context), true);
+                    editor.apply();
+                    break;
+                }
+            }
+            if (editor == null) {
+                Country.Germany.setDownloadKeysFrom(true);
+                editor = sharedPreferences.edit();
+                editor.putBoolean(Country.Germany.getCode(context), true);
+                editor.apply();
+            }
         }
 
         ActionBar actionBar = getSupportActionBar();
