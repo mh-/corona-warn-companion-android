@@ -233,11 +233,11 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = this.getPreferences(MODE_PRIVATE);
 
         // get App Mode from SharedPreferences
-        int appModeOrdinal = sharedPreferences.getInt(getString(R.string.saved_app_mode), NORMAL_MODE.ordinal());
+        int appModeOrdinal = sharedPreferences.getInt(getString(R.string.saved_app_mode), RAMBLE_MODE.ordinal());
         try {
             CWCApplication.appMode = CWCApplication.AppModeOptions.values()[appModeOrdinal];
         } catch (ArrayIndexOutOfBoundsException e) {
-            CWCApplication.appMode = NORMAL_MODE;
+            CWCApplication.appMode = RAMBLE_MODE;
         }
         desiredAppMode = CWCApplication.appMode;
 
