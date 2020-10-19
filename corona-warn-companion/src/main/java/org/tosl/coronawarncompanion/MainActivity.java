@@ -101,6 +101,8 @@ public class MainActivity extends AppCompatActivity {
     private RpiList rpiList = null;
     private Date maxDate = null;
     private Date minDate = null;
+    // try again in 5 mins if initial download of diagnosis keys fails
+    private long nextDKDownloadTime = System.currentTimeMillis() + 5 * 60000;
 
     @SuppressWarnings("SpellCheckingInspection")
     private final int normalBarColor = Color.parseColor("#8CEAFF");
@@ -423,6 +425,12 @@ public class MainActivity extends AppCompatActivity {
         if (CWCApplication.appMode == RAMBLE_MODE && rambleDbOnDisk.newExportFileAvailable(this)) {
             recreateMainActivityOnNextPossibleOccasion();
         }
+
+        if (CWCApplication.appMode != DEMO_MODE && System.currentTimeMillis() > nextDKDownloadTime) {
+            // wait at least 5 mins before trying again, more if download succeeds
+            nextDKDownloadTime = System.currentTimeMillis() + 5 * 60000;
+            recreateMainActivityOnNextPossibleOccasion();
+        }
     }
 
     private void showExtractionError() {
@@ -493,6 +501,10 @@ public class MainActivity extends AppCompatActivity {
             sb.append(" ");
             sb.append(getResources().getQuantityString(R.plurals.title_diagnosis_keys_downloaded_warning,
                     errorCount, errorCount));
+        }
+        else {
+            // wait one hour before getting an update
+            nextDKDownloadTime = System.currentTimeMillis() + 60 * 60000;
         }
 
         textViewDks.setText(sb.toString());
