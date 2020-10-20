@@ -438,6 +438,8 @@ public class MainActivity extends AppCompatActivity {
             textViewExtractionError.setText(R.string.error_no_rpis_normal_mode);
         } else if (CWCApplication.appMode == RAMBLE_MODE) {
             textViewExtractionError.setText(R.string.error_no_rpis_ramble_mode);
+        } else if (CWCApplication.appMode ==  MICROG_MODE) {
+            textViewExtractionError.setText(R.string.error_no_rpis_microg_mode);
         } else {
             throw new IllegalStateException();
         }
