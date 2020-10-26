@@ -316,7 +316,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
                 }
                 byte txPower = aem[1];
                 //Log.d(TAG, "TXPower: "+txPower+" dBm");
-                int rssi = (int) scanRecord.getRssi();
+                int rssi = scanRecord.getRssi();
                 //Log.d(TAG, "RSSI: "+rssi+" dBm");
                 int attenuation = txPower - rssi;
                 //Log.d(TAG, "Attenuation: "+attenuation+" dB");

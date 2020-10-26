@@ -13,9 +13,6 @@ import org.tosl.coronawarncompanion.gmsreadout.ContactRecordsProtos;
 import org.tosl.coronawarncompanion.rpis.RpiList;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 import static org.tosl.coronawarncompanion.gmsreadout.Sudo.sudo;
 import static org.tosl.coronawarncompanion.tools.Utils.byteArrayToHexString;
@@ -62,14 +59,6 @@ public class MicroGDbOnDisk {
         }
     }
 
-    private void copyFile(InputStream in, OutputStream out) throws IOException {
-        byte[] buffer = new byte[1024];
-        int read;
-        while((read = in.read(buffer)) != -1){
-            out.write(buffer, 0, read);
-        }
-    }
-
     public RpiList getRpisFromContactDB(Activity activity) {
         RpiList rpiList = null;
 
@@ -97,25 +86,26 @@ public class MicroGDbOnDisk {
                             Log.w(TAG, "Warning: Found aemBytes == null");
                         } else {
                             long timestampMs = cursor.getLong(2);
-                            long rssi = cursor.getLong(3);
+                            int rssi = (int) cursor.getLong(3);
                             int duration = cursor.getInt(4);
 
                             Log.d(TAG, "Scan read: " + byteArrayToHexString(rpiBytes) + " " + byteArrayToHexString(aemBytes) +
                                     " RSSI: " + rssi + ", Timestamp: " + timestampMs + ", Duration: " + duration);
 
                             // limit RSSI, which could be a very large number, because of this bug: https://github.com/microg/android_packages_apps_GmsCore/issues/1230
-                            if (rssi < -200L) rssi = -200L;
-                            if (rssi > +200L) rssi = +200L;
+                            if (rssi < -200L) rssi = -200;
+                            if (rssi > +200L) rssi = +200;
 
                             // add scanRecord to contactRecords
                             ContactRecordsProtos.ContactRecords.Builder contactRecordsBuilder =
                                     ContactRecordsProtos.ContactRecords.newBuilder();
-                            ContactRecordsProtos.ScanRecord scanRecord = ContactRecordsProtos.ScanRecord.newBuilder()
+                            @SuppressWarnings("deprecation") ContactRecordsProtos.ScanRecord scanRecord = ContactRecordsProtos.ScanRecord.newBuilder()
                                     .setTimestamp((int)(timestampMs/1000L))
                                     .setRssi(rssi)
                                     .setAem(ByteString.copyFrom(aemBytes))
                                     .build();
                             contactRecordsBuilder.addRecord(scanRecord);
+                            //noinspection deprecation
                             scanRecord = ContactRecordsProtos.ScanRecord.newBuilder()
                                     .setTimestamp((int)((timestampMs+duration)/1000L))
                                     .setRssi(rssi)
