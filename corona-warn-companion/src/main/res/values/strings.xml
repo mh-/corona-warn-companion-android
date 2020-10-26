@@ -92,5 +92,13 @@
     <string name="country_netherlands">🇳🇱 Netherlands</string>
     <string name="flag_netherlands" translatable="false">🇳🇱</string>
     <string name="country_code_netherlands" translatable="false">NL</string>
+    <string name="country_ireland">🇮🇪 Ireland</string>
+    <string name="flag_ireland" translatable="false">🇮🇪</string>
+    <string name="country_code_ireland" translatable="false">IE</string>
+    <string name="country_italy">🇮🇹 Italy</string>
+    <string name="flag_italy" translatable="false">🇮🇹</string>
+    <string name="country_code_italy" translatable="false">IT</string>
+    <string name="countries_one_europe">🇩🇪 Germany, 🇮🇪 Ireland, 🇮🇹 Italy</string>
+    <string name="flags_one_europe" translatable="false">🇩🇪🇮🇪🇮🇹</string>
     <string name="toast_download_error">Error during download: %s</string>
 </resources>

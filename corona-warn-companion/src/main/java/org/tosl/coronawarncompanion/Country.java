@@ -18,7 +18,7 @@ public enum Country {
     Belgium(R.id.belgium, R.string.country_code_belgium, R.string.flag_belgium, new DKDownloadBelgium()),
     Canada(R.id.canada, R.string.country_code_canada, R.string.flag_canada, new DKDownloadCanada()),
     Czechia(R.id.czechia, R.string.country_code_czechia, R.string.flag_czechia, new DKDownloadCzechia()),
-    Germany(R.id.germany, R.string.country_code_germany, R.string.flag_germany, new DKDownloadGermany()),
+    Germany(R.id.germany, R.string.country_code_germany, R.string.flags_one_europe, new DKDownloadGermany()),
     Netherlands(R.id.netherlands, R.string.country_code_netherlands, R.string.flag_netherlands, new DKDownloadNetherlands()),
     Poland(R.id.poland, R.string.country_code_poland, R.string.flag_poland, new DKDownloadPoland()),
     Switzerland(R.id.switzerland, R.string.country_code_switzerland, R.string.flag_switzerland, new DKDownloadSwitzerland());
