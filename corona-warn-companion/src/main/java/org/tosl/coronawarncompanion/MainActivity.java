@@ -86,6 +86,7 @@ import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.RAMBLE_
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.MICROG_MODE;
 import static org.tosl.coronawarncompanion.CWCApplication.backgroundThreadsShouldStop;
 import static org.tosl.coronawarncompanion.CWCApplication.backgroundThreadsRunning;
+import static org.tosl.coronawarncompanion.CWCApplication.downloadOptimizationActive;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysSinceEpochFromENIN;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromMillis;
 import static org.tosl.coronawarncompanion.tools.Utils.getENINFromDate;
@@ -143,6 +144,9 @@ public class MainActivity extends AppCompatActivity {
             if (country.isDownloadKeysFrom()) {
                 menu.findItem(country.getId()).setChecked(true);
             }
+        }
+        if (CWCApplication.downloadOptimizationActive) {
+            menu.findItem(R.id.download_optimization).setChecked(true);
         }
         return true;
     }
@@ -207,6 +211,14 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             return false;
+        } else if (item.getItemId() == R.id.download_optimization) {
+            CWCApplication.downloadOptimizationActive = !CWCApplication.downloadOptimizationActive;
+            item.setChecked(CWCApplication.downloadOptimizationActive);
+            SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(getString(R.string.saved_download_optimization), CWCApplication.downloadOptimizationActive);
+            editor.apply();
+            return true;
         } else {
             return super.onOptionsItemSelected(item);
         }
@@ -258,6 +270,9 @@ public class MainActivity extends AppCompatActivity {
             editor.putBoolean(Country.Germany.getCode(context), true);
             editor.apply();
         }
+
+        // get Download Optimization active/inactive from SharedPreferences
+        CWCApplication.downloadOptimizationActive = sharedPreferences.getBoolean(getString(R.string.saved_download_optimization), true);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -505,13 +520,13 @@ public class MainActivity extends AppCompatActivity {
 
         if ((rpiList != null) && (!rpiList.isEmpty()) && (count > 0)) {
             textViewMatches.setText(getString(R.string.title_matching_not_done_yet));
-            startMatching(diagnosisKeysListAndFileInfoList.first);
+            startMatching(diagnosisKeysListAndFileInfoList.first, diagnosisKeysListAndFileInfoList.second);
         } else {
             showMatchingNotPossible();
         }
     }
 
-    private void startMatching(List<DiagnosisKey> diagnosisKeysList) {
+    private void startMatching(List<DiagnosisKey> diagnosisKeysList, List<DownloadFileInfo> downloadFileInfoList) {
         backgroundThreadsRunning = true;  // required so that DEMO_MODE toggle can safely stop the background threads
         backgroundThreadsShouldStop = false;
 
@@ -591,7 +606,7 @@ public class MainActivity extends AppCompatActivity {
                 i++;
             }
             numMatchingThreads = ranges.size();
-            
+
             ArrayList<Observable<Matcher.ProgressAndMatchEntryAndDkAndDay>> observables = new ArrayList<>();
             for (int threadNum = 0; threadNum < numMatchingThreads; threadNum++) {
                 Matcher matcher = new Matcher(rpiList,
@@ -608,7 +623,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void presentMatchResults() {
+    private void presentMatchResults(List<DownloadFileInfo> downloadFileInfoList) {
         MatchEntryContent matchEntryContent = CWCApplication.getMatchEntryContent();
         if ((rpiList != null) && (matchEntryContent != null)) {
             int numberOfMatches = 0;
@@ -643,6 +658,16 @@ public class MainActivity extends AppCompatActivity {
 
             chartMatches.setData(dataPoints3, matchBarColor, "Matches", true, this);
             chartMatches.setFormatAndRefresh(this);
+
+            if (total == 0) {
+                // if no match was found, we do not need to download some of the Diagnosis Keys again later
+                if (downloadFileInfoList != null) {
+                    for (DownloadFileInfo fileInfo : downloadFileInfoList) {
+                        Log.d(TAG, "FileInfo: Country: " + fileInfo.countryCode + ", Name: " + fileInfo.filename +
+                                ", DaysSinceEpoch: " + fileInfo.maxDay);
+                    }
+                }
+            }
 
             // End of this path.
             // From now on, the user can scroll the charts,

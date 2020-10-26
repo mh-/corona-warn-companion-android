@@ -30,6 +30,8 @@ public class CWCApplication extends Application {
     public enum AppModeOptions {NORMAL_MODE, DEMO_MODE, RAMBLE_MODE, MICROG_MODE}
     public static AppModeOptions appMode = AppModeOptions.NORMAL_MODE;
 
+    public static boolean downloadOptimizationActive = false;
+
     private static MatchEntryContent matchEntryContent = null;
     public static MatchEntryContent getMatchEntryContent() {return matchEntryContent;}
     public static void setMatchEntryContent(

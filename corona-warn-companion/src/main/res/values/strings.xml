@@ -115,4 +115,6 @@
     <string name="flags_one_europe" translatable="false">🇩🇪🇮🇪🇮🇹🇩🇰🇱🇻🇪🇸</string>
     <string name="toast_download_error">Error during download: %s</string>
     <string name="point_of_exposure">Point of exposure</string>
+    <string name="menu_entry_download_optimization">Download Diagnosis Keys only once</string>
+    <string name="saved_download_optimization" translatable="false">DOWNLOAD_OPTIMIZATION</string>
 </resources>

@@ -75,7 +75,6 @@
     <string name="austrian_color_code_yellow">gelb</string>
     <string name="austrian_color_code_red">rot</string>
     <string name="country_netherlands">🇳🇱 Niederlande</string>
-    <string name="toast_download_error">Fehler während Download: %s</string>
     <string name="country_canada">🇨🇦 Kanada</string>
     <string name="country_czechia">🇨🇿 Tschechien</string>
     <string name="country_ireland">🇮🇪 Irland</string>
@@ -85,4 +84,6 @@
     <string name="country_spain">🇪🇸 Spanien</string>
     <string name="countries_one_europe">🇩🇪 Deutschland, 🇮🇪 Irland, 🇮🇹 Italien, 🇩🇰 Dänemark, 🇱🇻 Lettland, 🇪🇸 Spanien</string>
     <string name="point_of_exposure">Risikobegegnung</string>
+    <string name="toast_download_error">Fehler während Download: %s</string>
+    <string name="menu_entry_download_optimization">Diagnoseschlüssel nur 1x laden</string>
 </resources>

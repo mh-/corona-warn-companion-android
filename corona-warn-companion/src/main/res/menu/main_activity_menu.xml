@@ -4,13 +4,13 @@
         android:title="@string/menu_entry_about" />
     <group android:id="@+id/mode_group"
         android:checkableBehavior="single">
-        <item android:id="@+id/normalmode"
+        <item android:id="@+id/normal_mode"
             android:title="@string/menu_entry_switch_to_normal_mode" />
-        <item android:id="@+id/ramblemode"
+        <item android:id="@+id/ramble_mode"
             android:title="@string/menu_entry_switch_to_ramble_mode" />
-        <item android:id="@+id/microgmode"
+        <item android:id="@+id/microg_mode"
             android:title="@string/menu_entry_switch_to_microg_mode" />
-        <item android:id="@+id/demomode"
+        <item android:id="@+id/demo_mode"
             android:title="@string/menu_entry_switch_to_demo_mode" />
     </group>
     <item android:title="@string/menu_entry_countries_sub_menu"
@@ -39,6 +39,9 @@
             </group>
         </menu>
     </item>
+    <item android:id="@+id/download_optimization"
+        android:checkable="true"
+        android:title="@string/menu_entry_download_optimization" />
     <item android:id="@+id/osslicenses"
         android:title="@string/menu_entry_oss_licenses" />
 </menu>
