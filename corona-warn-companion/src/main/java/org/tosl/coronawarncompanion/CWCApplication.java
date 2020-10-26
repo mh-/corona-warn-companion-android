@@ -23,7 +23,6 @@ import android.content.Context;
 
 import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
 
-import java.util.List;
 import java.util.TimeZone;
 
 public class CWCApplication extends Application {
