@@ -1,43 +1,25 @@
 package org.tosl.coronawarncompanion.microgreadout;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Environment;
 import android.util.Log;
-
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 import com.google.protobuf.ByteString;
 
-import org.iq80.leveldb.CompressionType;
-import org.iq80.leveldb.DBFactory;
-import org.iq80.leveldb.Options;
-import org.iq80.leveldb.impl.Iq80DBFactory;
-import org.tosl.coronawarncompanion.CWCApplication;
 import org.tosl.coronawarncompanion.gmsreadout.ContactRecordsProtos;
 import org.tosl.coronawarncompanion.rpis.RpiList;
 
 import java.io.File;
-import java.io.FileFilter;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.regex.Pattern;
 
 import static org.tosl.coronawarncompanion.gmsreadout.Sudo.sudo;
 import static org.tosl.coronawarncompanion.tools.Utils.byteArrayToHexString;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromMillis;
-import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromSeconds;
-import static org.tosl.coronawarncompanion.tools.Utils.hexStringToByteArray;
 
 public class MicroGDbOnDisk {
 
