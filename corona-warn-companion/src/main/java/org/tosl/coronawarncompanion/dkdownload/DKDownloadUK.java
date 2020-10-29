@@ -50,13 +50,13 @@ public class DKDownloadUK implements DKDownloadCountry {
         List<String> dailyZips = new ArrayList<>();
         List<String> hourlyZips = new ArrayList<>();
         Instant now = Instant.now();
-        Instant instant;
-        Instant currentDay;
-        for (instant = minDate.toInstant(), currentDay = minDate.toInstant(); instant.isBefore(now); currentDay = instant, instant = instant.plusSeconds(SECONDS_IN_DAY)) {
-            dailyZips.add(DATE_FORMATTER.format(instant) + ".zip");
+        Instant dailyInstant;
+        Instant hourlyInstant;
+        for (dailyInstant = minDate.toInstant(), hourlyInstant = minDate.toInstant(); dailyInstant.isBefore(now); hourlyInstant = dailyInstant, dailyInstant = dailyInstant.plusSeconds(SECONDS_IN_DAY)) {
+            dailyZips.add(DATE_FORMATTER.format(dailyInstant) + ".zip");
         }
-        for (currentDay = currentDay.plusSeconds(2 * SECONDS_IN_HOUR); currentDay.isBefore(now); currentDay = currentDay.plusSeconds(2 * SECONDS_IN_HOUR)) {
-            hourlyZips.add(DATE_FORMATTER.format(currentDay) + ".zip");
+        for (hourlyInstant = hourlyInstant.plusSeconds(2 * SECONDS_IN_HOUR); hourlyInstant.isBefore(now); hourlyInstant = hourlyInstant.plusSeconds(2 * SECONDS_IN_HOUR)) {
+            hourlyZips.add(DATE_FORMATTER.format(hourlyInstant) + ".zip");
         }
 
         return Observable.fromIterable(dailyZips)
