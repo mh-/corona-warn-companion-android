@@ -34,6 +34,8 @@
                     android:title="@string/country_poland" />
                 <item android:id="@+id/switzerland"
                     android:title="@string/country_switzerland" />
+                <item android:id="@+id/uk"
+                    android:title="@string/country_uk" />
             </group>
         </menu>
     </item>
