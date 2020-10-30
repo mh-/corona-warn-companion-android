@@ -68,8 +68,8 @@
     <string name="country_germany">🇩🇪 Deutschland</string>
     <string name="country_poland">🇵🇱 Polen</string>
     <string name="country_switzerland">🇨🇭 Schweiz</string>
-    <string name="country_uk">🇬🇧 Vereinigtes Königreich</string>
     <string name="country_austria">🇦🇹 Österreich</string>
+    <string name="country_eaw">🏴󠁧󠁢󠁥󠁮󠁧󠁿🏴󠁧󠁢󠁷󠁬󠁳󠁿 England und Wales</string>
     <string name="country_belgium">🇧🇪 Belgien</string>
     <string name="austrian_color_code_yellow">gelb</string>
     <string name="austrian_color_code_red">rot</string>

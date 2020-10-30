@@ -21,8 +21,8 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 
-public class DKDownloadUK implements DKDownloadCountry {
-    private static final String TAG = "DKDownloadSwitzerland";
+public class DKDownloadEnglandAndWales implements DKDownloadCountry {
+    private static final String TAG = "DKDownloadEAW";
 
     private final static int SECONDS_IN_HOUR = 60 * 60;
     private final static int SECONDS_IN_DAY = 24 * SECONDS_IN_HOUR;
@@ -70,6 +70,6 @@ public class DKDownloadUK implements DKDownloadCountry {
 
     @Override
     public String getCountryCode(Context context) {
-        return context.getResources().getString(R.string.country_code_uk);
+        return context.getResources().getString(R.string.country_code_eaw);
     }
 }
