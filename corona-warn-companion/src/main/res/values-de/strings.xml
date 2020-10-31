@@ -76,4 +76,7 @@
     <string name="toast_download_error">Fehler während Download: %s</string>
     <string name="country_canada">🇨🇦 Kanada</string>
     <string name="country_czechia">🇨🇿 Tschechien</string>
+    <string name="country_ireland">🇮🇪 Irland</string>
+    <string name="country_italy">🇮🇹 Italien</string>
+    <string name="countries_one_europe">🇩🇪 Deutschland, 🇮🇪 Irland, 🇮🇹 Italien</string>
 </resources>

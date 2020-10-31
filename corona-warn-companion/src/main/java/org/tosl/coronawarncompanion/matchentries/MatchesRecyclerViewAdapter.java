@@ -41,7 +41,6 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 
-import org.tosl.coronawarncompanion.CWCApplication;
 import org.tosl.coronawarncompanion.Country;
 import org.tosl.coronawarncompanion.R;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKey;
@@ -61,8 +60,10 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import static org.tosl.coronawarncompanion.tools.Utils.byteArrayToHexString;
+import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromENIN;
 import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromSeconds;
 import static org.tosl.coronawarncompanion.tools.Utils.resolveColorAttr;
+import static org.tosl.coronawarncompanion.tools.Utils.standardRollingPeriod;
 import static org.tosl.coronawarncompanion.tools.Utils.xorTwoByteArrays;
 
 /**
@@ -164,8 +165,19 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
             daysSinceOnsetOfSymptoms = dk.dk.getDaysSinceOnsetOfSymptoms();
             hasDaysSinceOnsetOfSymptoms = true;
         }
+        if ((daysSinceOnsetOfSymptoms == 0) && dk.countryCode.equals(Country.Germany.getCode(mContext))) {
+            // Workaround, because the German CWA server publishes DSOS == 0 for all keys.
+            // DSOS == 0 would be a very high risk, but it's also very unlikely that users get their test result back
+            // on the day when their symptoms started. So we suppress this for now.
+            hasDaysSinceOnsetOfSymptoms = false;
+        }
 
-        MatchEntryDetails matchEntryDetails = getMatchEntryDetails(list, CWCApplication.getTimeZoneOffsetSeconds());
+        //Log.d(TAG, "Old TimeZoneOffset: " + CWCApplication.getTimeZoneOffsetSeconds());
+        //Log.d(TAG, "New TimeZoneOffset: " + TimeZone.getDefault().
+        //        getOffset(getMillisFromENIN(dk.dk.getRollingStartIntervalNumber()+standardRollingPeriod/2)) / 1000);
+        MatchEntryDetails matchEntryDetails = getMatchEntryDetails(list,
+                TimeZone.getDefault().
+                        getOffset(getMillisFromENIN(dk.dk.getRollingStartIntervalNumber()+standardRollingPeriod/2)) / 1000);
         int minTimestampLocalTZDay0 = matchEntryDetails.minTimestampLocalTZDay0;
         int maxTimestampLocalTZDay0 = matchEntryDetails.maxTimestampLocalTZDay0;
 
@@ -304,7 +316,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
                 }
                 byte txPower = aem[1];
                 //Log.d(TAG, "TXPower: "+txPower+" dBm");
-                int rssi = (int) scanRecord.getRssi();
+                int rssi = scanRecord.getRssi();
                 //Log.d(TAG, "RSSI: "+rssi+" dBm");
                 int attenuation = txPower - rssi;
                 //Log.d(TAG, "Attenuation: "+attenuation+" dB");

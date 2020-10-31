@@ -16,6 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+// reference: https://github.com/google/exposure-notifications-internals/blob/main/exposurenotification/src/main/proto/contact_record.proto
+//
+// compile with:
+// protoc --java_out=. ContactRecords.proto
+// (this generates org/tosl/coronawarncompanion/gmsreadout/ContactRecordsProtos.java)
+
 syntax = "proto2";
 
 package gmsreadout;
@@ -25,8 +31,11 @@ option java_outer_classname = "ContactRecordsProtos";
 
 message ScanRecord {
   optional uint32 timestamp = 1;
-  optional int64 rssi = 3;
-  optional bytes aem = 4;
+  optional bytes rssi_multiple_values = 2;
+  optional int32 rssi = 3 [deprecated = true];
+  repeated bytes aem_multiple_values = 6;
+  optional bytes aem = 4 [deprecated = true];
+  optional uint32 previous_scan_timestamp = 5;
 }
 
 message ContactRecords {

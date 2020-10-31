@@ -402,7 +402,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showExtractionError() {
-        if (CWCApplication.appMode == NORMAL_MODE) {
+        if ((CWCApplication.appMode == NORMAL_MODE) || (CWCApplication.appMode == MICROG_MODE)) {
             textViewExtractionError.setText(R.string.error_no_rpis_normal_mode);
         } else if (CWCApplication.appMode == RAMBLE_MODE) {
             textViewExtractionError.setText(R.string.error_no_rpis_ramble_mode);
