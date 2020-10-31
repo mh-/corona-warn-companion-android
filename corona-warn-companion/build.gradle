@@ -128,6 +128,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-scalars:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+    implementation 'org.osmdroid:osmdroid-android:6.1.8'
 
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.0.10'
 

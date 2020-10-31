@@ -44,6 +44,7 @@ public class RpiList {
 
     private final int timeZoneOffsetSeconds;
     private final Random rand;
+    private boolean haveLoc;
 
     public static class ListsPerDayUTC {
         public final HashMap<RpiBytes, RpiEntry> rpiEntries = new HashMap<>(2048);     // RpiEntries
@@ -128,6 +129,15 @@ public class RpiList {
         mapOfDailyCountsLocalTZ = new TreeMap<>();
         timeZoneOffsetSeconds = CWCApplication.getTimeZoneOffsetSeconds();
         rand = new Random();  // not very random, but sufficient for the use case here
+        haveLoc = false;
+    }
+
+    public boolean getHaveLocation() {
+        return haveLoc;
+    }
+
+    public void setHaveLocation(boolean value) {
+        haveLoc = value;
     }
 
     public void addEntry(Integer daysSinceEpochUTC, byte[] rpiBytes, ContactRecordsProtos.ContactRecords contactRecords) {

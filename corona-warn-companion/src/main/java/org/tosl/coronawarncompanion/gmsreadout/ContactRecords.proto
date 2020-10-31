@@ -36,6 +36,8 @@ message ScanRecord {
   repeated bytes aem_multiple_values = 6;
   optional bytes aem = 4 [deprecated = true];
   optional uint32 previous_scan_timestamp = 5;
+  optional double latitude = 7;
+  optional double longitude = 8;
 }
 
 message ContactRecords {

@@ -49,6 +49,8 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
+import org.osmdroid.config.Configuration;
+
 import org.tosl.coronawarncompanion.barcharts.BarChartSync;
 import org.tosl.coronawarncompanion.barcharts.CwcBarChart;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKey;
@@ -230,6 +232,9 @@ public class MainActivity extends AppCompatActivity {
         this.context = this;
 
         SharedPreferences sharedPreferences = this.getPreferences(MODE_PRIVATE);
+
+        // configure osmdroid
+        Configuration.getInstance().load(context, sharedPreferences);
 
         // get App Mode from SharedPreferences
         int appModeOrdinal = sharedPreferences.getInt(getString(R.string.saved_app_mode), NORMAL_MODE.ordinal());
@@ -540,6 +545,7 @@ public class MainActivity extends AppCompatActivity {
                                         title_matching_not_done_yet_with_progress, progress.first, progress.second))));
                 Log.d(TAG, "Finished matching, sending the message...");
                 CWCApplication.setMatchEntryContent(matchEntryContent);
+                CWCApplication.setShowMap(rpiList.getHaveLocation());
             }
             backgroundThreadsRunning = false;
             backgroundThreadsShouldStop = false;

@@ -28,6 +28,7 @@ import android.graphics.Color;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -41,6 +42,15 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 
+import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.MapController;
+import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.CopyrightOverlay;
+import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.views.CustomZoomButtonsController.Visibility;
+
+import org.tosl.coronawarncompanion.CWCApplication;
 import org.tosl.coronawarncompanion.Country;
 import org.tosl.coronawarncompanion.R;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKey;
@@ -80,11 +90,12 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
     private final float textScalingFactor;
 
     private final ArrayList<DkAndMatchEntries> mValues;
+    private final boolean showMap;
     private final Context mContext;
 
     private boolean showAllScans = false;
 
-    public MatchesRecyclerViewAdapter(DailyMatchEntries dailyMatchEntries, Context context) {
+    public MatchesRecyclerViewAdapter(DailyMatchEntries dailyMatchEntries, boolean showMap, Context context) {
         this.mContext = context;
         this.mValues = new ArrayList<>();
         for (Map.Entry<DiagnosisKey, MatchEntryContent.GroupedByDkMatchEntries> entry :
@@ -92,6 +103,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
             mValues.add(new DkAndMatchEntries(entry.getKey(), entry.getValue()));
         }
         Collections.sort(mValues);
+        this.showMap = showMap;
         DisplayMetrics metrics = this.mContext.getResources().getDisplayMetrics();
         this.textScalingFactor = metrics.scaledDensity/metrics.density;
         this.lineColor = resolveColorAttr(android.R.attr.textColorSecondary, context);
@@ -102,7 +114,21 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.match_card_fragment, parent, false);
-        return new ViewHolder(view);
+        return new ViewHolder(view, showMap, this.mContext);
+    }
+
+    @Override
+    public void onViewDetachedFromWindow(ViewHolder holder) {
+        super.onViewDetachedFromWindow(holder);
+
+        holder.mMapView.onPause();
+    }
+
+    @Override
+    public void onViewAttachedToWindow(ViewHolder holder) {
+        super.onViewAttachedToWindow(holder);
+
+        holder.mMapView.onResume();
     }
 
     @SuppressWarnings("deprecation")
@@ -234,6 +260,19 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
                 mContext);
         holder.mChartView.getLineData().getDataSetByIndex(1).setVisible(this.showAllScans);
 
+        if (this.showMap && matchEntryDetails.latitude != 0 && matchEntryDetails.longitude != 0) {
+            MapController mapController = (MapController) holder.mMapView.getController();
+            mapController.setZoom(17);
+            GeoPoint point = new GeoPoint(matchEntryDetails.latitude, matchEntryDetails.longitude);
+            Marker marker = new Marker(holder.mMapView);
+            marker.setPosition(point);
+            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+            marker.setTitle("Point of exposure");
+            holder.mMapView.setExpectedCenter(point);
+            holder.mMapView.getOverlays().add(marker);
+            holder.mMapView.invalidate();
+        }
+
         if (this.showAllScans) {
             String txPowerStr;
             if (matchEntryDetails.minTxPower == matchEntryDetails.maxTxPower) {
@@ -265,6 +304,8 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         public byte maxTxPower;
         public int minTimestampLocalTZDay0;
         public int maxTimestampLocalTZDay0;
+        public double longitude;
+        public double latitude;
         public MatchEntryDetails() {
             this.dataPoints = new ArrayList<>();
             this.dotColors = new ArrayList<>();
@@ -289,6 +330,8 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         result.maxAttenuation = Integer.MIN_VALUE;
         result.minTxPower = Byte.MAX_VALUE;
         result.maxTxPower = Byte.MIN_VALUE;
+        result.longitude = 0;
+        result.latitude = 0;
 
         class InterimDataPoint implements Comparable<InterimDataPoint> {
             public final Integer timestampLocalTZ;
@@ -344,6 +387,13 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
                 }
                 if (maxTimestampLocalTZ < timestampLocalTZ) {
                     maxTimestampLocalTZ = timestampLocalTZ;
+                }
+
+                if (scanRecord.hasLatitude()) {
+                    result.latitude = scanRecord.getLatitude();
+                }
+                if (scanRecord.hasLongitude()) {
+                    result.longitude = scanRecord.getLongitude();
                 }
             }
         }
@@ -588,14 +638,35 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         public final TextView mTextViewRiskDetails;
         public final TextView mTextViewTxPower;
         public final LineChart mChartView;
+        public final MapView mMapView;
         public DkAndMatchEntries mDkAndMatchEntries;
 
-        public ViewHolder(View view) {
+        public ViewHolder(View view, boolean showMap, Context context) {
             super(view);
             mTextViewMainText = view.findViewById(R.id.textViewMainText);
             mTextViewRiskDetails = view.findViewById(R.id.textViewRiskDetails);
             mTextViewTxPower = view.findViewById(R.id.textViewTxPower);
             mChartView = view.findViewById(R.id.chart);
+
+            mMapView = view.findViewById(R.id.map);
+            if (showMap) {
+                mMapView.getOverlays().add(new CopyrightOverlay(context));
+                mMapView.setTileSource(TileSourceFactory.MAPNIK);
+                mMapView.getZoomController().setVisibility(Visibility.ALWAYS);
+                mMapView.setMultiTouchControls(true);
+                mMapView.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        // Don't allow scrolling in map for simplicity and consistency.
+                        // To support vertical scrolling, we would have to create
+                        // a custom MapView that overrides RecyclerView scrolling.
+                        return true;
+                    }
+                });
+            }
+            else {
+                mMapView.setVisibility(View.GONE);
+            }
         }
 
         @Override

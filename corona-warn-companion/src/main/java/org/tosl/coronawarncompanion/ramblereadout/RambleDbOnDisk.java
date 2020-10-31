@@ -71,6 +71,7 @@ public class RambleDbOnDisk {
                                         "FROM devices WHERE service_uuids='fd6f'", null);
 
                         rpiList = new RpiList();
+                        rpiList.setHaveLocation(false);
 
                         while (cursor.moveToNext()) {
                             // parse entry from table "devices"
@@ -111,7 +112,7 @@ public class RambleDbOnDisk {
                                                 // get Scan Records from table "locations"
                                                 ContactRecordsProtos.ContactRecords.Builder contactRecordsBuilder =
                                                         ContactRecordsProtos.ContactRecords.newBuilder();
-                                                Cursor cursor2 = rambleDb.rawQuery("SELECT timestamp, rssi " +
+                                                Cursor cursor2 = rambleDb.rawQuery("SELECT timestamp, rssi, longitude, latitude " +
                                                         "FROM locations WHERE device_id=" + idStr, null);
                                                 while (cursor2.moveToNext()) {
                                                     String timestampStr = cursor2.getString(0);
@@ -128,13 +129,34 @@ public class RambleDbOnDisk {
                                                                 int rssi = Integer.parseInt(rssiStr);
                                                                 //Log.d(TAG, "Scan events: " + timestamp + " " + rssi);
 
-                                                                // add scanRecord to contactRecords
-                                                                ContactRecordsProtos.ScanRecord scanRecord = ContactRecordsProtos.ScanRecord.newBuilder()
-                                                                        .setTimestamp(timestamp)
-                                                                        .setRssi(rssi)
-                                                                        .setAem(ByteString.copyFrom(aemBytes))
-                                                                        .build();
-                                                                contactRecordsBuilder.addRecord(scanRecord);
+                                                                String longitudeStr = cursor2.getString(2);
+                                                                String latitudeStr = cursor2.getString(3);
+
+                                                                if (longitudeStr == null || latitudeStr == null) {
+                                                                    Log.w(TAG, "Warning: Found longitudeStr == null || latitudeStr == null");
+
+                                                                    // add scanRecord to contactRecords
+                                                                    ContactRecordsProtos.ScanRecord scanRecord = ContactRecordsProtos.ScanRecord.newBuilder()
+                                                                            .setTimestamp(timestamp)
+                                                                            .setRssi(rssi)
+                                                                            .setAem(ByteString.copyFrom(aemBytes))
+                                                                            .build();
+                                                                    contactRecordsBuilder.addRecord(scanRecord);
+                                                                }
+                                                                else {
+                                                                    //Log.d(TAG, "longitude: " + longitudeStr + " / latitude: " + latitudeStr);
+
+                                                                    // add scanRecord to contactRecords
+                                                                    ContactRecordsProtos.ScanRecord scanRecord = ContactRecordsProtos.ScanRecord.newBuilder()
+                                                                            .setTimestamp(timestamp)
+                                                                            .setRssi(rssi)
+                                                                            .setAem(ByteString.copyFrom(aemBytes))
+                                                                            .setLongitude(Double.parseDouble(longitudeStr))
+                                                                            .setLatitude(Double.parseDouble(latitudeStr))
+                                                                            .build();
+                                                                    contactRecordsBuilder.addRecord(scanRecord);
+                                                                    rpiList.setHaveLocation(true);
+                                                                }
                                                             }
                                                         }
                                                     }
