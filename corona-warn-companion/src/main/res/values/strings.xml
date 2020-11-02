@@ -81,6 +81,9 @@
     <string name="country_switzerland">🇨🇭 Switzerland</string>
     <string name="flag_switzerland" translatable="false">🇨🇭</string>
     <string name="country_code_switzerland" translatable="false">CH</string>
+    <string name="country_eaw">🏴󠁧󠁢󠁥󠁮󠁧󠁿🏴󠁧󠁢󠁷󠁬󠁳󠁿 England and Wales</string>
+    <string name="flag_eaw" translatable="false">🏴󠁧󠁢󠁥󠁮󠁧󠁿🏴󠁧󠁢󠁷󠁬󠁳󠁿</string>
+    <string name="country_code_eaw" translatable="false">EAW</string>
     <string name="country_austria">🇦🇹 Austria</string>
     <string name="flag_austria" translatable="false">🇦🇹</string>
     <string name="country_code_austria" translatable="false">AT</string>
