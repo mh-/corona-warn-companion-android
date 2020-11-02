@@ -37,6 +37,7 @@
     <string name="invalid">invalid</string>
     <string name="distance_shown_as_attenuation">Distance (attenuation in dB)</string>
     <string name="menu_entry_show_hide_all_scans">Show/Hide All Scans</string>
+    <string name="menu_entry_show_hide_location">Show/Hide Location</string>
     <string name="menu_entry_switch_to_normal_mode">Normal Mode</string>
     <string name="menu_entry_switch_to_ramble_mode">RaMBLE Mode</string>
     <string name="menu_entry_switch_to_microg_mode">microG Mode</string>

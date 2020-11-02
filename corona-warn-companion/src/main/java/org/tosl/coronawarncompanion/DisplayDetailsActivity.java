@@ -50,6 +50,7 @@ public class DisplayDetailsActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.details_activity_menu, menu);
+        menu.findItem(R.id.showhidelocation).setVisible(CWCApplication.getLocationDataAvailable());
         return true;
     }
 
@@ -63,6 +64,16 @@ public class DisplayDetailsActivity extends AppCompatActivity {
                 matchesRecyclerViewAdapter = (MatchesRecyclerViewAdapter) recyclerView.getAdapter();
                 if (matchesRecyclerViewAdapter != null) {
                     matchesRecyclerViewAdapter.toggleShowAllScans();
+                }
+            }
+            return true;
+        } else if (item.getItemId() == R.id.showhidelocation) {
+            RecyclerView recyclerView = (RecyclerView) this.matchesRecyclerViewFragment.getView();
+            MatchesRecyclerViewAdapter matchesRecyclerViewAdapter;
+            if (recyclerView != null) {
+                matchesRecyclerViewAdapter = (MatchesRecyclerViewAdapter) recyclerView.getAdapter();
+                if (matchesRecyclerViewAdapter != null) {
+                    matchesRecyclerViewAdapter.toggleShowMap();
                 }
             }
             return true;

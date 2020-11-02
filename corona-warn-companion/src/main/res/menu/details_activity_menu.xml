@@ -2,4 +2,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/showhideallscans"
         android:title="@string/menu_entry_show_hide_all_scans" />
+    <item android:id="@+id/showhidelocation"
+        android:title="@string/menu_entry_show_hide_location" />
 </menu>

@@ -42,7 +42,7 @@ public class MatchesRecyclerViewFragment extends Fragment {
 
     private final MatchEntryContent mMatchEntryContent;
     private final int mDaysSinceEpochLocalTZ;
-    private final boolean showMap;
+    private final boolean locationDataAvailable;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -51,10 +51,10 @@ public class MatchesRecyclerViewFragment extends Fragment {
      * @param matchEntryContent The MarchEntryContent class that has all the MatchEntries.
      */
     public MatchesRecyclerViewFragment(int daysSinceEpochLocalTZ, MatchEntryContent matchEntryContent,
-                                       boolean showMap) {
+                                       boolean locationDataAvailable) {
         this.mDaysSinceEpochLocalTZ = daysSinceEpochLocalTZ;
         this.mMatchEntryContent = matchEntryContent;
-        this.showMap = showMap;
+        this.locationDataAvailable = locationDataAvailable;
     }
 
     @Override
@@ -81,7 +81,7 @@ public class MatchesRecyclerViewFragment extends Fragment {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
             MatchesRecyclerViewAdapter adapter = new MatchesRecyclerViewAdapter(mMatchEntryContent.matchEntries.
-                    getDailyMatchEntries(mDaysSinceEpochLocalTZ), showMap, context);
+                    getDailyMatchEntries(mDaysSinceEpochLocalTZ), locationDataAvailable, context);
             recyclerView.setAdapter(adapter);
             //adapter.setHour(mInitialHour);
         }

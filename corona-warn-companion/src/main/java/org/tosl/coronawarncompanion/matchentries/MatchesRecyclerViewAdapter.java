@@ -50,7 +50,6 @@ import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.views.CustomZoomButtonsController.Visibility;
 
-import org.tosl.coronawarncompanion.CWCApplication;
 import org.tosl.coronawarncompanion.Country;
 import org.tosl.coronawarncompanion.R;
 import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKey;
@@ -90,12 +89,13 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
     private final float textScalingFactor;
 
     private final ArrayList<DkAndMatchEntries> mValues;
-    private final boolean showMap;
+    private final boolean locationDataAvailable;
     private final Context mContext;
 
     private boolean showAllScans = false;
+    private boolean mapDisplayAllowed = false;
 
-    public MatchesRecyclerViewAdapter(DailyMatchEntries dailyMatchEntries, boolean showMap, Context context) {
+    public MatchesRecyclerViewAdapter(DailyMatchEntries dailyMatchEntries, boolean locationDataAvailable, Context context) {
         this.mContext = context;
         this.mValues = new ArrayList<>();
         for (Map.Entry<DiagnosisKey, MatchEntryContent.GroupedByDkMatchEntries> entry :
@@ -103,7 +103,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
             mValues.add(new DkAndMatchEntries(entry.getKey(), entry.getValue()));
         }
         Collections.sort(mValues);
-        this.showMap = showMap;
+        this.locationDataAvailable = locationDataAvailable;
         DisplayMetrics metrics = this.mContext.getResources().getDisplayMetrics();
         this.textScalingFactor = metrics.scaledDensity/metrics.density;
         this.lineColor = resolveColorAttr(android.R.attr.textColorSecondary, context);
@@ -114,7 +114,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.match_card_fragment, parent, false);
-        return new ViewHolder(view, showMap, this.mContext);
+        return new ViewHolder(view, this.locationDataAvailable && this.mapDisplayAllowed, this.mContext);
     }
 
     @Override
@@ -260,7 +260,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
                 mContext);
         holder.mChartView.getLineData().getDataSetByIndex(1).setVisible(this.showAllScans);
 
-        if (this.showMap && matchEntryDetails.latitude != 0 && matchEntryDetails.longitude != 0) {
+        if (this.locationDataAvailable && this.mapDisplayAllowed && matchEntryDetails.latitude != 0 && matchEntryDetails.longitude != 0) {
             MapController mapController = (MapController) holder.mMapView.getController();
             mapController.setZoom(17);
             GeoPoint point = new GeoPoint(matchEntryDetails.latitude, matchEntryDetails.longitude);
@@ -678,6 +678,11 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
 
     public void toggleShowAllScans() {
         this.showAllScans = !this.showAllScans;
+        this.notifyDataSetChanged();
+    }
+
+    public void toggleShowMap() {
+        this.mapDisplayAllowed = !this.mapDisplayAllowed;
         this.notifyDataSetChanged();
     }
 }

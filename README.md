@@ -15,7 +15,7 @@ There are 3 options:
 1. Download the latest released APK from the Assets at https://github.com/mh-/corona-warn-companion-android/releases
 2. Install via `adb` tool and USB cable: `adb install corona-warn-companion-github-release.apk`
 ### 3. Build the app from source code, using Android Studio
-1. `git clode https://github.com/mh-/corona-warn-companion-android.git`
+1. `git clone https://github.com/mh-/corona-warn-companion-android.git`
 2. In Android Studio, select a 'flavor': 
 `github` is the normal version, called "Corona-Warn-Companion". 
 `playstore` is a version that was renamed to "Warn-App-Companion" because of the Play Store requirements for COVID-19 apps;
@@ -43,6 +43,7 @@ This app helps you to better understand warnings of the official Corona-Warn-App
 
 If risk encounters are found, it shows the details:
 At which times and with which radio attenuation (roughly corresponds to the distance) did the encounters take place, and what level of transmission risk did the encounters have.
+For encounters that were recorded by RaMBLE, it can also display the location.
 
 ![-Example Details-](screenshots/details_en.png)
 
@@ -50,7 +51,7 @@ Note that 1 means a low and 8 means a high transmission risk.
 
 ### What the app does not do:
 - The app does not process any personal data.
-- The app only accesses the internet for the purpose 2 (see above), i.e. it only downloads data from the official warning servers and does not send any data to other servers.
+- The app only accesses the internet for the purpose 2 (see above), i.e. it only downloads data from the official warning servers and does not send any data to other servers (unless you ask it to show the location of an encounter, in which case it will contact OpenStreetMap servers).
 - The app does not show any advertising.
 
 **Note:** This app has only been tested on a few devices so far, so it is possible that it will not work and/or show incorrect results.
