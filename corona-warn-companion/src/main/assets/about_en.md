@@ -39,9 +39,14 @@ The source code of the app is published at https://github.com/mh-/corona-warn-co
 
 # Countries covered
 - Austria
-- Germany
+- Belgium
+- Canada
+- Czechia
+- Germany, Ireland, Italy
+- Netherlands
 - Poland
 - Switzerland
+- England and Wales
 
 In the top right hand corner of the app is a menu button, please use this to select the countries from which you want to download Diagnosis Keys.
 

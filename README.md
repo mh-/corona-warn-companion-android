@@ -67,9 +67,14 @@ RaMBLE however stores only `raw_rssi`, which means that the colors shown on the 
 
 # Countries covered
 - Austria
-- Germany
+- Belgium
+- Canada
+- Czechia
+- Germany, Ireland, Italy
+- Netherlands
 - Poland
 - Switzerland
+- England and Wales
 
 In the top right hand corner of the app is a menu button, 
 please use this to select the countries from which you want to download Diagnosis Keys.
