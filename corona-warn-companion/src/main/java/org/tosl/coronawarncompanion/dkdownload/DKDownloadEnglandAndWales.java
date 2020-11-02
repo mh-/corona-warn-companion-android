@@ -9,8 +9,10 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
@@ -39,6 +41,18 @@ public class DKDownloadEnglandAndWales implements DKDownloadCountry {
 
     @Override
     public Observable<byte[]> getDKBytes(Context context, OkHttpClient okHttpClient, Date minDate) {
+
+        Calendar firstAvailableDate = Calendar.getInstance();
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+        firstAvailableDate.setTimeZone(tz);
+        firstAvailableDate.add(Calendar.DATE, -13);
+        firstAvailableDate.set(Calendar.HOUR_OF_DAY, 0);
+        firstAvailableDate.set(Calendar.MINUTE, 0);
+        firstAvailableDate.set(Calendar.SECOND, 0);
+        firstAvailableDate.set(Calendar.MILLISECOND, 0);
+        if (minDate.compareTo(firstAvailableDate.getTime()) < 0) {
+            minDate = firstAvailableDate.getTime();
+        }
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(DK_URL)
