@@ -124,7 +124,7 @@ public class DisplayDetailsActivity extends AppCompatActivity {
             // RecyclerView List:
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             this.matchesRecyclerViewFragment =
-                    new MatchesRecyclerViewFragment(selectedDaysSinceEpochLocalTZ, matchEntryContent);
+                    new MatchesRecyclerViewFragment(selectedDaysSinceEpochLocalTZ, matchEntryContent, CWCApplication.getShowMap());
             transaction.replace(R.id.contentFragment, this.matchesRecyclerViewFragment);
             transaction.commit();
 
