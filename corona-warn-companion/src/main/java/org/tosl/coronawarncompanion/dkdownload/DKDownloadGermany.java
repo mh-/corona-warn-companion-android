@@ -6,7 +6,7 @@ import org.tosl.coronawarncompanion.R;
 
 public class DKDownloadGermany extends DKDownloadSAP {
 
-    private static final String DK_URL = "https://svc90.main.px.t-online.de/version/v1/diagnosis-keys/country/DE/";
+    private static final String DK_URL = "https://svc90.main.px.t-online.de/version/v1/diagnosis-keys/country/EUR/";
 
     public DKDownloadGermany() {
         super(DK_URL);
