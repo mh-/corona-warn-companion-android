@@ -545,7 +545,7 @@ public class MainActivity extends AppCompatActivity {
                                         title_matching_not_done_yet_with_progress, progress.first, progress.second))));
                 Log.d(TAG, "Finished matching, sending the message...");
                 CWCApplication.setMatchEntryContent(matchEntryContent);
-                CWCApplication.setShowMap(rpiList.getHaveLocation());
+                CWCApplication.setLocationDataAvailable(rpiList.getHaveLocation());
             }
             backgroundThreadsRunning = false;
             backgroundThreadsShouldStop = false;

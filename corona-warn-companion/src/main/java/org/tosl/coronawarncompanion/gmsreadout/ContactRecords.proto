@@ -36,8 +36,8 @@ message ScanRecord {
   repeated bytes aem_multiple_values = 6;
   optional bytes aem = 4 [deprecated = true];
   optional uint32 previous_scan_timestamp = 5;
-  optional double latitude = 7;
-  optional double longitude = 8;
+  optional double latitude = 7;  // latitude / longitude are not part of the GMS database, they are only
+  optional double longitude = 8; // added here because this protobuf format is used in all modes.
 }
 
 message ContactRecords {

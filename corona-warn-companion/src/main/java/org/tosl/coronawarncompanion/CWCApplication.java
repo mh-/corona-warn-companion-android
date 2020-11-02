@@ -36,12 +36,12 @@ public class CWCApplication extends Application {
             MatchEntryContent myMatchEntryContent) {matchEntryContent = myMatchEntryContent;
     }
 
-    private static boolean showMap = false;
-    public static boolean getShowMap() {
-        return showMap;
+    private static boolean locationDataAvailable = false;
+    public static boolean getLocationDataAvailable() {
+        return locationDataAvailable;
     }
-    public static void setShowMap(boolean myShowMap) {
-        showMap = myShowMap;
+    public static void setLocationDataAvailable(boolean locationDataAvailable) {
+        CWCApplication.locationDataAvailable = locationDataAvailable;
     }
 
     private static int timeZoneOffsetSeconds;
