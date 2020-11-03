@@ -81,4 +81,5 @@
     <string name="country_ireland">🇮🇪 Irland</string>
     <string name="country_italy">🇮🇹 Italien</string>
     <string name="countries_one_europe">🇩🇪 Deutschland, 🇮🇪 Irland, 🇮🇹 Italien</string>
+    <string name="point_of_exposure">Risikobegegnung</string>
 </resources>

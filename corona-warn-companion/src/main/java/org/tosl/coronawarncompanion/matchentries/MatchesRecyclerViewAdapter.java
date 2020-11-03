@@ -267,7 +267,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
             Marker marker = new Marker(holder.mMapView);
             marker.setPosition(point);
             marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-            marker.setTitle("Point of exposure");
+            marker.setTitle(this.mContext.getResources().getString(R.string.point_of_exposure));
             holder.mMapView.setVisibility(View.VISIBLE);
             holder.mMapView.setExpectedCenter(point);
             holder.mMapView.getOverlays().add(marker);
@@ -358,13 +358,13 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         // First step: Create a "flat" sorted list from all scan records from all matchEntries
         for (Matcher.MatchEntry matchEntry : list) {  // process each matchEntry separately
             for (ContactRecordsProtos.ScanRecord scanRecord : matchEntry.contactRecords.getRecordList()) {
-                byte[] aem = xorTwoByteArrays(scanRecord.getAem().toByteArray(), matchEntry.aemXorBytes);
+                @SuppressWarnings("deprecation") byte[] aem = xorTwoByteArrays(scanRecord.getAem().toByteArray(), matchEntry.aemXorBytes);
                 if ((aem[0] != 0x40) || (aem[2] != 0x00) || (aem[3] != 0x00)) {
                     Log.w(TAG, "WARNING: Invalid AEM: " + byteArrayToHexString(aem));
                 }
                 byte txPower = aem[1];
                 //Log.d(TAG, "TXPower: "+txPower+" dBm");
-                int rssi = scanRecord.getRssi();
+                @SuppressWarnings("deprecation") int rssi = scanRecord.getRssi();
                 //Log.d(TAG, "RSSI: "+rssi+" dBm");
                 int attenuation = txPower - rssi;
                 //Log.d(TAG, "Attenuation: "+attenuation+" dB");
@@ -646,6 +646,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         public final MapView mMapView;
         public DkAndMatchEntries mDkAndMatchEntries;
 
+        @SuppressLint("ClickableViewAccessibility")
         public ViewHolder(View view, boolean showMap, Context context) {
             super(view);
             mTextViewMainText = view.findViewById(R.id.textViewMainText);
