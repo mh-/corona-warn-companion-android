@@ -268,6 +268,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
             marker.setPosition(point);
             marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
             marker.setTitle("Point of exposure");
+            holder.mMapView.setVisibility(View.VISIBLE);
             holder.mMapView.setExpectedCenter(point);
             holder.mMapView.getOverlays().add(marker);
             holder.mMapView.invalidate();
