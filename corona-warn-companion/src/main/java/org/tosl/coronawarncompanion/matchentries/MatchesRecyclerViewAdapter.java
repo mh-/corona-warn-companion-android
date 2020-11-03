@@ -272,6 +272,10 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
             holder.mMapView.getOverlays().add(marker);
             holder.mMapView.invalidate();
         }
+        else {
+            // showing a default map without a marker would cause confusion
+            holder.mMapView.setVisibility(View.GONE);
+        }
 
         if (this.showAllScans) {
             String txPowerStr;
