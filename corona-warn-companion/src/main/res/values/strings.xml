@@ -112,7 +112,7 @@
     <string name="flag_spain" translatable="false">🇪🇸</string>
     <string name="country_code_spain" translatable="false">ES</string>
     <string name="countries_one_europe">🇩🇪 Germany, 🇮🇪 Ireland, 🇮🇹 Italy, 🇩🇰 Denmark, 🇱🇻 Latvia, 🇪🇸 Spain</string>
-    <string name="flags_one_europe" translatable="false">🇩🇪🇮🇪🇮🇹</string>
+    <string name="flags_one_europe" translatable="false">🇩🇪🇮🇪🇮🇹🇩🇰🇱🇻🇪🇸</string>
     <string name="toast_download_error">Error during download: %s</string>
     <string name="point_of_exposure">Point of exposure</string>
 </resources>
