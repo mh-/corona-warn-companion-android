@@ -102,7 +102,16 @@
     <string name="country_italy">🇮🇹 Italy</string>
     <string name="flag_italy" translatable="false">🇮🇹</string>
     <string name="country_code_italy" translatable="false">IT</string>
-    <string name="countries_one_europe">🇩🇪 Germany, 🇮🇪 Ireland, 🇮🇹 Italy</string>
+    <string name="country_denmark">🇩🇰 Denmark</string>
+    <string name="flag_denmark" translatable="false">🇩🇰</string>
+    <string name="country_code_denmark" translatable="false">DK</string>
+    <string name="country_latvia">🇱🇻 Latvia</string>
+    <string name="flag_latvia" translatable="false">🇱🇻</string>
+    <string name="country_code_latvia" translatable="false">LV</string>
+    <string name="country_spain">🇪🇸 Spain</string>
+    <string name="flag_spain" translatable="false">🇪🇸</string>
+    <string name="country_code_spain" translatable="false">ES</string>
+    <string name="countries_one_europe">🇩🇪 Germany, 🇮🇪 Ireland, 🇮🇹 Italy, 🇩🇰 Denmark, 🇱🇻 Latvia, 🇪🇸 Spain</string>
     <string name="flags_one_europe" translatable="false">🇩🇪🇮🇪🇮🇹</string>
     <string name="toast_download_error">Error during download: %s</string>
     <string name="point_of_exposure">Point of exposure</string>

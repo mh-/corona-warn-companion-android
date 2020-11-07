@@ -42,7 +42,7 @@ The source code of the app is published at https://github.com/mh-/corona-warn-co
 - Belgium
 - Canada
 - Czechia
-- Germany, Ireland, Italy
+- Germany, Ireland, Italy, Denmark, Latvia and Spain
 - Netherlands
 - Poland
 - Switzerland

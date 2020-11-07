@@ -71,7 +71,7 @@ RaMBLE however stores only `raw_rssi`, which means that the colors shown on the 
 - Belgium
 - Canada
 - Czechia
-- Germany, Ireland, Italy
+- Germany, Ireland, Italy, Denmark, Latvia and Spain
 - Netherlands
 - Poland
 - Switzerland

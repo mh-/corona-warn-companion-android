@@ -80,6 +80,9 @@
     <string name="country_czechia">🇨🇿 Tschechien</string>
     <string name="country_ireland">🇮🇪 Irland</string>
     <string name="country_italy">🇮🇹 Italien</string>
-    <string name="countries_one_europe">🇩🇪 Deutschland, 🇮🇪 Irland, 🇮🇹 Italien</string>
+    <string name="country_denmark">🇩🇰 Dänemark</string>
+    <string name="country_latvia">🇱🇻 Lettland</string>
+    <string name="country_spain">🇪🇸 Spanien</string>
+    <string name="countries_one_europe">🇩🇪 Deutschland, 🇮🇪 Irland, 🇮🇹 Italien, 🇩🇰 Dänemark, 🇱🇻 Lettland, 🇪🇸 Spanien</string>
     <string name="point_of_exposure">Risikobegegnung</string>
 </resources>
