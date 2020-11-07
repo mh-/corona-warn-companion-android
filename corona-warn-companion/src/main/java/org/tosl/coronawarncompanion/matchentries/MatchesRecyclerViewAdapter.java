@@ -260,7 +260,10 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
                 mContext);
         holder.mChartView.getLineData().getDataSetByIndex(1).setVisible(this.showAllScans);
 
-        if (this.locationDataAvailable && this.mapDisplayAllowed && matchEntryDetails.latitude != 0 && matchEntryDetails.longitude != 0) {
+        if (this.locationDataAvailable && this.mapDisplayAllowed &&
+                matchEntryDetails.latitude != 0.0 && matchEntryDetails.longitude != 0.0) {
+            // this test means that we will not show valid locations if they are _exactly_ on equator and/or
+            // _exactly_ on prime meridian, but that should be rare enough so that we can accept it.
             MapController mapController = (MapController) holder.mMapView.getController();
             mapController.setZoom(17);
             GeoPoint point = new GeoPoint(matchEntryDetails.latitude, matchEntryDetails.longitude);
@@ -335,8 +338,8 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         result.maxAttenuation = Integer.MIN_VALUE;
         result.minTxPower = Byte.MAX_VALUE;
         result.maxTxPower = Byte.MIN_VALUE;
-        result.longitude = 0;
-        result.latitude = 0;
+        result.longitude = 0.0;
+        result.latitude = 0.0;
 
         class InterimDataPoint implements Comparable<InterimDataPoint> {
             public final Integer timestampLocalTZ;
@@ -358,42 +361,92 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         // First step: Create a "flat" sorted list from all scan records from all matchEntries
         for (Matcher.MatchEntry matchEntry : list) {  // process each matchEntry separately
             for (ContactRecordsProtos.ScanRecord scanRecord : matchEntry.contactRecords.getRecordList()) {
-                @SuppressWarnings("deprecation") byte[] aem = xorTwoByteArrays(scanRecord.getAem().toByteArray(), matchEntry.aemXorBytes);
-                if ((aem[0] != 0x40) || (aem[2] != 0x00) || (aem[3] != 0x00)) {
-                    Log.w(TAG, "WARNING: Invalid AEM: " + byteArrayToHexString(aem));
-                }
-                byte txPower = aem[1];
-                //Log.d(TAG, "TXPower: "+txPower+" dBm");
-                @SuppressWarnings("deprecation") int rssi = scanRecord.getRssi();
-                //Log.d(TAG, "RSSI: "+rssi+" dBm");
-                int attenuation = txPower - rssi;
-                //Log.d(TAG, "Attenuation: "+attenuation+" dB");
+                // check whether the GMS database contains the "old" or the "new" format:
+                // (up to now, only the "old" / deprecated version was seen in the wild)
+                if (scanRecord.hasRssiMultipleValues() && scanRecord.getRssiMultipleValues().size() > 0 &&
+                        scanRecord.getAemMultipleValuesCount() == scanRecord.getRssiMultipleValues().size()) {
+                    // new format
+                    for (int pos = 0; pos < scanRecord.getRssiMultipleValues().size(); pos++) {
+                        byte[] aem = xorTwoByteArrays(scanRecord.getAemMultipleValues(pos).toByteArray(), matchEntry.aemXorBytes);
+                        if ((aem[2] != 0x00) || (aem[3] != 0x00)) {
+                            Log.w(TAG, "WARNING: Apparently invalid AEM: " + byteArrayToHexString(aem));
+                        }
+                        byte txPower = aem[1];
+                        //Log.d(TAG, "TXPower: "+txPower+" dBm");
+                        byte rssi = scanRecord.getRssiMultipleValues().toByteArray()[pos];
+                        //Log.d(TAG, "RSSI: "+rssi+" dBm");
+                        int attenuation = txPower - rssi;
+                        //Log.d(TAG, "Attenuation: "+attenuation+" dB");
 
-                int timestampLocalTZ = scanRecord.getTimestamp() + timeZoneOffset;
+                        int timestampLocalTZ = scanRecord.getTimestamp() + timeZoneOffset;
 
-                // store to temporary buffers:
-                dataPointsInterimList.add(new InterimDataPoint(timestampLocalTZ, attenuation));
+                        // store to temporary buffers:
+                        dataPointsInterimList.add(new InterimDataPoint(timestampLocalTZ, attenuation));
 
-                // if found, store max/min values
-                if (result.minTxPower > txPower) {
-                    result.minTxPower = txPower;
-                }
-                if (result.maxTxPower < txPower) {
-                    result.maxTxPower = txPower;
-                }
-                if (result.minAttenuation > attenuation) {
-                    result.minAttenuation = attenuation;
-                }
-                if (result.maxAttenuation < attenuation) {
-                    result.maxAttenuation = attenuation;
-                }
-                if (minTimestampLocalTZ > timestampLocalTZ) {
-                    minTimestampLocalTZ = timestampLocalTZ;
-                }
-                if (maxTimestampLocalTZ < timestampLocalTZ) {
-                    maxTimestampLocalTZ = timestampLocalTZ;
-                }
+                        // if found, store max/min values
+                        if (result.minTxPower > txPower) {
+                            result.minTxPower = txPower;
+                        }
+                        if (result.maxTxPower < txPower) {
+                            result.maxTxPower = txPower;
+                        }
+                        if (result.minAttenuation > attenuation) {
+                            result.minAttenuation = attenuation;
+                        }
+                        if (result.maxAttenuation < attenuation) {
+                            result.maxAttenuation = attenuation;
+                        }
+                        if (minTimestampLocalTZ > timestampLocalTZ) {
+                            minTimestampLocalTZ = timestampLocalTZ;
+                        }
+                        if (maxTimestampLocalTZ < timestampLocalTZ) {
+                            maxTimestampLocalTZ = timestampLocalTZ;
+                        }
+                    }
+                } else //noinspection deprecation
+                    if (scanRecord.hasRssi() && scanRecord.hasAem()) {
+                    // old format
+                    @SuppressWarnings("deprecation") byte[] aem = xorTwoByteArrays(scanRecord.getAem().toByteArray(), matchEntry.aemXorBytes);
+                    if ((aem[2] != 0x00) || (aem[3] != 0x00)) {
+                        Log.w(TAG, "WARNING: Apparently invalid AEM: " + byteArrayToHexString(aem));
+                    }
+                    byte txPower = aem[1];
+                    //Log.d(TAG, "TXPower: "+txPower+" dBm");
+                    @SuppressWarnings("deprecation") int rssi = scanRecord.getRssi();
+                    //Log.d(TAG, "RSSI: "+rssi+" dBm");
+                    int attenuation = txPower - rssi;
+                    //Log.d(TAG, "Attenuation: "+attenuation+" dB");
 
+                    int timestampLocalTZ = scanRecord.getTimestamp() + timeZoneOffset;
+
+                    // store to temporary buffers:
+                    dataPointsInterimList.add(new InterimDataPoint(timestampLocalTZ, attenuation));
+
+                    // if found, store max/min values
+                    if (result.minTxPower > txPower) {
+                        result.minTxPower = txPower;
+                    }
+                    if (result.maxTxPower < txPower) {
+                        result.maxTxPower = txPower;
+                    }
+                    if (result.minAttenuation > attenuation) {
+                        result.minAttenuation = attenuation;
+                    }
+                    if (result.maxAttenuation < attenuation) {
+                        result.maxAttenuation = attenuation;
+                    }
+                    if (minTimestampLocalTZ > timestampLocalTZ) {
+                        minTimestampLocalTZ = timestampLocalTZ;
+                    }
+                    if (maxTimestampLocalTZ < timestampLocalTZ) {
+                        maxTimestampLocalTZ = timestampLocalTZ;
+                    }
+                } else {
+                    // unrecognized format
+                    Log.e(TAG, "ERROR: Found invalid RPI ProtoBuf data.");
+                }
+                // if available, update location
+                // (this means that we will simply show the last location that we found in this process)
                 if (scanRecord.hasLatitude()) {
                     result.latitude = scanRecord.getLatitude();
                 }
