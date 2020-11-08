@@ -35,7 +35,7 @@ public class MicroGDbOnDisk {
         this.context = context;
     }
 
-    public void copyFromGMS() {
+    public boolean copyFromGMS() {
         // Copy the microG GMS database to local app cache
         Log.d(TAG, "Trying to copy microG database");
         File cacheDir = context.getExternalCacheDir();
@@ -56,13 +56,17 @@ public class MicroGDbOnDisk {
         Log.d(TAG, "Result from trying to copy LevelDB: "+result);
         if (result.length() < 10) {
             Log.e(TAG, "ERROR: Super User rights not granted!");
+            return false;
         }
+        return true;
     }
 
     public RpiList getRpisFromContactDB(Activity activity) {
         RpiList rpiList = null;
 
-        copyFromGMS();
+        if (!copyFromGMS()) {
+            return null;
+        }
 
         try (SQLiteDatabase microGDb = SQLiteDatabase.openDatabase(cachePathStr + "/" + dbNameModified,
                 null, SQLiteDatabase.OPEN_READONLY)) {

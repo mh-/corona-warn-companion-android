@@ -60,6 +60,7 @@
     <string name="error_app_mode_switching_not_possible">Im Moment kann der Modus leider nicht gewechselt werden.\nBitte warte, bis alle Berechnungen abgeschlossen sind.</string>
     <string name="error_no_rpis_normal_mode">FEHLER!\nBegegnungen konnten nicht ausgelesen werden.\nSind Exposure Notifications eingeschaltet?\nHast Du dieser App ROOT-Rechte gegeben?</string>
     <string name="error_no_rpis_ramble_mode">FEHLER!\nBegegnungen konnten nicht ausgelesen werden.\nHast Du der App erlaubt, auf Dateien auf Deinem Gerät zuzugreifen?\nHast Du eine RaMBLE Datenbank exportiert? Falls ja, ist sie möglicherweise leer oder defekt.</string>
+    <string name="error_no_rpis_microg_mode">FEHLER!\nBegegnungen konnten nicht ausgelesen werden.\nWillst Du wirklich den microG Modus benutzen?</string>
     <string name="error_download">FEHLER!\nEs gab ein Problem beim Herunterladen der Diagnoseschlüssel.\nFunktioniert Deine Internetverbindung?</string>
     <string name="title_activity_about">Über diese App</string>
     <string name="about_version">Version\n%s (%d, %s)</string>

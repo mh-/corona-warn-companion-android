@@ -99,9 +99,12 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_MESSAGE_COUNT = "org.tosl.coronawarncompanion.COUNT_MESSAGE";
     private static boolean mainActivityShouldBeRecreated = false;
     private static CWCApplication.AppModeOptions desiredAppMode;
+    private RambleDbOnDisk rambleDbOnDisk;
     private RpiList rpiList = null;
     private Date maxDate = null;
     private Date minDate = null;
+    // try again in 5 mins if initial download of diagnosis keys fails
+    private long nextDKDownloadTime = System.currentTimeMillis() + 5 * 60000;
 
     @SuppressWarnings("SpellCheckingInspection")
     private final int normalBarColor = Color.parseColor("#8CEAFF");
@@ -237,11 +240,11 @@ public class MainActivity extends AppCompatActivity {
         Configuration.getInstance().load(context, sharedPreferences);
 
         // get App Mode from SharedPreferences
-        int appModeOrdinal = sharedPreferences.getInt(getString(R.string.saved_app_mode), NORMAL_MODE.ordinal());
+        int appModeOrdinal = sharedPreferences.getInt(getString(R.string.saved_app_mode), RAMBLE_MODE.ordinal());
         try {
             CWCApplication.appMode = CWCApplication.AppModeOptions.values()[appModeOrdinal];
         } catch (ArrayIndexOutOfBoundsException e) {
-            CWCApplication.appMode = NORMAL_MODE;
+            CWCApplication.appMode = RAMBLE_MODE;
         }
         desiredAppMode = CWCApplication.appMode;
 
@@ -250,10 +253,24 @@ public class MainActivity extends AppCompatActivity {
             country.setDownloadKeysFrom(sharedPreferences.getBoolean(country.getCode(context), false));
         }
         if (CWCApplication.getNumberOfActiveCountries() < 1) {
-            Country.Germany.setDownloadKeysFrom(true);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putBoolean(Country.Germany.getCode(context), true);
-            editor.apply();
+            String countryCode = Locale.getDefault().getCountry();
+            Log.i(TAG, "Country: " + countryCode);
+            SharedPreferences.Editor editor = null;
+            for (Country country : Country.values()) {
+                if (country.getCode(context).equals(countryCode)) {
+                    country.setDownloadKeysFrom(true);
+                    editor = sharedPreferences.edit();
+                    editor.putBoolean(country.getCode(context), true);
+                    editor.apply();
+                    break;
+                }
+            }
+            if (editor == null) {
+                Country.Germany.setDownloadKeysFrom(true);
+                editor = sharedPreferences.edit();
+                editor.putBoolean(Country.Germany.getCode(context), true);
+                editor.apply();
+            }
         }
 
         ActionBar actionBar = getSupportActionBar();
@@ -314,7 +331,7 @@ public class MainActivity extends AppCompatActivity {
             ContactDbOnDisk contactDbOnDisk = new ContactDbOnDisk(this);
             rpiList = contactDbOnDisk.getRpisFromContactDB();
         } else if (CWCApplication.appMode == RAMBLE_MODE) {
-            RambleDbOnDisk rambleDbOnDisk = new RambleDbOnDisk(this);
+            rambleDbOnDisk = new RambleDbOnDisk(this);
             // limit RaMBLE encounters to the last 14 days
             rpiList = rambleDbOnDisk.getRpisFromContactDB(this,
                     getDaysFromMillis(System.currentTimeMillis()) - 14);
@@ -406,11 +423,28 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (CWCApplication.appMode == RAMBLE_MODE && rambleDbOnDisk.newExportFileAvailable(this)) {
+            recreateMainActivityOnNextPossibleOccasion();
+        }
+
+        if (CWCApplication.appMode != DEMO_MODE && System.currentTimeMillis() > nextDKDownloadTime) {
+            // wait at least 5 mins before trying again, more if download succeeds
+            nextDKDownloadTime = System.currentTimeMillis() + 5 * 60000;
+            recreateMainActivityOnNextPossibleOccasion();
+        }
+    }
+
     private void showExtractionError() {
         if ((CWCApplication.appMode == NORMAL_MODE) || (CWCApplication.appMode == MICROG_MODE)) {
             textViewExtractionError.setText(R.string.error_no_rpis_normal_mode);
         } else if (CWCApplication.appMode == RAMBLE_MODE) {
             textViewExtractionError.setText(R.string.error_no_rpis_ramble_mode);
+        } else if (CWCApplication.appMode ==  MICROG_MODE) {
+            textViewExtractionError.setText(R.string.error_no_rpis_microg_mode);
         } else {
             throw new IllegalStateException();
         }
@@ -474,6 +508,10 @@ public class MainActivity extends AppCompatActivity {
             sb.append(" ");
             sb.append(getResources().getQuantityString(R.plurals.title_diagnosis_keys_downloaded_warning,
                     errorCount, errorCount));
+        }
+        else {
+            // wait one hour before getting an update
+            nextDKDownloadTime = System.currentTimeMillis() + 60 * 60000;
         }
 
         textViewDks.setText(sb.toString());

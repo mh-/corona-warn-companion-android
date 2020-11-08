@@ -28,6 +28,7 @@ import static org.tosl.coronawarncompanion.tools.Utils.hexStringToByteArray;
 public class RambleDbOnDisk {
 
     private static final String TAG = "RambleDbOnDisk";
+    private static String rambleDbFileName = null;
     private final Context context;
 
     public RambleDbOnDisk(Context context) {
@@ -58,7 +59,7 @@ public class RambleDbOnDisk {
                 // sort all candidates alphabetically
                 Arrays.sort(fileArray);
                 // and take the last entry, because that will have the most recent date/time
-                String rambleDbFileName = fileArray[fileArray.length-1].getName();
+                rambleDbFileName = fileArray[fileArray.length - 1].getName();
                 //Log.d(TAG, "Selected RaMBLE file: " + downloadDir + "/" + rambleDbFileName);
 
                 try (SQLiteDatabase rambleDb = SQLiteDatabase.openDatabase(downloadDir + "/" + rambleDbFileName,
@@ -183,5 +184,36 @@ public class RambleDbOnDisk {
             }
         }
         return rpiList;
+    }
+
+    public boolean newExportFileAvailable(Activity activity) {
+
+        // get live permission to access files
+        boolean grantedAll = ContextCompat.checkSelfPermission(this.context,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        if (!grantedAll)
+        {
+            ActivityCompat.requestPermissions (activity,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    0);
+        }
+
+        File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        if (downloadDir != null) {
+            // ... search for files like RaMBLE_playstore_v40.15_20200819_0644.sqlite
+            final Pattern p = Pattern.compile("RaMBLE_.*.sqlite");
+            FileFilter fileFilter = pathname -> p.matcher(pathname.getName()).matches();
+            File[] fileArray = downloadDir.listFiles(fileFilter);
+            if (fileArray != null && fileArray.length > 0) {
+                if (rambleDbFileName == null) {
+                    return true;
+                }
+                // sort all candidates alphabetically
+                Arrays.sort(fileArray);
+                // and take the last entry, because that will have the most recent date/time
+                return !(rambleDbFileName.equals(fileArray[fileArray.length - 1].getName()));
+            }
+        }
+        return false;
     }
 }
