@@ -21,6 +21,8 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 
 import static org.tosl.coronawarncompanion.dkdownload.Unzip.getUnzippedBytesFromZipFileBytes;
+import static org.tosl.coronawarncompanion.tools.Utils.getENINFromDate;
+import static org.tosl.coronawarncompanion.tools.Utils.standardRollingPeriod;
 
 public class DKDownloadUtils {
 
@@ -58,7 +60,10 @@ public class DKDownloadUtils {
                 .map(dkListList -> dkListList
                         .stream()
                         .flatMap(List::stream)
-                        .collect(Collectors.toList()));
+                        .filter(dk -> dk.dk.getRollingStartIntervalNumber()
+                                >= getENINFromDate(minDate)-standardRollingPeriod) // -1 day because of the 2h window
+                        .collect(Collectors.toList())
+                );
     }
 
     public static List<DiagnosisKey>
