@@ -31,12 +31,8 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
-import android.os.Message;
-import android.os.Process;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -77,6 +73,10 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.DEMO_MODE;
@@ -102,6 +102,8 @@ public class MainActivity extends AppCompatActivity {
     private RpiList rpiList = null;
     private Date maxDate = null;
     private Date minDate = null;
+    private int numMatchingThreads;
+    DisposableObserver<Matcher.ProgressAndMatchEntryAndDkAndDay> mergedObserver;
 
     @SuppressWarnings("SpellCheckingInspection")
     private final int normalBarColor = Color.parseColor("#8CEAFF");
@@ -501,56 +503,92 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public Handler uiThreadHandler;
-    public HandlerThread backgroundMatcher;
-
     private void startMatching(List<DiagnosisKey> diagnosisKeysList) {
         backgroundThreadsRunning = true;  // required so that DEMO_MODE toggle can safely stop the background threads
         backgroundThreadsShouldStop = false;
 
-        uiThreadHandler = new Handler(Looper.getMainLooper()) {
+        DisposableObserver<Matcher.ProgressAndMatchEntryAndDkAndDay> matchingObserver =
+                new DisposableObserver<Matcher.ProgressAndMatchEntryAndDkAndDay>() {
+            private MatchEntryContent matchEntryContent;
+            private int numMatches = 0;
+            private int[] progressArray;
+
             @Override
-            public void handleMessage(@SuppressWarnings("NullableProblems") Message inputMessage) {
-                Log.d(TAG, "Message received: Matching finished.");
+            protected void onStart() {
+                matchEntryContent = new MatchEntryContent();
+                progressArray = new int[numMatchingThreads];
+            }
+
+            @Override
+            public void onNext(@io.reactivex.annotations.NonNull Matcher.ProgressAndMatchEntryAndDkAndDay progressAndMatchEntryAndDkAndDay) {
+                // if available, add match
+                if (progressAndMatchEntryAndDkAndDay.matchEntryAndDkAndDay != null) {
+                    matchEntryContent.matchEntries.add(progressAndMatchEntryAndDkAndDay.matchEntryAndDkAndDay);
+                    numMatches = matchEntryContent.matchEntries.getTotalMatchingDkCount();
+                }
+                // update progress
+                progressArray[progressAndMatchEntryAndDkAndDay.threadNumber] = progressAndMatchEntryAndDkAndDay.currentProgress;
+                int progressSum = 0;
+                for (int i = 0; i < numMatchingThreads; i++) {
+                    progressSum += progressArray[i];
+                }
+                textViewMatches.setText(getResources().getString(R.string.title_matching_not_done_yet_with_progress,
+                        progressSum / numMatchingThreads, numMatches));
+            }
+
+            @Override
+            public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+                Log.e(TAG, "ERROR during matching!");
+            }
+
+            @Override
+            public void onComplete() {
+                CWCApplication.setMatchEntryContent(matchEntryContent);
+                CWCApplication.setLocationDataAvailable(rpiList.getHaveLocation());
+                Log.d(TAG, "Matching finished.");
+                backgroundThreadsRunning = false;
+                backgroundThreadsShouldStop = false;
                 presentMatchResults();
             }
         };
 
-        backgroundMatcher = new HandlerThread("BackgroundMatcher");
-        backgroundMatcher.start();
-        Handler backgroundThreadHandler = new Handler(backgroundMatcher.getLooper());
-        backgroundThreadHandler.post(new BackgroundMatching(this, diagnosisKeysList));
-    }
-
-    private class BackgroundMatching implements Runnable {
-        private final MainActivity mainActivity;
-        private final List<DiagnosisKey> diagnosisKeysList;
-
-        BackgroundMatching(MainActivity theMainActivity,
-                           List<DiagnosisKey> diagnosisKeysList) {
-            mainActivity = theMainActivity;
-            this.diagnosisKeysList = diagnosisKeysList;
-        }
-
-        @Override
-        public void run() {
-            android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_DISPLAY);
-
-            if ((rpiList != null) && (diagnosisKeysList.size() != 0)) {
-                MatchEntryContent matchEntryContent = new MatchEntryContent();
-                Matcher matcher = new Matcher(rpiList, diagnosisKeysList, matchEntryContent);
-                matcher.findMatches(
-                        progress -> runOnUiThread(
-                                () -> textViewMatches.setText(getResources().getString(R.string.
-                                        title_matching_not_done_yet_with_progress, progress.first, progress.second))));
-                Log.d(TAG, "Finished matching, sending the message...");
-                CWCApplication.setMatchEntryContent(matchEntryContent);
-                CWCApplication.setLocationDataAvailable(rpiList.getHaveLocation());
+        int dkListLen = diagnosisKeysList.size();
+        if ((rpiList != null) && (dkListLen != 0)) {
+            int desiredThreads = Runtime.getRuntime().availableProcessors();
+            Log.d(TAG, "Matching: Trying to split into " + desiredThreads + " threads.");
+            if (desiredThreads > dkListLen) {
+                desiredThreads = dkListLen;
+                Log.d(TAG, "Matching: Reduced to " + desiredThreads + " threads, because of short list");
             }
-            backgroundThreadsRunning = false;
-            backgroundThreadsShouldStop = false;
-            Message completeMessage = mainActivity.uiThreadHandler.obtainMessage();
-            completeMessage.sendToTarget();
+            ArrayList<Pair<Integer, Integer>> ranges = new ArrayList<>();
+            int lastEndExclusive = 0;
+            for (int i = 1; i <= desiredThreads; i++) {
+                int newEndExclusive = dkListLen * i / desiredThreads;
+                if (newEndExclusive < lastEndExclusive) {
+                    newEndExclusive = lastEndExclusive;
+                }
+                ranges.add(new Pair<>(lastEndExclusive, newEndExclusive));
+                Log.d(TAG, "Matching: Range " + lastEndExclusive + ".." + newEndExclusive);
+                lastEndExclusive = newEndExclusive;
+                if (newEndExclusive >= dkListLen) {
+                    break;
+                }
+            }
+            numMatchingThreads = ranges.size();
+            
+            ArrayList<Observable<Matcher.ProgressAndMatchEntryAndDkAndDay>> observables = new ArrayList<>();
+            for (int i = 0; i < numMatchingThreads; i++) {
+                Matcher matcher = new Matcher(rpiList,
+                        diagnosisKeysList.subList(ranges.get(i).first, ranges.get(i).second), i);
+                observables.add(
+                        matcher.getMatchingObservable()
+                                .subscribeOn(Schedulers.computation())
+                                .observeOn(AndroidSchedulers.mainThread())
+                );
+            }
+            Observable<Matcher.ProgressAndMatchEntryAndDkAndDay> mergedObservable =
+                    Observable.merge(observables);
+            mergedObserver = mergedObservable.subscribeWith(matchingObserver);
         }
     }
 

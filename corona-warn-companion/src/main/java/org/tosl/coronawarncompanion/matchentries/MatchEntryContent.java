@@ -54,15 +54,14 @@ public class MatchEntryContent {
             return map.get(daysSinceEpoch);
         }
 
-        public void add(Matcher.MatchEntry entry, DiagnosisKey dk,
-                        Integer daysSinceEpochLocalTZ) {
-            if (!map.containsKey(daysSinceEpochLocalTZ)) {
-                map.put(daysSinceEpochLocalTZ, new DailyMatchEntries());
+        public void add(Matcher.MatchEntryAndDkAndDay matchEntryAndDkAndDay) {
+            if (!map.containsKey(matchEntryAndDkAndDay.daysSinceEpochLocalTZ)) {
+                map.put(matchEntryAndDkAndDay.daysSinceEpochLocalTZ, new DailyMatchEntries());
             }
-            DailyMatchEntries dailyMatchEntries = map.get(daysSinceEpochLocalTZ);
+            DailyMatchEntries dailyMatchEntries = map.get(matchEntryAndDkAndDay.daysSinceEpochLocalTZ);
             if (dailyMatchEntries != null) {
                 int previousMatchingDkCount = dailyMatchEntries.getDailyMatchingDkCount();
-                dailyMatchEntries.add(entry, dk);
+                dailyMatchEntries.add(matchEntryAndDkAndDay.matchEntry, matchEntryAndDkAndDay.diagnosisKey);
                 totalRpiCount++;
                 totalMatchingDkCount += (dailyMatchEntries.getDailyMatchingDkCount() - previousMatchingDkCount);
                 // Log.d(TAG, "Added entry for day: " + daysSinceEpochLocalTZ +
