@@ -555,6 +555,9 @@ public class MainActivity extends AppCompatActivity {
         int dkListLen = diagnosisKeysList.size();
         if ((rpiList != null) && (dkListLen != 0)) {
             int desiredThreads = Runtime.getRuntime().availableProcessors();
+            if (desiredThreads < 1) {
+                desiredThreads = 1;
+            }
             Log.d(TAG, "Matching: Trying to split into " + desiredThreads + " threads.");
             if (desiredThreads > dkListLen) {
                 desiredThreads = dkListLen;
@@ -562,24 +565,29 @@ public class MainActivity extends AppCompatActivity {
             }
             ArrayList<Pair<Integer, Integer>> ranges = new ArrayList<>();
             int lastEndExclusive = 0;
-            for (int i = 1; i <= desiredThreads; i++) {
-                int newEndExclusive = dkListLen * i / desiredThreads;
+            int newEndExclusive = 0;
+            int i = 1;
+            while (newEndExclusive < dkListLen) {
+                newEndExclusive = dkListLen * i / desiredThreads;
                 if (newEndExclusive < lastEndExclusive) {
                     newEndExclusive = lastEndExclusive;
                 }
-                ranges.add(new Pair<>(lastEndExclusive, newEndExclusive));
-                Log.d(TAG, "Matching: Range " + lastEndExclusive + ".." + newEndExclusive);
-                lastEndExclusive = newEndExclusive;
-                if (newEndExclusive >= dkListLen) {
-                    break;
+                if (newEndExclusive > dkListLen) {
+                    newEndExclusive = dkListLen;
                 }
+                if (newEndExclusive > lastEndExclusive) {
+                    ranges.add(new Pair<>(lastEndExclusive, newEndExclusive));
+                    Log.d(TAG, "Matching: Range " + lastEndExclusive + ".." + newEndExclusive);
+                }
+                lastEndExclusive = newEndExclusive;
+                i++;
             }
             numMatchingThreads = ranges.size();
             
             ArrayList<Observable<Matcher.ProgressAndMatchEntryAndDkAndDay>> observables = new ArrayList<>();
-            for (int i = 0; i < numMatchingThreads; i++) {
+            for (int threadNum = 0; threadNum < numMatchingThreads; threadNum++) {
                 Matcher matcher = new Matcher(rpiList,
-                        diagnosisKeysList.subList(ranges.get(i).first, ranges.get(i).second), i);
+                        diagnosisKeysList.subList(ranges.get(threadNum).first, ranges.get(threadNum).second), threadNum);
                 observables.add(
                         matcher.getMatchingObservable()
                                 .subscribeOn(Schedulers.computation())
