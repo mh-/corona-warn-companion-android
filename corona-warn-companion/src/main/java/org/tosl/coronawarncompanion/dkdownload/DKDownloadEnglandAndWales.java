@@ -2,10 +2,12 @@ package org.tosl.coronawarncompanion.dkdownload;
 
 import android.content.Context;
 import android.util.Log;
+import android.util.Pair;
 
 import org.tosl.coronawarncompanion.R;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -22,6 +24,8 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
+
+import static org.tosl.coronawarncompanion.tools.Utils.getDaysSinceEpochFromDate;
 
 public class DKDownloadEnglandAndWales implements DKDownloadCountry {
     private static final String TAG = "DKDownloadEAW";
@@ -40,7 +44,7 @@ public class DKDownloadEnglandAndWales implements DKDownloadCountry {
     }
 
     @Override
-    public Observable<byte[]> getDKBytes(Context context, OkHttpClient okHttpClient, Date minDate) {
+    public Observable<Pair<byte[], DownloadFileInfo>> getDKBytesAndFileInfo(Context context, OkHttpClient okHttpClient, Date minDate) {
 
         Calendar firstAvailableDate = Calendar.getInstance();
         TimeZone tz = TimeZone.getTimeZone("UTC");
@@ -74,12 +78,19 @@ public class DKDownloadEnglandAndWales implements DKDownloadCountry {
         }
 
         return Observable.fromIterable(dailyZips)
-                .flatMapMaybe(timestamp -> DKDownloadUtils.wrapRetrofit(context, api.getDaily(timestamp))
-                        .doOnSuccess(responseBody -> Log.d(TAG, "Downloaded daily: " + timestamp)))
+                .flatMapMaybe(filename -> DKDownloadUtils.wrapRetrofit(context, api.getDaily(filename))
+                        .map(ResponseBody::bytes)
+                        .map(responseBytes -> new Pair<>(responseBytes,
+                                new DownloadFileInfo(getCountryCode(context), filename,
+                                        (int)LocalDate.parse(filename.substring(0,10), DATE_FORMATTER).toEpochDay())))
+                                .doOnSuccess(responseBody -> Log.d(TAG, "Downloaded daily: " + filename)))
                 .concatWith(Observable.fromIterable(hourlyZips)
-                        .flatMapMaybe(timestamp -> DKDownloadUtils.wrapRetrofit(context, api.getHourly(timestamp))
-                                .doOnSuccess(responseBody -> Log.d(TAG, "Download two-hourly: " + timestamp))))
-                .map(ResponseBody::bytes);
+                        .flatMapMaybe(filename -> DKDownloadUtils.wrapRetrofit(context, api.getHourly(filename))
+                                .map(ResponseBody::bytes)
+                                .map(responseBytes -> new Pair<>(responseBytes,
+                                        new DownloadFileInfo(getCountryCode(context), filename,
+                                                (int)LocalDate.parse(filename.substring(0,10), DATE_FORMATTER).toEpochDay())))
+                                .doOnSuccess(responseBody -> Log.d(TAG, "Download two-hourly: " + filename))));
     }
 
     @Override

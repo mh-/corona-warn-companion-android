@@ -86,7 +86,6 @@ import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.RAMBLE_
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.MICROG_MODE;
 import static org.tosl.coronawarncompanion.CWCApplication.backgroundThreadsShouldStop;
 import static org.tosl.coronawarncompanion.CWCApplication.backgroundThreadsRunning;
-import static org.tosl.coronawarncompanion.CWCApplication.downloadOptimizationActive;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysSinceEpochFromENIN;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromMillis;
 import static org.tosl.coronawarncompanion.tools.Utils.getENINFromDate;
@@ -132,13 +131,13 @@ public class MainActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_activity_menu, menu);
         if (CWCApplication.appMode == NORMAL_MODE) {
-            menu.findItem(R.id.normalmode).setChecked(true);
+            menu.findItem(R.id.normal_mode).setChecked(true);
         } else if (CWCApplication.appMode == DEMO_MODE) {
-            menu.findItem(R.id.demomode).setChecked(true);
+            menu.findItem(R.id.demo_mode).setChecked(true);
         } if (CWCApplication.appMode == RAMBLE_MODE) {
-            menu.findItem(R.id.ramblemode).setChecked(true);
+            menu.findItem(R.id.ramble_mode).setChecked(true);
         } if (CWCApplication.appMode == MICROG_MODE) {
-            menu.findItem(R.id.microgmode).setChecked(true);
+            menu.findItem(R.id.microg_mode).setChecked(true);
         }
         for (Country country : Country.values()) {
             if (country.isDownloadKeysFrom()) {
@@ -161,8 +160,8 @@ public class MainActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.about) {
             startActivity(new Intent(this, AboutActivity.class));
             return true;
-        } else if (item.getItemId() == R.id.normalmode || item.getItemId() == R.id.demomode ||
-                item.getItemId() == R.id.ramblemode || item.getItemId() == R.id.microgmode) {
+        } else if (item.getItemId() == R.id.normal_mode || item.getItemId() == R.id.demo_mode ||
+                item.getItemId() == R.id.ramble_mode || item.getItemId() == R.id.microg_mode) {
             if (backgroundThreadsShouldStop) {
                 // user has to wait a little bit longer
                 CharSequence text = getString(R.string.error_app_mode_switching_not_possible);
@@ -172,11 +171,11 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
             item.setChecked(true);
-            if (item.getItemId() == R.id.normalmode) {
+            if (item.getItemId() == R.id.normal_mode) {
                 desiredAppMode = NORMAL_MODE;
-            } else if (item.getItemId() == R.id.demomode) {
+            } else if (item.getItemId() == R.id.demo_mode) {
                 desiredAppMode = DEMO_MODE;
-            } else if (item.getItemId() == R.id.microgmode) {
+            } else if (item.getItemId() == R.id.microg_mode) {
                 desiredAppMode = MICROG_MODE;
             } else {
                 desiredAppMode = RAMBLE_MODE;
@@ -571,7 +570,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "Matching finished.");
                 backgroundThreadsRunning = false;
                 backgroundThreadsShouldStop = false;
-                presentMatchResults();
+                presentMatchResults(downloadFileInfoList);
             }
         };
 
