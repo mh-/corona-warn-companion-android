@@ -70,10 +70,12 @@ public class Crypto {
 
     public static byte[] deriveAemKey(byte[] tek) {
         byte[] derivedKey = null;
-        try {
-            derivedKey = hkdfSha256(tek, null, "EN-AEMK".getBytes(StandardCharsets.UTF_8), 16);
-        } catch (CryptoException e) {
-            e.printStackTrace();
+        synchronized (Crypto.class) {
+            try {
+                derivedKey = hkdfSha256(tek, null, "EN-AEMK".getBytes(StandardCharsets.UTF_8), 16);
+            } catch (CryptoException e) {
+                e.printStackTrace();
+            }
         }
         return derivedKey;
     }

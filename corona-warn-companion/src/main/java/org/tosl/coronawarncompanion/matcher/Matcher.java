@@ -135,6 +135,7 @@ public class Matcher {
                     Log.d(TAG, "Finished matching...");
                     emitter.onComplete();
                 } catch (Exception e) {
+                    e.printStackTrace();
                     emitter.onError(e);
                 }
             }

@@ -62,6 +62,8 @@ import org.tosl.coronawarncompanion.matcher.Matcher;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -433,6 +435,16 @@ public class MainActivity extends AppCompatActivity {
         chartMatches.switchPleaseWaitAnimationOff();
     }
 
+    private void showMatchingError(Throwable e) {
+        chartMatches.switchPleaseWaitAnimationOff();
+        textViewMatches.setText(getString(R.string.title_matching_error, e.toString()));
+        StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+        String stackTrace = sw.toString();
+        Toast toast = Toast.makeText(getApplicationContext(), stackTrace, Toast.LENGTH_LONG);
+        toast.show();
+    }
+
     @Override
     public void onRequestPermissionsResult (int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == 0 && permissions.length == 1 &&
@@ -538,7 +550,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onError(@io.reactivex.annotations.NonNull Throwable e) {
-                Log.e(TAG, "ERROR during matching!");
+                Log.e(TAG, "ERROR during matching!", e);
+                showMatchingError(e);
             }
 
             @Override

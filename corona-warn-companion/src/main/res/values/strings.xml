@@ -13,6 +13,7 @@
     <string name="title_matching_not_done_yet">Matching in progress…</string>
     <string name="title_matching_not_done_yet_with_progress" tools:ignore="PluralsCandidate">Matching in progress… %1$d%% (%2$d found)</string>
     <string name="title_matching_not_possible">Matching not possible. (Need both scanned encounters and diagnosis keys for this.)</string>
+    <string name="title_matching_error">Matching error. (An unexpected error happened during matching: %s)</string>
     <string name="title_no_matches_found">No risk encounters found.</string>
     <plurals name="title_number_of_matches_found">
         <item quantity="one">%d risk encounter. Tap to see details…</item>
