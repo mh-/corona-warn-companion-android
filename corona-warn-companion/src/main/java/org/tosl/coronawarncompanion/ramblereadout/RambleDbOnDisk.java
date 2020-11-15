@@ -75,99 +75,123 @@ public class RambleDbOnDisk {
 
                         while (cursor.moveToNext()) {
                             // parse entry from table "devices"
-                            String serviceRpiAemStr = cursor.getString(0);
-                            if (serviceRpiAemStr == null) {
-                                Log.w(TAG, "Warning: Found serviceRpiAemStr == null");
+                            String lastSeenStr = cursor.getString(2);
+                            if (lastSeenStr == null) {
+                                Log.w(TAG, "Warning: Found lastSeenStr == null");
                             } else {
-                                String rpiAemStr = serviceRpiAemStr.split(":")[1];
-                                String rpiStr = rpiAemStr.substring(0, 16 * 2);
-                                byte[] rpiBytes = hexStringToByteArray(rpiStr);
-                                String aemStr = rpiAemStr.substring(16 * 2);
-                                byte[] aemBytes = hexStringToByteArray(aemStr);
-                                String firstSeenStr = cursor.getString(1);
-                                if (firstSeenStr == null) {
-                                    Log.w(TAG, "Warning: Found firstSeenStr == null");
-                                } else {
-                                    int firstSeenTimestamp = Integer.parseInt(firstSeenStr);
-                                    String lastSeenStr = cursor.getString(2);
-                                    if (lastSeenStr == null) {
-                                        Log.w(TAG, "Warning: Found lastSeenStr == null");
+                                int lastSeenTimestamp = 0;
+                                try {
+                                    lastSeenTimestamp = Integer.parseInt(lastSeenStr);
+                                } catch (NumberFormatException e) {
+                                    Log.w(TAG, "Warning: Found lastSeenTimestamp with unparseable number");
+                                }
+                                // only use entry if it's recent enough
+                                if (getDaysFromSeconds(lastSeenTimestamp) >= minDaysSinceEpochUTC) {
+                                    String serviceRpiAemStr = cursor.getString(0);
+                                    if (serviceRpiAemStr == null) {
+                                        Log.w(TAG, "Warning: Found serviceRpiAemStr == null");
                                     } else {
-                                        int lastSeenTimestamp = Integer.parseInt(lastSeenStr);
-                                        // only use entry if it's recent enough
-                                        if (getDaysFromSeconds(lastSeenTimestamp) >= minDaysSinceEpochUTC) {
-                                            // firstSeenTimestamp might be too old, in case of BDADDR collisions
-                                            // see https://github.com/mh-/corona-warn-companion-android/issues/62
-                                            // Therefore we limit the interval to max. 30 minutes
-                                            if (firstSeenTimestamp < lastSeenTimestamp - 30*60) {
-                                                firstSeenTimestamp = lastSeenTimestamp - 30*60;
-                                            }
-                                            String idStr = cursor.getString(3);
-                                            if (idStr == null) {
-                                                Log.w(TAG, "Warning: Found idStr == null");
+                                        String[] service_data_substrings = serviceRpiAemStr.split(":");
+                                        if (service_data_substrings.length != 2) {
+                                            Log.w(TAG, "Warning: Found service_data_substrings.length != 2");
+                                        } else {
+                                            if (!service_data_substrings[0].equalsIgnoreCase("fd6f")) {
+                                                Log.w(TAG, "Warning: Found service_data_substrings[0] != fd6f");
                                             } else {
-                                                // Log.d(TAG, "Device seen: " + byteArrayToHexString(rpiBytes) + " " + byteArrayToHexString(aemBytes) +
-                                                //        " " + firstSeenTimestamp + "-" + lastSeenTimestamp + " " + idStr);
-
-                                                // get Scan Records from table "locations"
-                                                ContactRecordsProtos.ContactRecords.Builder contactRecordsBuilder =
-                                                        ContactRecordsProtos.ContactRecords.newBuilder();
-                                                Cursor cursor2 = rambleDb.rawQuery("SELECT timestamp, rssi, longitude, latitude " +
-                                                        "FROM locations WHERE device_id=" + idStr, null);
-                                                while (cursor2.moveToNext()) {
-                                                    String timestampStr = cursor2.getString(0);
-                                                    if (timestampStr == null) {
-                                                        Log.w(TAG, "Warning: Found timestampStr == null");
+                                                String rpiAemStr = service_data_substrings[1];
+                                                if (rpiAemStr.length() != 2*16+2*4) {
+                                                    Log.w(TAG, "Warning: Found rpiAemStr with incorrect length");
+                                                } else {
+                                                    String rpiStr = rpiAemStr.substring(0, 16 * 2);
+                                                    byte[] rpiBytes = hexStringToByteArray(rpiStr);
+                                                    String aemStr = rpiAemStr.substring(16 * 2);
+                                                    byte[] aemBytes = hexStringToByteArray(aemStr);
+                                                    String firstSeenStr = cursor.getString(1);
+                                                    if (firstSeenStr == null) {
+                                                        Log.w(TAG, "Warning: Found firstSeenStr == null");
                                                     } else {
-                                                        int timestamp = Integer.parseInt(timestampStr);
-                                                        // check if this belongs to the (potentially corrected) time interval:
-                                                        if (timestamp >= firstSeenTimestamp) {
-                                                            String rssiStr = cursor2.getString(1);
-                                                            if (rssiStr == null) {
-                                                                Log.w(TAG, "Warning: Found rssiStr == null");
+                                                        int firstSeenTimestamp = 0;
+                                                        try {
+                                                            firstSeenTimestamp = Integer.parseInt(firstSeenStr);
+                                                        } catch (NumberFormatException e) {
+                                                            Log.w(TAG, "Warning: Found firstSeenTimestamp with unparseable number");
+                                                        }
+                                                        if (firstSeenTimestamp != 0) {
+                                                            // firstSeenTimestamp might be too old, in case of BDADDR collisions
+                                                            // see https://github.com/mh-/corona-warn-companion-android/issues/62
+                                                            // Therefore we limit the interval to max. 30 minutes
+                                                            if (firstSeenTimestamp < lastSeenTimestamp - 30 * 60) {
+                                                                firstSeenTimestamp = lastSeenTimestamp - 30 * 60;
+                                                            }
+                                                            String idStr = cursor.getString(3);
+                                                            if (idStr == null) {
+                                                                Log.w(TAG, "Warning: Found idStr == null");
                                                             } else {
-                                                                int rssi = Integer.parseInt(rssiStr);
-                                                                //Log.d(TAG, "Scan events: " + timestamp + " " + rssi);
+                                                                // Log.d(TAG, "Device seen: " + byteArrayToHexString(rpiBytes) + " " + byteArrayToHexString(aemBytes) +
+                                                                //        " " + firstSeenTimestamp + "-" + lastSeenTimestamp + " " + idStr);
 
-                                                                String longitudeStr = cursor2.getString(2);
-                                                                String latitudeStr = cursor2.getString(3);
+                                                                // get Scan Records from table "locations"
+                                                                ContactRecordsProtos.ContactRecords.Builder contactRecordsBuilder =
+                                                                        ContactRecordsProtos.ContactRecords.newBuilder();
+                                                                Cursor cursor2 = rambleDb.rawQuery("SELECT timestamp, rssi, longitude, latitude " +
+                                                                        "FROM locations WHERE device_id=" + idStr, null);
+                                                                while (cursor2.moveToNext()) {
+                                                                    String timestampStr = cursor2.getString(0);
+                                                                    if (timestampStr == null) {
+                                                                        Log.w(TAG, "Warning: Found timestampStr == null");
+                                                                    } else {
+                                                                        int timestamp = Integer.parseInt(timestampStr);
+                                                                        // check if this belongs to the (potentially corrected) time interval:
+                                                                        if (timestamp >= firstSeenTimestamp) {
+                                                                            String rssiStr = cursor2.getString(1);
+                                                                            if (rssiStr == null) {
+                                                                                Log.w(TAG, "Warning: Found rssiStr == null");
+                                                                            } else {
+                                                                                int rssi = Integer.parseInt(rssiStr);
+                                                                                //Log.d(TAG, "Scan events: " + timestamp + " " + rssi);
 
-                                                                if (longitudeStr == null || latitudeStr == null) {
-                                                                    Log.w(TAG, "Warning: Found longitudeStr == null || latitudeStr == null");
+                                                                                String longitudeStr = cursor2.getString(2);
+                                                                                String latitudeStr = cursor2.getString(3);
 
-                                                                    // add scanRecord to contactRecords
-                                                                    ContactRecordsProtos.ScanRecord scanRecord = ContactRecordsProtos.ScanRecord.newBuilder()
-                                                                            .setTimestamp(timestamp)
-                                                                            .setRssi(rssi)
-                                                                            .setAem(ByteString.copyFrom(aemBytes))
-                                                                            .build();
-                                                                    contactRecordsBuilder.addRecord(scanRecord);
+                                                                                if (longitudeStr == null || latitudeStr == null) {
+                                                                                    Log.w(TAG, "Warning: Found longitudeStr == null || latitudeStr == null");
+
+                                                                                    // add scanRecord to contactRecords
+                                                                                    ContactRecordsProtos.ScanRecord scanRecord = ContactRecordsProtos.ScanRecord.newBuilder()
+                                                                                            .setTimestamp(timestamp)
+                                                                                            .setRssi(rssi)
+                                                                                            .setAem(ByteString.copyFrom(aemBytes))
+                                                                                            .build();
+                                                                                    contactRecordsBuilder.addRecord(scanRecord);
+                                                                                } else {
+                                                                                    //Log.d(TAG, "longitude: " + longitudeStr + " / latitude: " + latitudeStr);
+
+                                                                                    // add scanRecord to contactRecords
+                                                                                    ContactRecordsProtos.ScanRecord scanRecord = ContactRecordsProtos.ScanRecord.newBuilder()
+                                                                                            .setTimestamp(timestamp)
+                                                                                            .setRssi(rssi)
+                                                                                            .setAem(ByteString.copyFrom(aemBytes))
+                                                                                            .setLongitude(Double.parseDouble(longitudeStr))
+                                                                                            .setLatitude(Double.parseDouble(latitudeStr))
+                                                                                            .build();
+                                                                                    contactRecordsBuilder.addRecord(scanRecord);
+                                                                                    rpiList.setHaveLocation(true);
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
                                                                 }
-                                                                else {
-                                                                    //Log.d(TAG, "longitude: " + longitudeStr + " / latitude: " + latitudeStr);
+                                                                cursor2.close();
 
-                                                                    // add scanRecord to contactRecords
-                                                                    ContactRecordsProtos.ScanRecord scanRecord = ContactRecordsProtos.ScanRecord.newBuilder()
-                                                                            .setTimestamp(timestamp)
-                                                                            .setRssi(rssi)
-                                                                            .setAem(ByteString.copyFrom(aemBytes))
-                                                                            .setLongitude(Double.parseDouble(longitudeStr))
-                                                                            .setLatitude(Double.parseDouble(latitudeStr))
-                                                                            .build();
-                                                                    contactRecordsBuilder.addRecord(scanRecord);
-                                                                    rpiList.setHaveLocation(true);
+                                                                // store entry (incl. contactRecords) in rpiList
+                                                                int daysSinceEpochUTC = getDaysFromSeconds(firstSeenTimestamp);
+                                                                rpiList.addEntry(daysSinceEpochUTC, rpiBytes, contactRecordsBuilder.build());
+                                                                if (getDaysFromSeconds(lastSeenTimestamp) != daysSinceEpochUTC) {  // extremely unlikely
+                                                                    rpiList.addEntry(daysSinceEpochUTC + 1, rpiBytes, contactRecordsBuilder.build());
                                                                 }
                                                             }
                                                         }
                                                     }
-                                                }
-                                                cursor2.close();
-
-                                                // store entry (incl. contactRecords) in rpiList
-                                                int daysSinceEpochUTC = getDaysFromSeconds(firstSeenTimestamp);
-                                                rpiList.addEntry(daysSinceEpochUTC, rpiBytes, contactRecordsBuilder.build());
-                                                if (getDaysFromSeconds(lastSeenTimestamp) != daysSinceEpochUTC) {  // extremely unlikely
-                                                    rpiList.addEntry(daysSinceEpochUTC + 1, rpiBytes, contactRecordsBuilder.build());
                                                 }
                                             }
                                         }
