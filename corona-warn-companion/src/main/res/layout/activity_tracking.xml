@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".TrackingActivity">
+    <TextView
+        android:id="@+id/headingTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:fontFamily="sans-serif-condensed-medium"
+        android:text="Tracking"
+        android:textSize="24sp" />
+    <TextView
+        android:id="@+id/toggle_button_tracking_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_below="@id/headingTextView"
+
+        android:fontFamily="sans-serif-condensed-medium"
+        android:text="Tracking aktivieren"
+        android:textSize="18sp" />
+
+<ToggleButton
+    android:id="@+id/toggle_button_tracking"
+    android:layout_below="@id/headingTextView"
+    android:layout_toRightOf="@id/toggle_button_tracking_label"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"/>
+    <Button
+        android:id="@+id/showTrackingData"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Trackingdaten abrufen"
+        android:layout_below="@id/toggle_button_tracking"/>
+    <TextView
+        android:id="@+id/tracking_time_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Zeitpunkt:"
+        android:layout_below="@id/showTrackingData"/>
+    <EditText
+        android:layout_below="@id/showTrackingData"
+        android:id="@+id/tracking_time"
+        android:layout_toRightOf="@id/tracking_time_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+    android:hint="Example: 14.11.2020 14:30"/>
+    <Button
+        android:id="@+id/getPosition"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Position ermitteln"
+        android:layout_below="@id/tracking_time"/>
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_below="@id/getPosition"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+        <!-- tools:context="com.example.mapwithmarker.MapsMarkerActivity" />-->
+
+
+
+</RelativeLayout>

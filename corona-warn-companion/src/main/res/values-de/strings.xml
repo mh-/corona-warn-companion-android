@@ -46,7 +46,9 @@
     <string name="menu_entry_oss_licenses">Open Source Software Lizenzen</string>
     <string name="menu_entry_view_further_oss_licenses">Weitere Open Source Software Lizenzen</string>
     <string name="menu_entry_about">Über diese App</string>
+    <string name="menu_entry_tracking">Tracking</string>
     <string name="title_activity_licenses">OSS Lizenzen</string>
+    <string name="title_activity_tracking">Tracking</string>
     <!--suppress AndroidDomInspection -->
     <string name="title_activity_main">@string/app_name</string>
     <string name="title_activity_main_demo_prefix">"DEMO "</string>
@@ -86,4 +88,12 @@
     <string name="country_spain">🇪🇸 Spanien</string>
     <string name="countries_one_europe">🇩🇪 Deutschland, 🇮🇪 Irland, 🇮🇹 Italien, 🇩🇰 Dänemark, 🇱🇻 Lettland, 🇪🇸 Spanien</string>
     <string name="point_of_exposure">Risikobegegnung</string>
+    <!-- Tracking -->
+    <string name="wrong_date_format">Das eingegebene Datum hat das falsche Format.</string>
+    <string name="endtime_before_starttime">Die Endzeit liegt vor der Startzeit.</string>
+    <string name="trackingdata">Trackingdaten</string>
+    <string name="before">vor</string>
+    <string name="minutes">Minuten</string>
+    <string name="title_enable_gps">GPS aktivieren</string>
+    <string name="info_enable_gps">Bitte aktiviere GPS, um die Tracking Funktion nutzen zu können.</string>
 </resources>

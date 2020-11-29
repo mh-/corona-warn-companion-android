@@ -133,7 +133,8 @@ public class MainActivity extends AppCompatActivity {
         inflater.inflate(R.menu.main_activity_menu, menu);
         if (CWCApplication.appMode == NORMAL_MODE) {
             menu.findItem(R.id.normalmode).setChecked(true);
-        } else if (CWCApplication.appMode == DEMO_MODE) {
+        }
+        else if (CWCApplication.appMode == DEMO_MODE) {
             menu.findItem(R.id.demomode).setChecked(true);
         } if (CWCApplication.appMode == RAMBLE_MODE) {
             menu.findItem(R.id.ramblemode).setChecked(true);
@@ -158,7 +159,12 @@ public class MainActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.about) {
             startActivity(new Intent(this, AboutActivity.class));
             return true;
-        } else if (item.getItemId() == R.id.normalmode || item.getItemId() == R.id.demomode ||
+        }
+        else if (item.getItemId() == R.id.tracking){
+            startActivity(new Intent(this, TrackingActivity.class));
+            return true;
+        }
+        else if (item.getItemId() == R.id.normalmode || item.getItemId() == R.id.demomode ||
                 item.getItemId() == R.id.ramblemode || item.getItemId() == R.id.microgmode) {
             if (backgroundThreadsShouldStop) {
                 // user has to wait a little bit longer
