@@ -30,7 +30,9 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Gravity;
@@ -61,6 +63,10 @@ import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
 import org.tosl.coronawarncompanion.matcher.Matcher;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -236,6 +242,27 @@ public class MainActivity extends AppCompatActivity {
         recreate();
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        // We have received an intent. This is likely a microg database.
+        String action = intent.getAction();
+        String type = intent.getType();
+        if (Intent.ACTION_SEND.equals(action) && type != null) {
+            if ("application/vnd.microg.exposure+sqlite3".equals(type)) {
+                // Since loading of DB currently happens in onCreate(), we simply recreate here.
+                // Current intent gets 'saved' and passed to onCreate()
+                setIntent(intent);
+
+                Log.d(TAG, "Got MicroG Database Send intent while running! Recreating.");
+                recreate();
+                return;
+            }
+        }
+        Log.d(TAG, "Got some unknown intent while running! Ignoring.");
+    }
+
     @SuppressLint("CheckResult")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -256,6 +283,51 @@ public class MainActivity extends AppCompatActivity {
             CWCApplication.appMode = NORMAL_MODE;
         }
         desiredAppMode = CWCApplication.appMode;
+
+        // If the app was opened with a Send intent, parse the database-uri and use it as a microg database
+        // instead of using su to copy it from the gms directory
+        File databaseFile = null;
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String type = intent.getType();
+        if (Intent.ACTION_SEND.equals(action) && type != null) {
+            if ("application/vnd.microg.exposure+sqlite3".equals(type)) {
+                // We got a database uri shared with us. Use this one instead of the usual one!
+                Uri databaseUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+                // clear intent, because onCreate() might get called again
+                intent.removeExtra(Intent.EXTRA_STREAM);
+                if (databaseUri != null) {
+                    Log.d(TAG, "Got database URI via send activity: " + databaseUri.toString());
+                    try {
+                        // We only get a file descriptor from the uri, so we write it to a local cache file.
+                        // Necessary since SQLite wants a file it can open.
+                        ParcelFileDescriptor inputPFD = getContentResolver().openFileDescriptor(databaseUri, "r");
+                        FileDescriptor fd = inputPFD.getFileDescriptor();
+                        databaseFile = File.createTempFile("database.db", null, this.getCacheDir());
+                        FileInputStream in = new FileInputStream(fd);
+                        FileOutputStream out = new FileOutputStream(databaseFile);
+                        byte[] buf = new byte[1024];
+                        int len;
+                        while ((len = in.read(buf)) > 0) {
+                            out.write(buf, 0, len);
+                        }
+
+                        // Force switch app to microg mode
+                        if (desiredAppMode != MICROG_MODE) {
+                            Log.d(TAG, "Force switch to MicroG Mode!");
+                            CharSequence text = "Switching App to MicroG Mode!";
+                            Toast.makeText(this.context, text, Toast.LENGTH_LONG).show();
+
+                            desiredAppMode = MICROG_MODE;
+                            CWCApplication.appMode = MICROG_MODE;
+                        }
+                    } catch (Exception e) {
+                        Log.w(TAG, "Could not open database send via intent! " + e.toString());
+                        databaseFile.delete();
+                    }
+                }
+            }
+        }
 
         // get the active countries from SharedPreferences
         for (Country country : Country.values()) {
@@ -334,7 +406,7 @@ public class MainActivity extends AppCompatActivity {
                     getDaysFromMillis(System.currentTimeMillis()) - 14);
         } else if (CWCApplication.appMode == MICROG_MODE) {
             MicroGDbOnDisk microGDbOnDisk = new MicroGDbOnDisk(this);
-            rpiList = microGDbOnDisk.getRpisFromContactDB(this);
+            rpiList = microGDbOnDisk.getRpisFromContactDB(this, databaseFile);
         } else if (CWCApplication.appMode == CCTG_MODE) {
             CctgDbOnDisk cctgDbOnDisk = new CctgDbOnDisk(this);
             rpiList = cctgDbOnDisk.getRpisFromContactDB(this);
