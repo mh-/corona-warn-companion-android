@@ -46,7 +46,9 @@
     <string name="menu_entry_oss_licenses">Open Source Software Licenses</string>
     <string name="menu_entry_view_further_oss_licenses">Further Open Source Software Licenses</string>
     <string name="menu_entry_about">About this app</string>
+    <string name="menu_entry_tracking">Tracking</string>
     <string name="title_activity_licenses">OSS Licenses</string>
+    <string name="title_activity_tracking">Tracking</string>
     <!--suppress AndroidDomInspection -->
     <string name="title_activity_main">@string/app_name</string>
     <string name="title_activity_main_demo_prefix">"DEMO "</string>
@@ -116,4 +118,12 @@
     <string name="flags_one_europe" translatable="false">🇩🇪🇮🇪🇮🇹🇩🇰🇱🇻🇪🇸</string>
     <string name="toast_download_error">Error during download: %s</string>
     <string name="point_of_exposure">Point of exposure</string>
+    <!-- Tracking -->
+    <string name="wrong_date_format">The entered date has the wrong format</string>
+    <string name="endtime_before_starttime">The end time is before the start time.</string>
+    <string name="trackingdata">Tracking data</string>
+    <string name="before">before</string>
+    <string name="minutes">minutes</string>
+    <string name="title_enable_gps">Enable GPS</string>
+    <string name="info_enable_gps">Please enable GPS to use the tracking function.</string>
 </resources>

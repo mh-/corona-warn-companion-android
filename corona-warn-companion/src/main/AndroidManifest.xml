@@ -3,6 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="org.tosl.coronawarncompanion">
 
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"></uses-permission>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -18,7 +23,19 @@
         android:theme="@style/AppTheme"
         android:requestLegacyExternalStorage="true"
         tools:ignore="AllowBackup">
-
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+        <service
+            android:enabled="true"
+            android:exported="true"
+            android:directBootAware="true"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:foregroundServiceType="location"
+            android:name="org.tosl.coronawarncompanion.tracking.LocationService"/>
         <activity
             android:name="org.tosl.coronawarncompanion.MainActivity"
             android:launchMode="singleTask"
@@ -55,5 +72,34 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.tosl.coronawarncompanion.MainActivity" />
         </activity>
+        <activity
+            android:name="org.tosl.coronawarncompanion.TrackingActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.tosl.coronawarncompanion.MainActivity" />
+        </activity>
+        <receiver
+            android:name="org.tosl.coronawarncompanion.tracking.RestartBackgroundService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="restartservice" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name="org.tosl.coronawarncompanion.tracking.BroadcastReceiverOnBootComplete"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter android:directBootAware="true">
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="android.intent.action.REBOOT"/>
+            </intent-filter>
+        </receiver>
+
     </application>
 </manifest>
