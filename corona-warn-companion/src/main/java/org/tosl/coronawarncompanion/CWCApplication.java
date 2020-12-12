@@ -27,7 +27,7 @@ import java.util.TimeZone;
 
 public class CWCApplication extends Application {
 
-    public enum AppModeOptions {NORMAL_MODE, DEMO_MODE, RAMBLE_MODE, MICROG_MODE}
+    public enum AppModeOptions {NORMAL_MODE, DEMO_MODE, RAMBLE_MODE, MICROG_MODE, CCTG_MODE}
     public static AppModeOptions appMode = AppModeOptions.NORMAL_MODE;
 
     private static MatchEntryContent matchEntryContent = null;

@@ -42,6 +42,7 @@
     <string name="menu_entry_switch_to_normal_mode">Normal Mode</string>
     <string name="menu_entry_switch_to_ramble_mode">RaMBLE Mode</string>
     <string name="menu_entry_switch_to_microg_mode">microG Mode</string>
+    <string name="menu_entry_switch_to_cctg_mode">CCTG Mode</string>
     <string name="menu_entry_switch_to_demo_mode">Demo Mode</string>
     <string name="menu_entry_oss_licenses">Open Source Software Licenses</string>
     <string name="menu_entry_view_further_oss_licenses">Further Open Source Software Licenses</string>
@@ -52,11 +53,13 @@
     <string name="title_activity_main_demo_prefix">"DEMO "</string>
     <string name="title_activity_main_ramble_version">"RaMBLE-Warn-Companion"</string>
     <string name="title_activity_main_microg_version">"microG-Warn-Companion"</string>
+    <string name="title_activity_main_cctg_version">"CCTG-Warn-Companion"</string>
     <!--suppress AndroidDomInspection -->
     <string name="title_activity_details">@string/app_name</string>
     <string name="title_activity_details_demo">DEMO sample details</string>
     <string name="title_activity_details_ramble">RaMBLE-based details</string>
     <string name="title_activity_details_microg">microG-based details</string>
+    <string name="title_activity_details_cctg">CCTG-based details</string>
     <string name="title_activity_further_licenses">Further OSS Licenses</string>
     <string name="error_app_mode_switching_not_possible">Sorry, at the moment we cannot switch modes.\nPlease wait until all operations have finished.</string>
     <string name="error_no_rpis_normal_mode">ERROR!\nNo encounters could be extracted.\nAre Exposure Notifications enabled?\nDid you grant ROOT rights to this app?</string>

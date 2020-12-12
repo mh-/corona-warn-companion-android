@@ -53,6 +53,7 @@ import org.tosl.coronawarncompanion.diagnosiskeys.DiagnosisKey;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadCountry;
 import org.tosl.coronawarncompanion.dkdownload.DKDownloadUtils;
 import org.tosl.coronawarncompanion.gmsreadout.ContactDbOnDisk;
+import org.tosl.coronawarncompanion.microgreadout.CctgDbOnDisk;
 import org.tosl.coronawarncompanion.ramblereadout.RambleDbOnDisk;
 import org.tosl.coronawarncompanion.microgreadout.MicroGDbOnDisk;
 import org.tosl.coronawarncompanion.rpis.RpiList;
@@ -81,6 +82,7 @@ import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 
+import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.CCTG_MODE;
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.DEMO_MODE;
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.NORMAL_MODE;
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.RAMBLE_MODE;
@@ -139,7 +141,10 @@ public class MainActivity extends AppCompatActivity {
             menu.findItem(R.id.ramblemode).setChecked(true);
         } if (CWCApplication.appMode == MICROG_MODE) {
             menu.findItem(R.id.microgmode).setChecked(true);
+        } if (CWCApplication.appMode == CCTG_MODE) {
+            menu.findItem(R.id.cctgmode).setChecked(true);
         }
+
         for (Country country : Country.values()) {
             if (country.isDownloadKeysFrom()) {
                 menu.findItem(country.getId()).setChecked(true);
@@ -159,7 +164,8 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(this, AboutActivity.class));
             return true;
         } else if (item.getItemId() == R.id.normalmode || item.getItemId() == R.id.demomode ||
-                item.getItemId() == R.id.ramblemode || item.getItemId() == R.id.microgmode) {
+                item.getItemId() == R.id.ramblemode || item.getItemId() == R.id.microgmode ||
+                item.getItemId() == R.id.cctgmode) {
             if (backgroundThreadsShouldStop) {
                 // user has to wait a little bit longer
                 CharSequence text = getString(R.string.error_app_mode_switching_not_possible);
@@ -175,6 +181,8 @@ public class MainActivity extends AppCompatActivity {
                 desiredAppMode = DEMO_MODE;
             } else if (item.getItemId() == R.id.microgmode) {
                 desiredAppMode = MICROG_MODE;
+            } else if (item.getItemId() == R.id.cctgmode) {
+                desiredAppMode = CCTG_MODE;
             } else {
                 desiredAppMode = RAMBLE_MODE;
             }
@@ -270,6 +278,8 @@ public class MainActivity extends AppCompatActivity {
                 actionBar.setTitle(getString(R.string.title_activity_main_ramble_version));
             } else if (CWCApplication.appMode == MICROG_MODE) {
                 actionBar.setTitle(getString(R.string.title_activity_main_microg_version));
+            } else if (CWCApplication.appMode == CCTG_MODE) {
+                actionBar.setTitle(getString(R.string.title_activity_main_cctg_version));
             } else {
                 throw new IllegalStateException();
             }
@@ -325,6 +335,9 @@ public class MainActivity extends AppCompatActivity {
         } else if (CWCApplication.appMode == MICROG_MODE) {
             MicroGDbOnDisk microGDbOnDisk = new MicroGDbOnDisk(this);
             rpiList = microGDbOnDisk.getRpisFromContactDB(this);
+        } else if (CWCApplication.appMode == CCTG_MODE) {
+            CctgDbOnDisk cctgDbOnDisk = new CctgDbOnDisk(this);
+            rpiList = cctgDbOnDisk.getRpisFromContactDB(this);
         } else {
             throw new IllegalStateException();
         }
@@ -375,7 +388,7 @@ public class MainActivity extends AppCompatActivity {
 
         textViewDks.setText(getString(R.string.title_diagnosis_keys_downloading, CWCApplication.getFlagsString(context)));
         if (CWCApplication.appMode == NORMAL_MODE || CWCApplication.appMode == RAMBLE_MODE ||
-                CWCApplication.appMode == MICROG_MODE) {
+                CWCApplication.appMode == MICROG_MODE || CWCApplication.appMode == CCTG_MODE) {
             List<DKDownloadCountry> dkDownloadCountries = new ArrayList<>();
 
             for (Country country : Country.values()) {
@@ -411,7 +424,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showExtractionError() {
-        if ((CWCApplication.appMode == NORMAL_MODE) || (CWCApplication.appMode == MICROG_MODE)) {
+        if ((CWCApplication.appMode == NORMAL_MODE) || (CWCApplication.appMode == MICROG_MODE) || (CWCApplication.appMode == CCTG_MODE)) {
             textViewExtractionError.setText(R.string.error_no_rpis_normal_mode);
         } else if (CWCApplication.appMode == RAMBLE_MODE) {
             textViewExtractionError.setText(R.string.error_no_rpis_ramble_mode);
