@@ -36,7 +36,7 @@ public class CctgDbOnDisk {
     }
 
     public void copyFromGMS() {
-        // Copy the microG GMS database to local app cache
+        // Copy the CCTG microG GMS database to local app cache
         Log.d(TAG, "Trying to copy CCTG database");
         File cacheDir = context.getExternalCacheDir();
         if (cacheDir == null) {

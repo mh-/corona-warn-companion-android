@@ -117,7 +117,7 @@ public class DisplayDetailsActivity extends AppCompatActivity {
                 } else if (CWCApplication.appMode == CWCApplication.AppModeOptions.MICROG_MODE) {
                     actionBar.setTitle(R.string.title_activity_details_microg);
                 } else if (CWCApplication.appMode == CWCApplication.AppModeOptions.CCTG_MODE) {
-                    actionBar.setTitle(R.string.title_activity_details_microg);
+                    actionBar.setTitle(R.string.title_activity_details_cctg);
                 } else {
                     throw new IllegalStateException();
                 }
