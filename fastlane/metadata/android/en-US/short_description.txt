@@ -1,1 +1,1 @@
-Shows Details about CWA Exposures
+Shows Details about CWA Risk Exposures

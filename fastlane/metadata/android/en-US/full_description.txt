@@ -1,7 +1,7 @@
 <i>Corona-Warn-Companion</i> can (and does) work independently of the official CWA, but it needs input from something that collects Bluetooth RPIs. That can be…
 
 * the official Corona app or F-Droid's <a href='https://f-droid.org/packages/de.corona.tracing/'>Corona Tracing</a> app using Google Mobile Services (root required to access its DB)
-* the official Corona app or F-Droid's <a href='https://f-droid.org/packages/de.corona.tracing/'>Corona Tracing</a> app using microG (root required to access its DB)
+* the official Corona app or F-Droid's <a href='https://f-droid.org/packages/de.corona.tracing/'>Corona Tracing</a> app using microG (root required to access its DB / or use the new built-in export feature)
 * <a href='https://play.google.com/store/apps/details?id=com.contextis.android.BLEScanner'>RaMBLE</a> (no root required)
 
 <i>Corona-Warn-Companion</i> is intended to help you to better understand warnings of the Corona-Warn-Apps.
@@ -11,6 +11,11 @@
 For CWA, ''Corona-Warn-Companion'' currently covers…
 
 * Austria
-* Germany
+* Belgium
+* Canada
+* Czechia
+* Germany, Ireland, Italy, Denmark, Latvia and Spain
+* Netherlands
 * Poland
 * Switzerland
+* England and Wales
