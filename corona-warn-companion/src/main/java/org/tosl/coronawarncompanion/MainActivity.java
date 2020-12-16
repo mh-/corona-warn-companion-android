@@ -246,7 +246,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
-        // We have received an intent. This is likely a microg database.
+        // We have received an intent. This is likely a microG database.
         String action = intent.getAction();
         String type = intent.getType();
         if (Intent.ACTION_SEND.equals(action) && type != null) {
@@ -255,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
                 // Current intent gets 'saved' and passed to onCreate()
                 setIntent(intent);
 
-                Log.d(TAG, "Got MicroG Database Send intent while running! Recreating.");
+                Log.d(TAG, "Got microG Database Send intent while running! Recreating.");
                 recreate();
                 return;
             }
@@ -284,7 +284,7 @@ public class MainActivity extends AppCompatActivity {
         }
         desiredAppMode = CWCApplication.appMode;
 
-        // If the app was opened with a Send intent, parse the database-uri and use it as a microg database
+        // If the app was opened with a Send intent, parse the database-uri and use it as a microG database
         // instead of using su to copy it from the gms directory
         File databaseFile = null;
         Intent intent = getIntent();
@@ -312,10 +312,10 @@ public class MainActivity extends AppCompatActivity {
                             out.write(buf, 0, len);
                         }
 
-                        // Force switch app to microg mode
+                        // Force switch app to microG mode
                         if (desiredAppMode != MICROG_MODE) {
-                            Log.d(TAG, "Force switch to MicroG Mode!");
-                            CharSequence text = "Switching App to MicroG Mode!";
+                            Log.d(TAG, "Force switch to microG Mode!");
+                            CharSequence text = getString(R.string.toast_switching_to_microg_mode);
                             Toast.makeText(this.context, text, Toast.LENGTH_LONG).show();
 
                             desiredAppMode = MICROG_MODE;
@@ -323,7 +323,10 @@ public class MainActivity extends AppCompatActivity {
                         }
                     } catch (Exception e) {
                         Log.w(TAG, "Could not open database send via intent! " + e.toString());
-                        databaseFile.delete();
+                        if (databaseFile != null) {
+                            //noinspection ResultOfMethodCallIgnored
+                            databaseFile.delete();
+                        }
                     }
                 }
             }

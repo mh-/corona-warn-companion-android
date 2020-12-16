@@ -89,4 +89,5 @@
     <string name="country_spain">🇪🇸 Spanien</string>
     <string name="countries_one_europe">🇩🇪 Deutschland, 🇮🇪 Irland, 🇮🇹 Italien, 🇩🇰 Dänemark, 🇱🇻 Lettland, 🇪🇸 Spanien</string>
     <string name="point_of_exposure">Risikobegegnung</string>
+    <string name="toast_switching_to_microg_mode">Die App wird in den microG Modus geschaltet!</string>
 </resources>

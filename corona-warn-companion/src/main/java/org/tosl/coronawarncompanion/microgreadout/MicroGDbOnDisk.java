@@ -71,7 +71,7 @@ public class MicroGDbOnDisk {
             databasePath = databaseFile.getPath();
         }
 
-        Log.d(TAG, "Loading MicroG " + databasePath);
+        Log.d(TAG, "Loading microG " + databasePath);
 
         try (SQLiteDatabase microGDb = SQLiteDatabase.openDatabase(databasePath,
                 null, SQLiteDatabase.OPEN_READONLY)) {
@@ -133,7 +133,7 @@ public class MicroGDbOnDisk {
                 }
                 cursor.close();
             }
-            Log.d(TAG, "Successfully parsed MicroG database.");
+            Log.d(TAG, "Successfully parsed microG database.");
         } catch (Exception e) {
             e.printStackTrace();
         }
