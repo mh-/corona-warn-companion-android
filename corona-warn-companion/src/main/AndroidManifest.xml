@@ -29,6 +29,17 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.EDIT" />
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data
+                    android:mimeType="application/vnd.microg.exposure+sqlite3"
+                    android:host="*"
+                    android:pathPattern=".*"
+                    />
+            </intent-filter>
         </activity>
 
         <activity

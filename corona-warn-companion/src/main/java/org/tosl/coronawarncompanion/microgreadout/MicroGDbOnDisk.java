@@ -59,16 +59,25 @@ public class MicroGDbOnDisk {
         }
     }
 
-    public RpiList getRpisFromContactDB(Activity activity) {
+    public RpiList getRpisFromContactDB(Activity activity, File databaseFile) {
         RpiList rpiList = null;
 
-        copyFromGMS();
+        String databasePath = "";
+        // Only copy from gms if databaseFile is null, else directly read from there
+        if (databaseFile == null) {
+            copyFromGMS();
+            databasePath = cachePathStr + "/" + dbNameModified;
+        } else {
+            databasePath = databaseFile.getPath();
+        }
 
-        try (SQLiteDatabase microGDb = SQLiteDatabase.openDatabase(cachePathStr + "/" + dbNameModified,
+        Log.d(TAG, "Loading MicroG " + databasePath);
+
+        try (SQLiteDatabase microGDb = SQLiteDatabase.openDatabase(databasePath,
                 null, SQLiteDatabase.OPEN_READONLY)) {
 
             if (microGDb != null) {
-                Log.d(TAG, "Opened microG Database: " + gmsPathStr + "/" + dbNameModified);
+                Log.d(TAG, "Opened microG Database: " + databasePath);
 
                 Cursor cursor = microGDb.rawQuery("SELECT rpi, aem, timestamp, rssi, duration "+
                         "FROM advertisements", null);
@@ -124,6 +133,7 @@ public class MicroGDbOnDisk {
                 }
                 cursor.close();
             }
+            Log.d(TAG, "Successfully parsed MicroG database.");
         } catch (Exception e) {
             e.printStackTrace();
         }
