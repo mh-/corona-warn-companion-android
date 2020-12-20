@@ -4,7 +4,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 # Features
 This app helps you to better understand warnings of the official Corona-Warn-App.
 
-**ATTENTION:** FOR FULL FUNCTIONALITY, THE APP REQUIRES ROOT PERMISSIONS. Without root permissions, the app cannot access your risk encounters, and only three features are available: 1. Test how many diagnosis keys can be downloaded from the server; 2. Use RaMBLE data; 3. Demo Mode.
+**ATTENTION:** To access the same recorded encounters as the official Corona-Warn-App, this app requires ROOT permissions. Without root permissions, the app can only be used together with the RaMBLE app, or with the CCTG app / microG.
 
 ### What the app does:
 1. The app reads the Rolling Proximity IDs recorded by your device from the Exposure Notifications database (this is only possible with root permissions, which is why official Exposure Notifications apps, such as Corona-Warn-App, cannot display these details).
@@ -21,7 +21,7 @@ This app helps you to better understand warnings of the official Corona-Warn-App
    ![-Example Matches-](file:///android_asset/matches_en.png)
 
 If risk encounters are found, it shows the details:
-At which times and with which radio attenuation (roughly corresponds to the distance) did the encounters take place, and what level of transmission risk did the encounters have.
+At which times and with which radio attenuation (roughly corresponds to the distance) did the encounters take place, and what level of transmission risk did the encounters have. For encounters that were recorded by RaMBLE, it can also display the location.
 
 ![-Example Details-](file:///android_asset/details_en.png)
 
@@ -29,20 +29,21 @@ Note that 1 means a low and 8 means a high transmission risk.
 
 ### What the app does not do:
 - The app does not process any personal data.
-- The app only accesses the internet for the purpose 2 (see above), i.e. it only downloads data from the official warning servers and does not send any data to other servers.
+- The app only accesses the internet for the purpose 2 (see above), i.e. it only downloads data from the official warning servers and does not send any data to other servers (unless you ask it to show the location of an encounter, in which case it will contact OpenStreetMap servers).
 - The app does not show any advertising.
-
-**Note:** This app has only been tested on a few devices so far, so it is possible that it will not work and/or show incorrect results.
 
 # Open Source
 The source code of the app is published at https://github.com/mh-/corona-warn-companion-android, so you can check the source code, build the app yourself, and you are also welcome to contribute to improvements.
 
 # Countries covered
+Download from the German server:
+- Germany, Denmark, Ireland, Italy, Croatia, Latvia, Netherlands, Poland, Spain, Cyprus
+
+Download from the respective country's server:
 - Austria
 - Belgium
 - Canada
 - Czechia
-- Germany, Ireland, Italy, Denmark, Latvia and Spain
 - Netherlands
 - Poland
 - Switzerland

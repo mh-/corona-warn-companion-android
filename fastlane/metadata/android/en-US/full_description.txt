@@ -6,16 +6,18 @@
 
 <i>Corona-Warn-Companion</i> is intended to help you to better understand warnings of the Corona-Warn-Apps.
 
-<b>ATTENTION: FOR FULL FUNCTIONALITY, THE APP REQUIRES ROOT PERMISSIONS.</b> Without root permissions, the app cannot access your risk encounters, and only three features are available: 1. Test how many diagnosis keys can be downloaded from the server; 2. Use RaMBLE data; 3. Demo Mode.
+<b>ATTENTION:</b> To access the same recorded encounters as the official Corona-Warn-App, this app requires ROOT permissions. Without root permissions, the app can only be used together with the RaMBLE app, or with the CCTG app / microG.
 
 For CWA, ''Corona-Warn-Companion'' currently covers…
+Download from the German server:
+- Germany, Denmark, Ireland, Italy, Croatia, Latvia, Netherlands, Poland, Spain, Cyprus
 
-* Austria
-* Belgium
-* Canada
-* Czechia
-* Germany, Ireland, Italy, Denmark, Latvia and Spain
-* Netherlands
-* Poland
-* Switzerland
-* England and Wales
+Download from the respective country's server:
+- Austria
+- Belgium
+- Canada
+- Czechia
+- Netherlands
+- Poland
+- Switzerland
+- England and Wales
