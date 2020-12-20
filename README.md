@@ -26,16 +26,16 @@ The `release` build variant will probably build out-of-the box only on macOS bec
 # Features
 This app helps you to better understand warnings of the official Corona-Warn-App.
 
-**ATTENTION:** FOR FULL FUNCTIONALITY, THE APP REQUIRES ROOT PERMISSIONS. Without root permissions, the app cannot access your risk encounters, and only three features are available: 1. Test how many diagnosis keys can be downloaded from the server; 2. Use RaMBLE data; 3. Demo Mode.
+**ATTENTION:** To access the same recorded encounters as the official Corona-Warn-App, this app requires ROOT permissions. Without root permissions, the app can only be used together with the RaMBLE app, or with the CCTG app / microG.
 
 ### What the app does:
 1. The app reads the Rolling Proximity IDs recorded by your device from the Exposure Notifications database 
    (this is only possible with root permissions, which is why official Exposure Notifications apps, such as Corona-Warn-App,
    cannot display these details).  
    ![-Example Recorded Encounters-](screenshots/rpis_en.png)
-   Alternatively, the app can also read a database exported from the [RaMBLE - Bluetooth LE Mapper app](https://play.google.com/store/apps/details?id=com.contextis.android.BLEScanner) (does not need root permissions).
+   Alternatively, without root permissions, the app can also read a database exported from the [RaMBLE - Bluetooth LE Mapper app](https://play.google.com/store/apps/details?id=com.contextis.android.BLEScanner), or from the [CCTG Corona Contact Tracing Germany app](https://f-droid.org/de/packages/de.corona.tracing/) / microG.
 2. The app downloads the Diagnosis Keys from the official German Corona-Warn-Server and other countries' servers, as selected by you.
-   For Germany, it downloads the keys published daily for the last few days, and the keys published every hour for today. Therefore, different information than in the official app might be displayed.
+   For Germany, it downloads the keys published daily for the last few days, and the keys published every hour for today. 
    Only keys for the days found in step 1 are shown and counted.  
    ![-Example Diagnosis Keys-](screenshots/dks_en.png)
 3. The app compares both in order to find matches (risk encounters).  
@@ -54,8 +54,6 @@ Note that 1 means a low and 8 means a high transmission risk.
 - The app only accesses the internet for the purpose 2 (see above), i.e. it only downloads data from the official warning servers and does not send any data to other servers (unless you ask it to show the location of an encounter, in which case it will contact OpenStreetMap servers).
 - The app does not show any advertising.
 
-**Note:** This app has only been tested on a few devices so far, so it is possible that it will not work and/or show incorrect results.
-
 # Open Source
 The source code of the app is published at https://github.com/mh-/corona-warn-companion-android, so you can check the source code, build the app yourself, and you are also welcome to contribute to improvements.
 
@@ -67,11 +65,14 @@ Note that the Exposure Notifications database contains `calibrated_rssi` ([see h
 RaMBLE however stores only `raw_rssi`, which means that the colors shown on the details screen are probably different from the case when the app reads the Exposure Notifications database.
 
 # Countries covered
+Download from the German server: 
+- Germany, Denmark, Ireland, Italy, Croatia, Latvia, Netherlands, Poland, Spain, Cyprus
+
+Download from the respective country's server:
 - Austria
 - Belgium
 - Canada
 - Czechia
-- Germany, Ireland, Italy, Denmark, Latvia and Spain
 - Netherlands
 - Poland
 - Switzerland
