@@ -87,3 +87,6 @@ please let us know via a GitHub issue.
 # Other
 - The app is used for private purposes only, it is not used for any business purposes.
 - The app is not a "hacking tool". It only reads data from the memory of your own device, which is stored there without additional encryption.
+
+---
+[<img src="https://www.jetbrains.com/company/brand/img/jetbrains_logo.png" width="60" />](https://www.jetbrains.com/?from=corona-warn-companion-android) Developed using [JetBrains](https://www.jetbrains.com/?from=corona-warn-companion-android) tools.
