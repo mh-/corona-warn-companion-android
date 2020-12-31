@@ -63,7 +63,9 @@
     <string name="title_activity_further_licenses">Weitere OSS Lizenzen</string>
     <string name="error_app_mode_switching_not_possible">Im Moment kann der Modus leider nicht gewechselt werden.\nBitte warte, bis alle Berechnungen abgeschlossen sind.</string>
     <string name="error_no_rpis_normal_mode">FEHLER!\nBegegnungen konnten nicht ausgelesen werden.\nSind Exposure Notifications eingeschaltet?\nHast Du dieser App ROOT-Rechte gegeben?</string>
-    <string name="error_no_rpis_ramble_mode">FEHLER!\nBegegnungen konnten nicht ausgelesen werden.\nHast Du der App erlaubt, auf Dateien auf Deinem Gerät zuzugreifen?\nHast Du eine RaMBLE Datenbank exportiert? Falls ja, ist sie möglicherweise leer oder defekt.</string>
+    <string name="error_empty_rpis_normal_mode">FEHLER!\nKeine Begegnungen gefunden.\nHast Du Begegnungen aufgezeichnet? Die Datenbank ist anscheinend noch leer.</string>
+    <string name="error_no_rpis_ramble_mode">FEHLER!\nBegegnungen konnten nicht ausgelesen werden.\nHast Du der App erlaubt, auf Dateien auf Deinem Gerät zuzugreifen?\nHast Du eine RaMBLE Datenbank exportiert? Falls ja, ist sie möglicherweise defekt.</string>
+    <string name="error_empty_rpis_ramble_mode">ERROR!\nFEHLER!\nKeine Begegnungen gefunden.\nHast Du Begegnungen aufgezeichnet und dann nochmal aus RaMBLE exportiert? Die exportierte Datenbank ist anscheinend noch leer.</string>
     <string name="error_download">FEHLER!\nEs gab ein Problem beim Herunterladen der Diagnoseschlüssel.\nFunktioniert Deine Internetverbindung?</string>
     <string name="title_activity_about">Über diese App</string>
     <string name="about_version">Version\n%s (%d, %s)</string>

@@ -455,7 +455,7 @@ public class MainActivity extends AppCompatActivity {
             }
             chartRpis.setData(dataPoints1, normalBarColor, "RPIs", false, this);
             chartRpis.setFormatAndRefresh(this);
-            showExtractionError();
+            showExtractionError(rpiList);
             showMatchingNotPossible();
         }
 
@@ -498,11 +498,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void showExtractionError() {
+    private void showExtractionError(RpiList rpiList) {
         if ((CWCApplication.appMode == NORMAL_MODE) || (CWCApplication.appMode == MICROG_MODE) || (CWCApplication.appMode == CCTG_MODE)) {
-            textViewExtractionError.setText(R.string.error_no_rpis_normal_mode);
+            if (rpiList == null) {
+                textViewExtractionError.setText(R.string.error_no_rpis_normal_mode);
+            } else {
+                textViewExtractionError.setText(R.string.error_empty_rpis_normal_mode);
+            }
         } else if (CWCApplication.appMode == RAMBLE_MODE) {
-            textViewExtractionError.setText(R.string.error_no_rpis_ramble_mode);
+            if (rpiList == null) {
+                textViewExtractionError.setText(R.string.error_no_rpis_ramble_mode);
+            } else {
+                textViewExtractionError.setText(R.string.error_empty_rpis_ramble_mode);
+            }
         } else {
             throw new IllegalStateException();
         }
