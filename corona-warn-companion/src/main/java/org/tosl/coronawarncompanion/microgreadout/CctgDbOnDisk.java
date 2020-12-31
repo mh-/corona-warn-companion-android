@@ -13,7 +13,10 @@ import org.tosl.coronawarncompanion.gmsreadout.ContactRecordsProtos;
 import org.tosl.coronawarncompanion.rpis.RpiList;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
+import static org.tosl.coronawarncompanion.gmsreadout.ContactDbOnDisk.deleteDir;
 import static org.tosl.coronawarncompanion.gmsreadout.Sudo.sudo;
 import static org.tosl.coronawarncompanion.tools.Utils.byteArrayToHexString;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromMillis;
@@ -28,6 +31,7 @@ public class CctgDbOnDisk {
     private static final String dbNameModifier = "_";
     private static final String dbNameModified = dbName+dbNameModifier;
     private static String cachePathStr = "";
+    private static File cacheDir = null;
 
     private final Context context;
 
@@ -38,24 +42,54 @@ public class CctgDbOnDisk {
     public void copyFromGMS() {
         // Copy the CCTG microG GMS database to local app cache
         Log.d(TAG, "Trying to copy CCTG database");
-        File cacheDir = context.getExternalCacheDir();
+        cacheDir = context.getExternalCacheDir();
         if (cacheDir == null) {
             cacheDir = context.getCacheDir();
         }
         assert cacheDir != null;
         cachePathStr = cacheDir.getPath();
 
-        // First rename the database, then copy it, then rename to the original name
-        String result = sudo(
-                "rm "+cachePathStr+"/"+dbNameModified,
-                "mv "+gmsPathStr+"/"+dbName+" "+gmsPathStr+"/"+dbNameModified,
-                "cp "+gmsPathStr+"/"+dbNameModified+" "+cachePathStr+"/",
-                "mv "+gmsPathStr+"/"+dbNameModified+" "+gmsPathStr+"/"+dbName,
-                "ls -la "+cachePathStr+"/"+dbNameModified
-        );
-        Log.d(TAG, "Result from trying to copy LevelDB: "+result);
-        if (result.length() < 10) {
-            Log.e(TAG, "ERROR: Super User rights not granted!");
+        try {
+            File testFile = File.createTempFile("test_file", null, cacheDir);
+            FileOutputStream stream = new FileOutputStream(testFile);
+            try {
+                stream.write("test".getBytes());
+                // get owner of testFile
+                String owner = sudo("ls -l "+testFile+"|head -n 1|cut -d \" \" -f 3").replace("\n", "");
+                Log.d(TAG, "Cache file owner: "+owner);
+                // get group of testFile
+                String group = sudo("ls -l "+testFile+"|head -n 1|cut -d \" \" -f 4").replace("\n", "");
+                Log.d(TAG, "Cache file group: "+group);
+                // get context of testFile
+                String context = sudo("ls -Z "+testFile+"|head -n 1|cut -d \" \" -f 1").replace("\n", "");
+                Log.d(TAG, "Cache file context: "+context);
+
+                // First rename the LevelDB directory, then copy it, then rename to the original name
+                String result = sudo(
+                        "rm "+cachePathStr+"/"+dbNameModified,
+                        "mv "+gmsPathStr+"/"+dbName+" "+gmsPathStr+"/"+dbNameModified,
+                        "cp "+gmsPathStr+"/"+dbNameModified+" "+cachePathStr+"/",
+                        "mv "+gmsPathStr+"/"+dbNameModified+" "+gmsPathStr+"/"+dbName,
+                        "ls -lZ "+cachePathStr+"/"+dbNameModified
+                );
+                Log.d(TAG, "Result from trying to copy LevelDB: "+result);
+                if (result.length() < 10) {
+                    Log.e(TAG, "ERROR: Super User rights not granted!");
+                }
+
+                // set owner and context (required for Android 11), and group as well
+                result = sudo(
+                        "chown -R "+owner+" "+cachePathStr+"/"+dbNameModified,
+                        "chgrp -R "+group+" "+cachePathStr+"/"+dbNameModified,
+                        "chcon -R "+context+" "+cachePathStr+"/"+dbNameModified,
+                        "ls -lZ "+cachePathStr+"/"+dbNameModified
+                );
+                Log.d(TAG, "Result from trying to set owner, group and context: "+result);
+            } finally {
+                stream.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -127,7 +161,7 @@ public class CctgDbOnDisk {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        deleteDir(cacheDir);
         return rpiList;
     }
 }
