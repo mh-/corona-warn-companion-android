@@ -566,7 +566,7 @@ public class MainActivity extends AppCompatActivity {
         for (DiagnosisKey diagnosisKeyEntry : diagnosisKeysList) {
             int ENIN = diagnosisKeyEntry.dk.getRollingStartIntervalNumber();
             Integer bin = diagnosisKeyCountMap.floorKey(ENIN);
-            if (bin != null) {
+            if ((bin != null) && (ENIN <= (bin + standardRollingPeriod))) {
                 Integer binCount = diagnosisKeyCountMap.get(bin);
                 if (binCount != null) {
                     binCount++;
