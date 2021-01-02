@@ -86,7 +86,11 @@ public class CwcBarChart  {
             @SuppressLint("DefaultLocale")
             @Override
             public String getAxisLabel(float value, AxisBase axis) {
-                return String.format("%5d", (int) value);
+                if ((int) value >= 1000) {
+                    return String.format("%dk", (int) Math.ceil(value / 1000f));
+                } else {
+                    return String.format("%5d", (int) value);
+                }
             }
         };
         // the bar labels
