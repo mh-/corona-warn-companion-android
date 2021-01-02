@@ -39,10 +39,10 @@
     <string name="distance_shown_as_attenuation">Abstand (Dämpfung in dB)</string>
     <string name="menu_entry_show_hide_all_scans">Alle Begegnungen zeigen/verbergen</string>
     <string name="menu_entry_show_hide_location">Karte zeigen/verbergen</string>
-    <string name="menu_entry_switch_to_normal_mode">Normaler Modus</string>
+    <string name="menu_entry_switch_to_normal_mode">Normaler Modus (root)</string>
     <string name="menu_entry_switch_to_ramble_mode">RaMBLE Modus</string>
-    <string name="menu_entry_switch_to_microg_mode">microG Modus</string>
-    <string name="menu_entry_switch_to_cctg_mode">CCTG Modus</string>
+    <string name="menu_entry_switch_to_microg_mode">microG Modus (root)</string>
+    <string name="menu_entry_switch_to_cctg_mode">CCTG Modus (root)</string>
     <string name="menu_entry_switch_to_demo_mode">Demo Modus</string>
     <string name="menu_entry_oss_licenses">Open Source Software Lizenzen</string>
     <string name="menu_entry_view_further_oss_licenses">Weitere Open Source Software Lizenzen</string>

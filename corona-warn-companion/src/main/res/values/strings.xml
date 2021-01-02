@@ -39,10 +39,10 @@
     <string name="distance_shown_as_attenuation">Distance (attenuation in dB)</string>
     <string name="menu_entry_show_hide_all_scans">Show/Hide All Scans</string>
     <string name="menu_entry_show_hide_location">Show/Hide Location</string>
-    <string name="menu_entry_switch_to_normal_mode">Normal Mode</string>
+    <string name="menu_entry_switch_to_normal_mode">Normal Mode (root)</string>
     <string name="menu_entry_switch_to_ramble_mode">RaMBLE Mode</string>
-    <string name="menu_entry_switch_to_microg_mode">microG Mode</string>
-    <string name="menu_entry_switch_to_cctg_mode">CCTG Mode</string>
+    <string name="menu_entry_switch_to_microg_mode">microG Mode (root)</string>
+    <string name="menu_entry_switch_to_cctg_mode">CCTG Mode (root)</string>
     <string name="menu_entry_switch_to_demo_mode">Demo Mode</string>
     <string name="menu_entry_oss_licenses">Open Source Software Licenses</string>
     <string name="menu_entry_view_further_oss_licenses">Further Open Source Software Licenses</string>
