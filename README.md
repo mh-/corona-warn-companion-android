@@ -58,6 +58,10 @@ This requires the installation of the [Corona Contact Tracing Germany app](https
 
 Note that the next time you want to use this app, you need to follow the same steps again (export and share from CCTG / microG ENF).
 
+---
+(BTW, if you wonder why this explanation is not part of the Play Store text: This is because of the Play Store requirements for COVID-19 apps; this is not a category 1 or 2 app and must therefore not use COVID-19 related terms in its Play Store listing.)
+
+---
 
 # Features
 This app helps you to better understand warnings of the official Corona-Warn-App (or its CCTG fork).
