@@ -7,13 +7,17 @@ Android App Which Shows Details about CWA Exposures (Requires Root)
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 # How to install the app
+
 There are 3 options:
+
 ### 1. Get the app from the Play Store
 1. Download from https://play.google.com/store/apps/details?id=org.tosl.warnappcompanion
 2. Write a short review
+
 ### 2. Install a release from GitHub
 1. Download the latest released APK from the Assets at https://github.com/mh-/corona-warn-companion-android/releases
 2. Install via `adb` tool and USB cable: `adb install corona-warn-companion-github-release.apk`
+
 ### 3. Build the app from source code, using Android Studio
 1. `git clone https://github.com/mh-/corona-warn-companion-android.git`
 2. In Android Studio, select a 'flavor': 
@@ -23,10 +27,42 @@ this is not a _category 1 or 2_ app and must therefore not use COVID-19 related 
 3. Build the `debug` build variant, and install it on your device. 
 The `release` build variant will probably build out-of-the box only on macOS because of the way how the keystore for app signing is accessed.
 
-# Features
-This app helps you to better understand warnings of the official Corona-Warn-App.
+# How to use the app
+After a lot of user feedback and many iterations, the app meanwhile has several modes. 
+The best user experience is available if the device is rooted and the app gets root permissions: With root permissions, the app can directly access the database _from a framework_ where the recorded Rolling Proximity IDs (RPIs) are stored.
 
-**ATTENTION:** To access the same recorded encounters as the official Corona-Warn-App, this app requires ROOT permissions. Without root permissions, the app can only be used together with the RaMBLE app, or with the CCTG app / microG.
+However, since many users cannot or do not wish to root their device, two other options (RaMBLE and CCTG) are also available, where _another app_ can export their recorded RPIs, so that this app can read them without root rights, and work with them.
+
+The currently available modes are:
+
+## Modes that require root permissions:
+
+### Normal mode (root):
+This app reads RPIs from the Google Exposure Notifications service / framework. Works together with the official [Corona-Warn-App](https://www.coronawarn.app/de/).
+
+### microG mode (root):
+This app reads RPIs from the [microG ENF framework](https://microg.org). Works if you have installed microG and an app that activates microG ENF RPI recording, and give root access to this app.
+
+### CCTG mode (root):
+This app reads RPIs from the [Corona Contact Tracing Germany app](https://bubu1.eu/cctg/) (which brings its own microG framework that stores the RPIs in its own location). Works if you have installed CCTG, and give root access to this app.
+
+## Modes that work without root:
+
+### RaMBLE mode:
+You need to record with the [RaMBLE app](https://play.google.com/store/apps/details?id=com.contextis.android.BLEScanner) (to record, tap the "▶" button), and then on the next day, export the database (tap the "⋮" button in the top right corner, select "Export Database"). Then set this app to RaMBLE Mode (tap the "⋮" menu button in the top right corner, select "RaMBLE Mode"). This app will then read from the "Downloads" directory, where RaMBLE has stored its exported database.
+
+Note that the next time you want to use this app, you need to follow the same steps again (export from RaMBLE).
+
+### CCTG export (not a special mode within this app):
+This requires the installation of the [Corona Contact Tracing Germany app](https://bubu1.eu/cctg/). On the next day, export the tracing information from CCTG and share with this app as described in the [CCTG FAQ](https://codeberg.org/corona-contact-tracing-germany/cwa-android#how-do-i-access-the-microg-exposure-notitifaction-settings-in-the-standalone-app). If you tap "export" on the microG ENF screen, and select to share with this app (tap on the Friendly Dog icon), this app is called and automatically reads the data, and also automatically selects "microG mode" in the process. 
+
+Note that the next time you want to use this app, you need to follow the same steps again (export and share from CCTG / microG ENF).
+
+
+# Features
+This app helps you to better understand warnings of the official Corona-Warn-App (or its CCTG fork).
+
+**ATTENTION:** To access the same recorded encounters as the official Corona-Warn-App, this app requires ROOT permissions. Without root permissions, the app can only be used together with the RaMBLE app, or with the CCTG app / microG. Please read the "How to use the app" section above.
 
 ### What the app does:
 1. The app reads the Rolling Proximity IDs recorded by your device from the Exposure Notifications database 
