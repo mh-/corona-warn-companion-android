@@ -26,8 +26,6 @@
                     android:title="@string/country_belgium" />
                 <item android:id="@+id/canada"
                     android:title="@string/country_canada" />
-                <item android:id="@+id/czechia"
-                    android:title="@string/country_czechia" />
                 <item android:id="@+id/germany"
                     android:title="@string/countries_one_europe" />
                 <item android:id="@+id/netherlands"

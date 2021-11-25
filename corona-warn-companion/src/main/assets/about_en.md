@@ -43,7 +43,6 @@ Download from the respective country's server:
 - Austria
 - Belgium
 - Canada
-- Czechia
 - Netherlands
 - Poland
 - Switzerland
