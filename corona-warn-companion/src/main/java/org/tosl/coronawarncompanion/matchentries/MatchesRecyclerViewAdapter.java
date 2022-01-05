@@ -570,7 +570,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         dataSetMin.setAxisDependency(YAxis.AxisDependency.LEFT);
         dataSetMin.setCircleColors(dotColorsMinAttenuation);
         dataSetMin.setDrawCircleHole(false);
-        dataSetMin.setCircleHoleColor(resolveColorAttr(android.R.attr.colorBackgroundFloating, context));
+        dataSetMin.setCircleHoleColor(resolveColorAttr(android.R.attr.colorForegroundInverse, context));
         //dataSetMin.enableDashedLine(0, 1, 0);
         dataSetMin.setColor(lineColor);
         dataSetMin.setDrawValues(false);
@@ -582,7 +582,7 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         dataSetRest.setAxisDependency(YAxis.AxisDependency.LEFT);
         dataSetRest.setCircleColors(dotColors);
         dataSetRest.setDrawCircleHole(false);
-        dataSetRest.setCircleHoleColor(resolveColorAttr(android.R.attr.colorBackgroundFloating, context));
+        dataSetRest.setCircleHoleColor(resolveColorAttr(android.R.attr.colorForegroundInverse, context));
         dataSetRest.enableDashedLine(0, 1, 0);  // these parameters mean: do not show line
         dataSetRest.setDrawValues(false);
         dataSetRest.setHighlightEnabled(false);
