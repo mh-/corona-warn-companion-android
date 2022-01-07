@@ -24,6 +24,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -107,7 +108,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     public static final String EXTRA_MESSAGE_DAY = "org.tosl.coronawarncompanion.DAY_MESSAGE";
     public static final String EXTRA_MESSAGE_COUNT = "org.tosl.coronawarncompanion.COUNT_MESSAGE";
-    private static boolean mainActivityShouldBeRecreated = false;
+    public static final int INTENT_PICK_RAMBLE_FILE = 1;
+ boolean mainActivityShouldBeRecreated = false;
     private static CWCApplication.AppModeOptions desiredAppMode;
     private RpiList rpiList = null;
     private Date maxDate = null;
@@ -293,7 +295,7 @@ public class MainActivity extends AppCompatActivity {
         if (Intent.ACTION_SEND.equals(action) && type != null) {
             if ("application/vnd.microg.exposure+sqlite3".equals(type)) {
                 // We got a database uri shared with us. Use this one instead of the usual one!
-                Uri databaseUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+                Uri databaseUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
                 // clear intent, because onCreate() might get called again
                 intent.removeExtra(Intent.EXTRA_STREAM);
                 if (databaseUri != null) {
@@ -379,9 +381,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        int timeZoneOffsetSeconds = CWCApplication.getTimeZoneOffsetSeconds();
-        Log.d(TAG, "Local TimeZone Offset in seconds: "+ timeZoneOffsetSeconds);
-
         long todayLastMidnightInMillis = getMillisFromDays(getDaysFromMillis(System.currentTimeMillis()));
         maxDate = new Date(todayLastMidnightInMillis);
         minDate = new Date(todayLastMidnightInMillis - getMillisFromDays(14));
@@ -402,21 +401,27 @@ public class MainActivity extends AppCompatActivity {
         if (CWCApplication.appMode == NORMAL_MODE || CWCApplication.appMode == DEMO_MODE) {
             ContactDbOnDisk contactDbOnDisk = new ContactDbOnDisk(this);
             rpiList = contactDbOnDisk.getRpisFromContactDB();
+            continueWhenRpisAreAvailable();
         } else if (CWCApplication.appMode == RAMBLE_MODE) {
-            RambleDbOnDisk rambleDbOnDisk = new RambleDbOnDisk(this);
-            // limit RaMBLE encounters to the last 14 days
-            rpiList = rambleDbOnDisk.getRpisFromContactDB(this,
-                    getDaysFromMillis(System.currentTimeMillis()) - 14);
+            intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("application/octet-stream");  // this is the MIME type of a RaMBLE SQLITE export
+            startActivityForResult(intent, INTENT_PICK_RAMBLE_FILE);
         } else if (CWCApplication.appMode == MICROG_MODE) {
             MicroGDbOnDisk microGDbOnDisk = new MicroGDbOnDisk(this);
             rpiList = microGDbOnDisk.getRpisFromContactDB(this, databaseFile);
+            continueWhenRpisAreAvailable();
         } else if (CWCApplication.appMode == CCTG_MODE) {
             CctgDbOnDisk cctgDbOnDisk = new CctgDbOnDisk(this);
             rpiList = cctgDbOnDisk.getRpisFromContactDB(this);
+            continueWhenRpisAreAvailable();
         } else {
             throw new IllegalStateException();
         }
+    }
 
+    @SuppressLint("CheckResult")
+    private void continueWhenRpisAreAvailable() {
         if ((rpiList != null) && (!rpiList.isEmpty())) {  // check that getting the RPIs didn't fail, e.g. because we didn't get root rights
             SortedSet<Integer> rpiListDaysSinceEpochLocalTZ = rpiList.getAvailableDaysSinceEpochLocalTZ();
             List<BarEntry> dataPoints1 = new ArrayList<>();
@@ -448,6 +453,8 @@ public class MainActivity extends AppCompatActivity {
         } else {  // getting the RPIs failed, e.g. because we didn't get root rights
             List<BarEntry> dataPoints1 = new ArrayList<>();
             long currentTimeMillis = System.currentTimeMillis();
+            int timeZoneOffsetSeconds = CWCApplication.getTimeZoneOffsetSeconds();
+            Log.d(TAG, "Local TimeZone Offset in seconds: "+ timeZoneOffsetSeconds);
             int currentTimestampLocalTZ = (int) (currentTimeMillis / 1000) + timeZoneOffsetSeconds;
             int daysSinceEpochLocalTZ = currentTimestampLocalTZ / (3600*24);
             for (int day = daysSinceEpochLocalTZ-13; day <= daysSinceEpochLocalTZ; day++) {
@@ -495,6 +502,27 @@ public class MainActivity extends AppCompatActivity {
             }
         } else {
             throw new IllegalStateException();
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode,
+                                 Intent resultData) {
+        super.onActivityResult(requestCode, resultCode, resultData);
+        if (requestCode == INTENT_PICK_RAMBLE_FILE
+                && resultCode == Activity.RESULT_OK) {
+            // The result data contains a URI for the document or directory that
+            // the user selected.
+            Uri uri;
+            if (resultData != null) {
+                uri = resultData.getData();
+                // Perform operations on the document using its URI.
+                RambleDbOnDisk rambleDbOnDisk = new RambleDbOnDisk(this, uri);
+                // limit RaMBLE encounters to the last 14 days
+                rpiList = rambleDbOnDisk.getRpisFromContactDB(
+                        getDaysFromMillis(System.currentTimeMillis()) - 14);
+                continueWhenRpisAreAvailable();
+            }
         }
     }
 
