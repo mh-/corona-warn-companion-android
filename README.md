@@ -11,13 +11,11 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 There are 3 options:
 
 ### 1. Get the app from the Play Store
-***NOTE: Don't do this for Android11 if you want to access RaMBLE data. Use https://github.com/mh-/corona-warn-companion-android/releases/2.1.2 instead. See https://github.com/mh-/corona-warn-companion-android/issues/143 for details.***
 1. Download from https://play.google.com/store/apps/details?id=org.tosl.warnappcompanion
 2. Write a short review
 
 ### 2. Install a release from GitHub
 1. Download the latest released APK from the Assets at https://github.com/mh-/corona-warn-companion-android/releases 
-***NOTE: For Android11 if you want to access RaMBLE data: Use https://github.com/mh-/corona-warn-companion-android/releases/2.1.2***
 2. Install via `adb` tool and USB cable: `adb install corona-warn-companion-github-release.apk`
 
 ### 3. Build the app from source code, using Android Studio
