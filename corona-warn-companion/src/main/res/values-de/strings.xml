@@ -89,7 +89,7 @@
     <string name="country_denmark">🇩🇰 Dänemark</string>
     <string name="country_latvia">🇱🇻 Lettland</string>
     <string name="country_spain">🇪🇸 Spanien</string>
-    <string name="countries_one_europe">🇩🇪 Deutschland, 🇩🇰 Dänemark, 🇮🇪 Irland, 🇮🇹 Italien, 🇭🇷 Kroatien, 🇱🇻 Lettland, 🇳🇱 Niederlande, 🇵🇱 Polen, 🇪🇸 Spanien, 🇨🇾 Zypern</string>
+    <string name="countries_one_europe">🇩🇪 Deutschland, 🇧🇪 Belgien, 🇩🇰 Dänemark, 🇪🇪 Estland, 🇫🇮 Finnland, 🇮🇪 Irland, 🇮🇹 Italien, 🇭🇷 Kroatien, 🇱🇻 Lettland, 🇱🇹 Litauen, 🇲🇹 Malta, 🇳🇱 Niederlande, 🇳🇴 Norwegen, 🇦🇹 Österreich, 🇵🇱 Polen, 🇸🇮 Slowenien, 🇨🇭 Schweiz, 🇪🇸 Spanien, 🇨🇾 Zypern</string>
     <string name="point_of_exposure">Risikobegegnung</string>
     <string name="toast_switching_to_microg_mode">Die App wird in den microG Modus geschaltet!</string>
 </resources>

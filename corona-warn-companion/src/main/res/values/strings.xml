@@ -117,8 +117,8 @@
     <string name="country_spain">🇪🇸 Spain</string>
     <string name="flag_spain" translatable="false">🇪🇸</string>
     <string name="country_code_spain" translatable="false">ES</string>
-    <string name="countries_one_europe">🇩🇪 Germany, 🇩🇰 Denmark, 🇮🇪 Ireland, 🇮🇹 Italy, 🇭🇷 Croatia, 🇱🇻 Latvia, 🇳🇱 Netherlands, 🇵🇱 Poland, 🇪🇸 Spain, 🇨🇾 Cyprus</string>
-    <string name="flags_one_europe" translatable="false">🇩🇪🇩🇰🇮🇪🇮🇹🇭🇷🇱🇻🇳🇱🇵🇱🇪🇸🇨🇾</string>
+    <string name="countries_one_europe">🇩🇪 Germany, 🇧🇪 Belgium, 🇩🇰 Denmark, 🇪🇪 Estonia, 🇫🇮 Finland, 🇮🇪 Ireland, 🇮🇹 Italy, 🇭🇷 Croatia, 🇱🇻 Latvia, 🇱🇹 Lithuania, 🇲🇹 Malta, 🇳🇱 Netherlands, 🇳🇴 Norway, 🇦🇹 Austria, 🇵🇱 Poland, 🇸🇮 Slovenia, 🇨🇭 Switzerland, 🇪🇸 Spain, 🇨🇾 Cyprus</string>
+    <string name="flags_one_europe" translatable="false">🇩🇪🇧🇪🇩🇰🇪🇪🇫🇮🇮🇪🇮🇹🇭🇷🇱🇻🇱🇹🇲🇹🇳🇱🇳🇴🇦🇹🇵🇱🇸🇮🇨🇭🇪🇸🇨🇾</string>
     <string name="toast_download_error">Error during download: %s</string>
     <string name="point_of_exposure">Point of exposure</string>
     <string name="toast_switching_to_microg_mode">Switching App to microG Mode!</string>
