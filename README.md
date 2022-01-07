@@ -40,18 +40,19 @@ The currently available modes are:
 ### Normal mode (root):
 This app reads RPIs from the Google Exposure Notifications service / framework. Works together with the official [Corona-Warn-App](https://www.coronawarn.app/de/).
 
-### microG mode (root):
-This app reads RPIs from the [microG ENF framework](https://microg.org). Works if you have installed microG and an app that activates microG ENF RPI recording, and give root access to this app.
-
 ### CCTG mode (root):
 This app reads RPIs from the [Corona Contact Tracing Germany app](https://bubu1.eu/cctg/) (which brings its own microG framework that stores the RPIs in its own location). Works if you have installed CCTG, and give root access to this app.
+***NOTE: Better use the CCTG export (as explained below) instead***
+
+### microG mode (root):
+This app reads RPIs from the [microG ENF framework](https://microg.org). Works if you have installed microG and an app that activates microG ENF RPI recording, and give root access to this app.
 
 ## Modes that work without root:
 
 ### RaMBLE mode:
-You need to record with the [RaMBLE app](https://play.google.com/store/apps/details?id=com.contextis.android.BLEScanner) (to record, tap the "▶" button), and then on the next day, export the database (tap the "⋮" button in the top right corner, select "Export Database"). Then set this app to RaMBLE Mode (tap the "⋮" menu button in the top right corner, select "RaMBLE Mode"). This app will then read from the "Downloads" directory, where RaMBLE has stored its exported database.
+You need to record with the [RaMBLE app](https://play.google.com/store/apps/details?id=com.contextis.android.BLEScanner) (to record, tap the "▶" button), and then on the next day, export the database (tap the "⋮" button in the top right corner, select "Export Database"). Then set this app to RaMBLE Mode (tap the "⋮" menu button in the top right corner, select "RaMBLE Mode"). *You then need to select the newest "RaMBLE_..." file from the "Downloads" directory*, where RaMBLE has stored its exported database.
 
-Note that the next time you want to use this app, you need to follow the same steps again (export from RaMBLE).
+Note that the next time you want to use this app, you need to follow the same steps again (export from RaMBLE, select the file in this app).
 
 ### CCTG export (not a special mode within this app):
 This requires the installation of the [Corona Contact Tracing Germany app](https://bubu1.eu/cctg/). On the next day, export the tracing information from CCTG and share with this app as described in the [CCTG FAQ](https://codeberg.org/corona-contact-tracing-germany/cwa-android#how-do-i-access-the-microg-exposure-notitifaction-settings-in-the-standalone-app). If you tap "export" on the microG ENF screen, and select to share with this app (tap on the Friendly Dog icon), this app is called and automatically reads the data, and also automatically selects "microG mode" in the process. 
