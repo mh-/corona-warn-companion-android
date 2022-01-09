@@ -114,6 +114,10 @@ public class MainActivity extends AppCompatActivity {
     private RpiList rpiList = null;
     private Date maxDate = null;
     private Date minDate = null;
+    private final int maxNumDownloadDays = 14;
+    private final int minNumDownloadDays = 1;
+    private int numDownloadDays = maxNumDownloadDays;
+    private int previousNumDownloadDays = maxNumDownloadDays;
     private int numMatchingThreads;
     DisposableObserver<Matcher.ProgressAndMatchEntryAndDkAndDay> mergedObserver;
 
@@ -170,6 +174,9 @@ public class MainActivity extends AppCompatActivity {
         }
         if (item.getItemId() == R.id.about) {
             startActivity(new Intent(this, AboutActivity.class));
+            return true;
+        } else if (item.getItemId() == R.id.set_num_download_days) {
+            startActivity(new Intent(this, SetNumberOfDownloadDaysActivity.class));
             return true;
         } else if (item.getItemId() == R.id.normalmode || item.getItemId() == R.id.demomode ||
                 item.getItemId() == R.id.ramblemode || item.getItemId() == R.id.microgmode ||
@@ -277,7 +284,7 @@ public class MainActivity extends AppCompatActivity {
         // configure osmdroid
         Configuration.getInstance().load(context, sharedPreferences);
 
-        // get App Mode from SharedPreferences
+        // get Number Of Download Days from SharedPreferences
         int appModeOrdinal = sharedPreferences.getInt(getString(R.string.saved_app_mode), NORMAL_MODE.ordinal());
         try {
             CWCApplication.appMode = CWCApplication.AppModeOptions.values()[appModeOrdinal];
@@ -285,6 +292,12 @@ public class MainActivity extends AppCompatActivity {
             CWCApplication.appMode = NORMAL_MODE;
         }
         desiredAppMode = CWCApplication.appMode;
+
+        // get App Mode from SharedPreferences
+        numDownloadDays = sharedPreferences.getInt(getString(R.string.saved_num_download_days), 14);
+        if (numDownloadDays > maxNumDownloadDays) numDownloadDays = maxNumDownloadDays;
+        if (numDownloadDays < minNumDownloadDays) numDownloadDays = minNumDownloadDays;
+        previousNumDownloadDays = numDownloadDays;
 
         // If the app was opened with a Send intent, parse the database-uri and use it as a microG database
         // instead of using su to copy it from the gms directory

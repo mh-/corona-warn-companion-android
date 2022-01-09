@@ -69,5 +69,13 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.tosl.coronawarncompanion.MainActivity" />
         </activity>
+        <activity
+            android:name="org.tosl.coronawarncompanion.SetNumberOfDownloadDaysActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.tosl.coronawarncompanion.MainActivity" />
+        </activity>
     </application>
 </manifest>

@@ -50,7 +50,7 @@ public class AboutActivity extends AppCompatActivity {
             actionBar.setTitle(R.string.title_activity_about);
         }
         TextView versionTextView = findViewById(R.id.versionTextView);
-        TextView mainTextView = findViewById(R.id.mainTextView);
+        TextView mainTextView = findViewById(R.id.explanationTextView);
 
         versionTextView.setText(getString(R.string.about_version,
                 BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, BuildConfig.BUILD_TYPE));

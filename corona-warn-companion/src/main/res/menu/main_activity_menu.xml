@@ -2,6 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/about"
         android:title="@string/menu_entry_about" />
+    <item android:id="@+id/set_num_download_days"
+        android:title="@string/menu_entry_set_num_download_days" />
     <group android:id="@+id/mode_group"
         android:checkableBehavior="single">
         <item android:id="@+id/normalmode"

@@ -69,7 +69,7 @@ public class DisplayLicensesActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setTitle(R.string.title_activity_licenses);
         }
-        TextView textView = findViewById(R.id.mainTextView);
+        TextView textView = findViewById(R.id.explanationTextView);
 
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         try {
