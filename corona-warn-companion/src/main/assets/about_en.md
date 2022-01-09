@@ -37,7 +37,7 @@ The source code of the app is published at https://github.com/mh-/corona-warn-co
 
 # Countries covered
 Download from the German server:
-- Germany, Denmark, Ireland, Italy, Croatia, Latvia, Netherlands, Poland, Spain, Cyprus
+- 🇩🇪 Germany, 🇧🇪 Belgium, 🇩🇰 Denmark, 🇪🇪 Estonia, 🇫🇮 Finland, 🇮🇪 Ireland, 🇮🇹 Italy, 🇭🇷 Croatia, 🇱🇻 Latvia, 🇱🇹 Lithuania, 🇲🇹 Malta, 🇳🇱 Netherlands, 🇳🇴 Norway, 🇦🇹 Austria, 🇵🇱 Poland, 🇸🇮 Slovenia, 🇨🇭 Switzerland, 🇪🇸 Spain, 🇨🇾 Cyprus
 
 Download from the respective country's server:
 - Austria
