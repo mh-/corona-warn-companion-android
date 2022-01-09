@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_MESSAGE_DAY = "org.tosl.coronawarncompanion.DAY_MESSAGE";
     public static final String EXTRA_MESSAGE_COUNT = "org.tosl.coronawarncompanion.COUNT_MESSAGE";
     public static final int INTENT_PICK_RAMBLE_FILE = 1;
- boolean mainActivityShouldBeRecreated = false;
+    boolean mainActivityShouldBeRecreated = false;
     private static CWCApplication.AppModeOptions desiredAppMode;
     private RpiList rpiList = null;
     private Date maxDate = null;
@@ -479,7 +479,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            //noinspection ResultOfMethodCallIgnored
             DKDownloadUtils.getDKsForCountries(context, OK_HTTP_CLIENT, minDate, dkDownloadCountries)
                     .subscribe(this::processDownloadedDiagnosisKeys, error -> {
                         Log.e(TAG, "Error downloading diagnosis keys: " + error);
@@ -571,10 +570,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult (int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 0 && permissions.length == 1 &&
                 permissions[0].equals(Manifest.permission.WRITE_EXTERNAL_STORAGE) &&
-                grantResults[0] == PackageManager.PERMISSION_GRANTED)
-        {
+                grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             recreateMainActivityOnNextPossibleOccasion();
         }
     }
@@ -776,6 +775,9 @@ public class MainActivity extends AppCompatActivity {
             // End of this path.
             // From now on, the user can scroll the charts,
             // or tap on a match to reach the DisplayDetailsActivity.
+
+            // now we don't need the RPI list anymore, Garbage Collector may release the memory:
+            rpiList = null;
 
             if (mainActivityShouldBeRecreated) {
                 recreateMainActivityNow();
