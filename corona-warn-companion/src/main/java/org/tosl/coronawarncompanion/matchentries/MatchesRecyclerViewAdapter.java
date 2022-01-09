@@ -28,7 +28,6 @@ import android.graphics.Color;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -118,16 +117,27 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
     }
 
     @Override
-    public void onViewDetachedFromWindow(ViewHolder holder) {
+    public void onViewDetachedFromWindow(@NonNull ViewHolder holder) {
         super.onViewDetachedFromWindow(holder);
-
-        holder.mMapView.onPause();
+        holder.mMapView.onDetach();
     }
 
     @Override
-    public void onViewAttachedToWindow(ViewHolder holder) {
-        super.onViewAttachedToWindow(holder);
+    public void onViewRecycled(@NonNull ViewHolder holder) {
+        super.onViewRecycled(holder);
+        holder.mMapView.onDetach();
+    }
 
+    @Override
+    public boolean onFailedToRecycleView(@NonNull ViewHolder holder) {
+        boolean result = super.onFailedToRecycleView(holder);
+        holder.mMapView.onDetach();
+        return result;
+    }
+
+    @Override
+    public void onViewAttachedToWindow(@NonNull ViewHolder holder) {
+        super.onViewAttachedToWindow(holder);
         holder.mMapView.onResume();
     }
 
@@ -713,14 +723,11 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
                 mMapView.setTileSource(TileSourceFactory.MAPNIK);
                 mMapView.getZoomController().setVisibility(Visibility.ALWAYS);
                 mMapView.setMultiTouchControls(true);
-                mMapView.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        // Don't allow scrolling in map for simplicity and consistency.
-                        // To support vertical scrolling, we would have to create
-                        // a custom MapView that overrides RecyclerView scrolling.
-                        return true;
-                    }
+                mMapView.setOnTouchListener((v, event) -> {
+                    // Don't allow scrolling in map for simplicity and consistency.
+                    // To support vertical scrolling, we would have to create
+                    // a custom MapView that overrides RecyclerView scrolling.
+                    return true;
                 });
             }
             else {
@@ -735,11 +742,13 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void toggleShowAllScans() {
         this.showAllScans = !this.showAllScans;
         this.notifyDataSetChanged();
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void toggleShowMap() {
         this.mapDisplayAllowed = !this.mapDisplayAllowed;
         this.notifyDataSetChanged();
