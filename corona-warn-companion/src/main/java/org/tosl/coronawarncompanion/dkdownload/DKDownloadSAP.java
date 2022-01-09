@@ -21,6 +21,9 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 
+import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromMillis;
+import static org.tosl.coronawarncompanion.tools.Utils.getMillisFromDays;
+
 public abstract class DKDownloadSAP implements DKDownloadCountry {
     private final String TAG;
     private final String DK_URL;
@@ -76,7 +79,7 @@ public abstract class DKDownloadSAP implements DKDownloadCountry {
     }
 
     @Override
-    public Observable<byte[]> getDKBytes(Context context, OkHttpClient okHttpClient, Date minDate) {
+    public Observable<byte[]> getDKBytes(Context context, OkHttpClient okHttpClient, Date minDate, int maxNumDownloadDays) {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(DK_URL)
@@ -87,6 +90,10 @@ public abstract class DKDownloadSAP implements DKDownloadCountry {
 
         Api api = retrofit.create(Api.class);
 
+        long todayLastMidnightInMillis = getMillisFromDays(getDaysFromMillis(System.currentTimeMillis()));
+        Date minDownloadDate = new Date(todayLastMidnightInMillis - getMillisFromDays(maxNumDownloadDays+1));
+        // +1 means: maxNumDownloadDays == 1 corresponds yesterday plus today's hourly packages.
+
         return DKDownloadUtils.wrapRetrofit(context, api.listDates())
                 .doOnSuccess(list -> Log.d(TAG, "retrieved dates: " + list))
                 .map(datesListString -> Arrays.asList(parseCwsListResponse(datesListString)))
@@ -94,6 +101,7 @@ public abstract class DKDownloadSAP implements DKDownloadCountry {
                 .flatMapObservable(datesListCurrentDatePair -> Observable.fromIterable(datesListCurrentDatePair.first)
                         .map(dateFormatter::parse)
                         .filter(date -> date.compareTo(minDate) > 0)
+                        .filter(date -> date.compareTo(minDownloadDate) > 0)
                         .map(DKDownloadSAP::getStringFromDate)
                         .flatMapMaybe(date -> DKDownloadUtils.wrapRetrofit(
                                 context, api.getDKsForDate(date))

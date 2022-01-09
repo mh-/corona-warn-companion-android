@@ -49,7 +49,9 @@ public class DKDownloadAustria implements DKDownloadCountry {
     }
 
     @Override
-    public Observable<byte[]> getDKBytes(Context context, OkHttpClient okHttpClient, Date minDate) {
+    public Observable<byte[]> getDKBytes(Context context, OkHttpClient okHttpClient, Date minDate, int maxNumDownloadDays) {
+
+        // TODO: maxNumDownloadDays not yet used, because of the "getFull14Batch()" method.
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(DK_URL)

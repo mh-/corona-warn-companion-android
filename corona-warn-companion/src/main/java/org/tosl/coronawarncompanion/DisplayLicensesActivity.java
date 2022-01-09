@@ -1,6 +1,6 @@
 /*
  * Corona-Warn-Companion. An app that shows COVID-19 Exposure Notifications details.
- * Copyright (C) 2020  Michael Huebler <corona-warn-companion@tosl.org> and other contributors.
+ * Copyright (C) 2020-2022 Michael Huebler <corona-warn-companion@tosl.org> and other contributors.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ public class DisplayLicensesActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setTitle(R.string.title_activity_licenses);
         }
-        TextView textView = findViewById(R.id.explanationTextView);
+        TextView textView = findViewById(R.id.explanationTextView1);
 
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         try {

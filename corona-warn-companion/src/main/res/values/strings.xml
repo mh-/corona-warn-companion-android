@@ -1,27 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="title_extracting_encounters">Extracting encounters…</string>
-    <string name="title_rpis_extracted" tools:ignore="PluralsCandidate">%d encounters scanned (%s-%s).</string>
+    <string name="title_rpis_extracted" tools:ignore="PluralsCandidate">%1$d encounters scanned (%2$s-%3$s).</string>
     <string name="title_no_rpis_extracted">No encounters found.</string>
-    <string name="title_diagnosis_keys_downloading">Downloading diagnosis keys… (%s)</string>
-    <string name="title_diagnosis_keys_downloaded" tools:ignore="PluralsCandidate">%d diagnosis keys downloaded (%s)."</string>
+    <plurals name="title_diagnosis_keys_downloading">
+        <item quantity="one">Downloading diagnosis keys… (%1$d day) (%2$s)</item>
+        <item quantity="other">Downloading diagnosis keys… (%1$d days) (%2$s)</item>
+    </plurals>
+    <plurals name="title_diagnosis_keys_downloaded">
+        <item quantity="one">%1$d diagnosis keys downloaded (%2$d day) (%3$s)."</item>
+        <item quantity="other">%1$d diagnosis keys downloaded (%2$d days) (%3$s)."</item>
+    </plurals>
     <plurals name="title_diagnosis_keys_downloaded_warning">
-        <item quantity="one">(⚠️Warning: %d error during download!️)</item>
-        <item quantity="other">(⚠️Warning: ️%d errors during download!)</item>
+        <item quantity="one">(⚠️Warning: %1$d error during download!️)</item>
+        <item quantity="other">(⚠️Warning: ️%1$d errors during download!)</item>
     </plurals>
     <string name="title_diagnosis_keys_download_failed">Download failed.</string>
     <string name="title_matching_not_done_yet">Matching in progress…</string>
     <string name="title_matching_not_done_yet_with_progress" tools:ignore="PluralsCandidate">Matching in progress… %1$d%% (%2$d found)</string>
     <string name="title_matching_not_possible">Matching not possible. (Need both scanned encounters and diagnosis keys for this.)</string>
-    <string name="title_matching_error">Matching error. (An unexpected error happened during matching: %s)</string>
+    <string name="title_matching_error">Matching error. (An unexpected error happened during matching: %1$s)</string>
     <string name="title_no_matches_found">No risk encounters found.</string>
     <plurals name="title_number_of_matches_found">
-        <item quantity="one">%d risk encounter. Tap to see details…</item>
-        <item quantity="other">%d risk encounters. Tap to see details…</item>
+        <item quantity="one">%1$d risk encounter. Tap to see details…</item>
+        <item quantity="other">%1$d risk encounters. Tap to see details…</item>
     </plurals>
     <plurals name="details_title_matches_on_day">
-        <item quantity="one">Risk encounter on %s:</item>
-        <item quantity="other">Risk encounters on %s:</item>
+        <item quantity="one">Risk encounter on %1$s:</item>
+        <item quantity="other">Risk encounters on %1$s:</item>
     </plurals>
     <string name="time">🕐</string>
     <string name="transmission_risk_level">Transmission Risk</string>
@@ -68,10 +74,10 @@
     <string name="error_empty_rpis_ramble_mode">ERROR!\nNo encounters found.\nDid you scan some encounters and then export a fresh RaMBLE database? The exported database is apparently empty.</string>
     <string name="error_download">ERROR!\nDownload of Diagnosis Keys failed.\nIs your internet connection working?</string>
     <string name="title_activity_about">About this app</string>
-    <string name="about_version">Version\n%s (%d, %s)</string>
+    <string name="about_version">Version\n%1$s (%2$d, %3$s)</string>
     <string name="error_download_invalid_key_file_header">ERROR!\nDownloaded Diagnosis Keys file starts with incorrect header!</string>
     <string name="saved_app_mode" translatable="false">APP_MODE</string>
-    <string name="tx_power">TX Power reported by sender: %s dB</string>
+    <string name="tx_power">TX Power reported by sender: %1$s dB</string>
     <string name="menu_entry_countries_sub_menu">Countries</string>
     <string name="country_canada">🇨🇦 Canada</string>
     <string name="flag_canada" translatable="false">🇨🇦</string>
@@ -119,11 +125,12 @@
     <string name="country_code_spain" translatable="false">ES</string>
     <string name="countries_one_europe">🇩🇪 Germany, 🇧🇪 Belgium, 🇩🇰 Denmark, 🇪🇪 Estonia, 🇫🇮 Finland, 🇮🇪 Ireland, 🇮🇹 Italy, 🇭🇷 Croatia, 🇱🇻 Latvia, 🇱🇹 Lithuania, 🇲🇹 Malta, 🇳🇱 Netherlands, 🇳🇴 Norway, 🇦🇹 Austria, 🇵🇱 Poland, 🇸🇮 Slovenia, 🇨🇭 Switzerland, 🇪🇸 Spain, 🇨🇾 Cyprus</string>
     <string name="flags_one_europe" translatable="false">🇩🇪🇧🇪🇩🇰🇪🇪🇫🇮🇮🇪🇮🇹🇭🇷🇱🇻🇱🇹🇲🇹🇳🇱🇳🇴🇦🇹🇵🇱🇸🇮🇨🇭🇪🇸🇨🇾</string>
-    <string name="toast_download_error">Error during download: %s</string>
+    <string name="toast_download_error">Error during download: %1$s</string>
     <string name="point_of_exposure">Point of exposure</string>
     <string name="toast_switching_to_microg_mode">Switching App to microG Mode!</string>
     <string name="title_activity_set_num_download_days">Number of Download Days</string>
-    <string name="explanation_for_num_download_days">This app downloads Diagnosis Keys (DKs) for matching with your recorded RPIs. The official Warn Apps download DKs that have been provided by the national servers over the last 14 days. But because the number of Diagnosis Keys went up, matching can take a very long time. Therefore, you have the option to download DKs for fewer days only. This makes sense if you use this app regularly, e.g. every 3 days. Then you can tell this app to only download new DKs that were made available during the last 3 days. For security, privacy, and Play Store policy reasons, this app will not store previous matching results, so you will not see results from older DKs. Note that the results will still be spread over up to 14 days, because infected users upload DKs for up to 14 days. This means that you could potentially download a DK today which belongs to a match 14 days ago. Please select the number of days (choose 14 to download all available DKs):</string>
+    <string name="explanation_for_num_download_days_1">This app downloads Diagnosis Keys (DKs) for matching with your recorded RPIs. The official Warn Apps download DKs that have been provided by the servers over the last %2$d days. But because the number of Diagnosis Keys went up, matching can now take a very long time. Therefore, you now have the option to download DKs for fewer days only (currently works e.g. for "Germany+Europe"). This makes sense if you use this app regularly, e.g. every 3 days. Then you can only download new DKs that were made available during the last 3 days. This app will not store previous matching results, so you will not see results from older DKs. Note that the results will still be spread over up to %2$d days, because infected users upload DKs for up to %2$d days.</string>
+    <string name="explanation_for_num_download_days_2">Please select the number of days (from %1$d to %2$d; choose %2$d to download all available DKs as before) and then tap ✔:</string>
     <string name="menu_entry_set_num_download_days">Number of Download Days</string>
     <string name="saved_num_download_days" translatable="false">NUM_DOWNLOAD_DAYS</string>
 </resources>

@@ -45,13 +45,13 @@ public class DKDownloadUtils {
     }
 
     public static Single<List<DiagnosisKey>>
-    getDKsForCountries(Context context, OkHttpClient okHttpClient, Date minDate, List<DKDownloadCountry> countries) {
+    getDKsForCountries(Context context, OkHttpClient okHttpClient, Date minDate, int maxNumDownloadDays, List<DKDownloadCountry> countries) {
         errorCount = 0;
         return Observable
                 .concat(countries
                         .stream()
                         .map(dkDownloadCountry -> dkDownloadCountry
-                                .getDKBytes(context, okHttpClient, minDate)
+                                .getDKBytes(context, okHttpClient, minDate, maxNumDownloadDays)
                                 .map(bytes -> new Pair<>(bytes, dkDownloadCountry.getCountryCode(context))))
                         .collect(Collectors.toList()))
                 .map(bytesCountryPair -> parseBytesToTeks(

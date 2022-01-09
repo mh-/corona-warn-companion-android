@@ -1,6 +1,6 @@
 /*
  * Corona-Warn-Companion. An app that shows COVID-19 Exposure Notifications details.
- * Copyright (C) 2020  Michael Huebler <corona-warn-companion@tosl.org> and other contributors.
+ * Copyright (C) 2020-2022 Michael Huebler <corona-warn-companion@tosl.org> and other contributors.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -89,6 +89,7 @@ import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 
+import static org.tosl.coronawarncompanion.CWCApplication.sharedPreferences;
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.CCTG_MODE;
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.DEMO_MODE;
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.NORMAL_MODE;
@@ -96,6 +97,9 @@ import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.RAMBLE_
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.MICROG_MODE;
 import static org.tosl.coronawarncompanion.CWCApplication.backgroundThreadsShouldStop;
 import static org.tosl.coronawarncompanion.CWCApplication.backgroundThreadsRunning;
+import static org.tosl.coronawarncompanion.CWCApplication.numDownloadDays;
+import static org.tosl.coronawarncompanion.CWCApplication.minNumDownloadDays;
+import static org.tosl.coronawarncompanion.CWCApplication.maxNumDownloadDays;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysSinceEpochFromENIN;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromMillis;
 import static org.tosl.coronawarncompanion.tools.Utils.getENINFromDate;
@@ -109,15 +113,11 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_MESSAGE_DAY = "org.tosl.coronawarncompanion.DAY_MESSAGE";
     public static final String EXTRA_MESSAGE_COUNT = "org.tosl.coronawarncompanion.COUNT_MESSAGE";
     public static final int INTENT_PICK_RAMBLE_FILE = 1;
-    boolean mainActivityShouldBeRecreated = false;
+    static boolean mainActivityShouldBeRecreated = false;
     private static CWCApplication.AppModeOptions desiredAppMode;
     private RpiList rpiList = null;
     private Date maxDate = null;
     private Date minDate = null;
-    private final int maxNumDownloadDays = 14;
-    private final int minNumDownloadDays = 1;
-    private int numDownloadDays = maxNumDownloadDays;
-    private int previousNumDownloadDays = maxNumDownloadDays;
     private int numMatchingThreads;
     DisposableObserver<Matcher.ProgressAndMatchEntryAndDkAndDay> mergedObserver;
 
@@ -202,7 +202,6 @@ public class MainActivity extends AppCompatActivity {
                 desiredAppMode = RAMBLE_MODE;
             }
             if (desiredAppMode != CWCApplication.appMode) {
-                SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putInt(getString(R.string.saved_app_mode), desiredAppMode.ordinal());
                 editor.apply();
@@ -220,7 +219,6 @@ public class MainActivity extends AppCompatActivity {
                     if (desiredNewState==true || CWCApplication.getNumberOfActiveCountries() > 1) {
                         item.setChecked(desiredNewState);
                         country.setDownloadKeysFrom(desiredNewState);
-                        SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         editor.putBoolean(country.getCode(context), desiredNewState);
                         editor.apply();
@@ -237,11 +235,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void recreateMainActivityOnNextPossibleOccasion() {
-        if (backgroundThreadsRunning) {  // don't do recreate() while background threads are running
+        if (!backgroundThreadsRunning) {  // recreate() only while background threads are not running
+            recreateMainActivityNow();
+        } else {
             mainActivityShouldBeRecreated = true;
             backgroundThreadsShouldStop = true;
-        } else {
-            recreateMainActivityNow();
         }
     }
 
@@ -279,12 +277,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         this.context = this;
 
-        SharedPreferences sharedPreferences = this.getPreferences(MODE_PRIVATE);
+        sharedPreferences = this.getPreferences(MODE_PRIVATE);
 
         // configure osmdroid
         Configuration.getInstance().load(context, sharedPreferences);
 
-        // get Number Of Download Days from SharedPreferences
+        // get App Mode from SharedPreferences
         int appModeOrdinal = sharedPreferences.getInt(getString(R.string.saved_app_mode), NORMAL_MODE.ordinal());
         try {
             CWCApplication.appMode = CWCApplication.AppModeOptions.values()[appModeOrdinal];
@@ -293,11 +291,16 @@ public class MainActivity extends AppCompatActivity {
         }
         desiredAppMode = CWCApplication.appMode;
 
-        // get App Mode from SharedPreferences
+        // get Number Of Download Days from SharedPreferences
         numDownloadDays = sharedPreferences.getInt(getString(R.string.saved_num_download_days), 14);
+        int previousNumDownloadDays = numDownloadDays;
         if (numDownloadDays > maxNumDownloadDays) numDownloadDays = maxNumDownloadDays;
         if (numDownloadDays < minNumDownloadDays) numDownloadDays = minNumDownloadDays;
-        previousNumDownloadDays = numDownloadDays;
+        if (previousNumDownloadDays != numDownloadDays) {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt(getString(R.string.saved_num_download_days), numDownloadDays);
+            editor.apply();
+        }
 
         // If the app was opened with a Send intent, parse the database-uri and use it as a microG database
         // instead of using su to copy it from the gms directory
@@ -481,7 +484,8 @@ public class MainActivity extends AppCompatActivity {
 
         // 2nd Section: Diagnosis Keys
 
-        textViewDks.setText(getString(R.string.title_diagnosis_keys_downloading, CWCApplication.getFlagsString(context)));
+        Resources res = getResources();
+        textViewDks.setText(res.getQuantityString(R.plurals.title_diagnosis_keys_downloading, numDownloadDays, numDownloadDays, CWCApplication.getFlagsString(context)));
         if (CWCApplication.appMode == NORMAL_MODE || CWCApplication.appMode == RAMBLE_MODE ||
                 CWCApplication.appMode == MICROG_MODE || CWCApplication.appMode == CCTG_MODE) {
             List<DKDownloadCountry> dkDownloadCountries = new ArrayList<>();
@@ -492,7 +496,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            DKDownloadUtils.getDKsForCountries(context, OK_HTTP_CLIENT, minDate, dkDownloadCountries)
+            //noinspection ResultOfMethodCallIgnored
+            DKDownloadUtils.getDKsForCountries(context, OK_HTTP_CLIENT, minDate, numDownloadDays, dkDownloadCountries)
                     .subscribe(this::processDownloadedDiagnosisKeys, error -> {
                         Log.e(TAG, "Error downloading diagnosis keys: " + error);
                         showDownloadError();
@@ -616,8 +621,9 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        Resources res = getResources();
         StringBuilder sb = new StringBuilder();
-        sb.append(getString(R.string.title_diagnosis_keys_downloaded, count, CWCApplication.getFlagsString(context)));
+        sb.append(res.getQuantityString(R.plurals.title_diagnosis_keys_downloaded, numDownloadDays, count, numDownloadDays, CWCApplication.getFlagsString(context)));
 
         int errorCount = DKDownloadUtils.getErrorCount();
         if (errorCount != 0) {

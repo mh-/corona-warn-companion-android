@@ -40,12 +40,12 @@ public class DKDownloadEnglandAndWales implements DKDownloadCountry {
     }
 
     @Override
-    public Observable<byte[]> getDKBytes(Context context, OkHttpClient okHttpClient, Date minDate) {
+    public Observable<byte[]> getDKBytes(Context context, OkHttpClient okHttpClient, Date minDate, int maxNumDownloadDays) {
 
         Calendar firstAvailableDate = Calendar.getInstance();
         TimeZone tz = TimeZone.getTimeZone("UTC");
         firstAvailableDate.setTimeZone(tz);
-        firstAvailableDate.add(Calendar.DATE, -13);
+        firstAvailableDate.add(Calendar.DATE, -(maxNumDownloadDays-1));
         firstAvailableDate.set(Calendar.HOUR_OF_DAY, 0);
         firstAvailableDate.set(Calendar.MINUTE, 0);
         firstAvailableDate.set(Calendar.SECOND, 0);

@@ -2,7 +2,7 @@ Notices for this App
 ====================
 
     Corona-Warn-Companion. An app that shows COVID-19 Exposure Notifications details.
-    Copyright (C) 2020  Michael Huebler <corona-warn-companion@tosl.org> and other contributors.
+    Copyright (C) 2020-2022  Michael Huebler <corona-warn-companion@tosl.org> and other contributors.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

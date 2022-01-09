@@ -1,4 +1,4 @@
-© 2020  Michael Huebler and other contributors.
+© 2020-2022  Michael Huebler and other contributors.
 Die Veröffentlichung dieses Programms erfolgt in der Hoffnung, dass es Dir von Nutzen sein wird, aber OHNE IRGENDEINE GARANTIE, sogar ohne die implizite Garantie ALLGEMEINER GEBRAUCHSTAUGLICHKEIT oder der VERWENDBARKEIT FÜR EINEN BESTIMMTEN ZWECK. Details findest Du in der GNU General Public License.
 
 # Funktionen

@@ -1,27 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="title_extracting_encounters">Begegnungen auslesen…</string>
-    <string name="title_rpis_extracted">%d Begegnungen erfasst (%s-%s).</string>
+    <string name="title_rpis_extracted">%1$d Begegnungen erfasst (%2$s-%3$s).</string>
     <string name="title_no_rpis_extracted">Keine Begegnungen gefunden.</string>
-    <string name="title_diagnosis_keys_downloading">Diagnoseschlüssel herunterladen… (%s)</string>
-    <string name="title_diagnosis_keys_downloaded">%d Diagnoseschlüssel heruntergeladen (%s).</string>
+    <plurals name="title_diagnosis_keys_downloading">
+        <item quantity="one">Diagnoseschlüssel herunterladen… (%1$d Tag) (%2$s)</item>
+        <item quantity="other">Diagnoseschlüssel herunterladen… (%1$d Tage) (%2$s)</item>
+    </plurals>
+    <plurals name="title_diagnosis_keys_downloaded">
+        <item quantity="one">%1$d Diagnoseschlüssel heruntergeladen (%2$d Tag) (%3$s)."</item>
+        <item quantity="other">%1$d Diagnoseschlüssel heruntergeladen (%2$d Tage) (%3$s)."</item>
+    </plurals>
     <plurals name="title_diagnosis_keys_downloaded_warning">
-        <item quantity="one">(⚠️Warnung: ️%d Fehler während des Downloads!️)</item>
-        <item quantity="other">(⚠️Warnung: ️%d Fehler während des Downloads!️)</item>
+        <item quantity="one">(⚠️Warnung: ️%1$d Fehler während des Downloads!️)</item>
+        <item quantity="other">(⚠️Warnung: ️%1$d Fehler während des Downloads!️)</item>
     </plurals>
     <string name="title_diagnosis_keys_download_failed">Keine Diagnoseschlüssel heruntergeladen.</string>
     <string name="title_matching_not_done_yet">Abgleich wird erstellt…</string>
     <string name="title_matching_not_done_yet_with_progress">Abgleich wird erstellt… %1$d%% (%2$d gefunden)</string>
     <string name="title_matching_not_possible">Abgleich nicht möglich. (Dafür werden sowohl Begegnungen als auch Diagnoseschlüssel benötigt.)</string>
-    <string name="title_matching_error">Fehler beim Abgleich. (Ein unerwarteter Fehler ist aufgetreten: %s)</string>
+    <string name="title_matching_error">Fehler beim Abgleich. (Ein unerwarteter Fehler ist aufgetreten: %1$s)</string>
     <string name="title_no_matches_found">Keine Risiko-Begegnungen gefunden.</string>
     <plurals name="title_number_of_matches_found">
-        <item quantity="one">%d Risiko-Begegnung. Tippe für Details…</item>
-        <item quantity="other">%d Risiko-Begegnungen. Tippe für Details…</item>
+        <item quantity="one">%1$d Risiko-Begegnung. Tippe für Details…</item>
+        <item quantity="other">%1$d Risiko-Begegnungen. Tippe für Details…</item>
     </plurals>
     <plurals name="details_title_matches_on_day">
-        <item quantity="one">Risiko-Begegnung am %s:</item>
-        <item quantity="other">Risiko-Begegnungen am %s:</item>
+        <item quantity="one">Risiko-Begegnung am %1$s:</item>
+        <item quantity="other">Risiko-Begegnungen am %1$s:</item>
     </plurals>
     <string name="time">🕐</string>
     <string name="transmission_risk_level">Übertragungsrisiko</string>
@@ -68,9 +74,9 @@
     <string name="error_empty_rpis_ramble_mode">ERROR!\nFEHLER!\nKeine Begegnungen gefunden.\nHast Du Begegnungen aufgezeichnet und dann nochmal aus RaMBLE exportiert? Die exportierte Datenbank ist anscheinend noch leer.</string>
     <string name="error_download">FEHLER!\nEs gab ein Problem beim Herunterladen der Diagnoseschlüssel.\nFunktioniert Deine Internetverbindung?</string>
     <string name="title_activity_about">Über diese App</string>
-    <string name="about_version">Version\n%s (%d, %s)</string>
+    <string name="about_version">Version\n%1$s (%2$d, %3$s)</string>
     <string name="error_download_invalid_key_file_header">FEHLER!\nEine heruntergeladene Diagnoseschlüssel-Datei beginnt nicht mit der erwarteten Zeichenfolge!</string>
-    <string name="tx_power">Gemeldete Sendeleistung: %s dB</string>
+    <string name="tx_power">Gemeldete Sendeleistung: %1$s dB</string>
     <string name="menu_entry_countries_sub_menu">Länder</string>
     <string name="country_germany">🇩🇪 Deutschland</string>
     <string name="country_poland">🇵🇱 Polen</string>
@@ -81,7 +87,7 @@
     <string name="austrian_color_code_yellow">gelb</string>
     <string name="austrian_color_code_red">rot</string>
     <string name="country_netherlands">🇳🇱 Niederlande</string>
-    <string name="toast_download_error">Fehler während Download: %s</string>
+    <string name="toast_download_error">Fehler während Download: %1$s</string>
     <string name="country_canada">🇨🇦 Kanada</string>
     <string name="country_czechia">🇨🇿 Tschechien</string>
     <string name="country_ireland">🇮🇪 Irland</string>
@@ -93,6 +99,7 @@
     <string name="point_of_exposure">Risikobegegnung</string>
     <string name="toast_switching_to_microg_mode">Die App wird in den microG Modus geschaltet!</string>
     <string name="title_activity_set_num_download_days">Anzahl der Download Tage</string>
-    <string name="explanation_for_num_download_days">This app downloads Diagnosis Keys (DKs) for matching with your recorded RPIs. The official Warn Apps download DKs that have been provided by the national servers over the last 14 days. But because the number of Diagnosis Keys went up, matching can take a very long time. Therefore, you have the option to download DKs for fewer days only. This makes sense if you use this app regularly, e.g. every 3 days. Then you can tell this app to only download new DKs that were made available during the last 3 days. For security, privacy, and Play Store policy reasons, this app will not store previous matching results, so you will not see results from older DKs. Note that the results will still be spread over up to 14 days, because infected users upload DKs for up to 14 days. This means that you could potentially download a DK today which belongs to a match 14 days ago. Please select the number of days (choose 14 to download all available DKs):</string>
+    <string name="explanation_for_num_download_days_1">Diese App lädt Diagnoseschlüssel (Diagnosis Keys, DKs) herunter, um sie mit den erfassten Begegnungen (RPIs) abzugleichen. Die offiziellen Warn Apps laden DKs, die von den Servern während der letzten %2$d Tage bereitgestellt wurden. Weil aber die Anzahl der DKs stark angestiegen ist, kann der Abgleich sehr lange dauern. Deshalb kann nun gewählt werden, dass DKs nur für weniger Tage heruntergeladen werden sollen (funktioniert im Moment z.B. für "Deutschland+Europa"). Das macht Sinn, wenn diese App regelmäßig genutzt wird, z.B. alle 3 Tage. Dann werden z.B. nur neue DKs geladen, die während der letzten 3 Tage veröffentlicht wurden. Diese App wird keine Abgleichsergebnisse speichern, daher werden dann keine Ergebnisse von älteren DKs angezeigt. Die Ergebnisse werden auch weiterhin über bis zu %2$d Tage verteilt sein, weil infizierte Nutzer DKs der letzten %2$d Tage hochladen.</string>
+    <string name="explanation_for_num_download_days_2">Bitte die gewünschte Anzahl der Tage eingeben (von %1$d bis %2$d; %2$d eingeben, um wie bisher alle verfügbaren DKs zu laden) und dann ✔ tippen:</string>
     <string name="menu_entry_set_num_download_days">Anzahl der Download Tage</string>
 </resources>

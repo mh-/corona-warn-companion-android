@@ -1,6 +1,6 @@
 /*
  * Corona-Warn-Companion. An app that shows COVID-19 Exposure Notifications details.
- * Copyright (C) 2020  Michael Huebler <corona-warn-companion@tosl.org> and other contributors.
+ * Copyright (C) 2020-2022  Michael Huebler <corona-warn-companion@tosl.org> and other contributors.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ package org.tosl.coronawarncompanion;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
 
 import org.tosl.coronawarncompanion.matchentries.MatchEntryContent;
 
@@ -27,8 +28,14 @@ import java.util.TimeZone;
 
 public class CWCApplication extends Application {
 
+    public static SharedPreferences sharedPreferences;
+
     public enum AppModeOptions {NORMAL_MODE, DEMO_MODE, RAMBLE_MODE, MICROG_MODE, CCTG_MODE}
     public static AppModeOptions appMode = AppModeOptions.NORMAL_MODE;
+
+    static final int maxNumDownloadDays = 14;
+    static final int minNumDownloadDays = 1;
+    static int numDownloadDays = maxNumDownloadDays;
 
     private static MatchEntryContent matchEntryContent = null;
     public static MatchEntryContent getMatchEntryContent() {return matchEntryContent;}

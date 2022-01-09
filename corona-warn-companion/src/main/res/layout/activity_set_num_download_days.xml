@@ -9,9 +9,9 @@
     <!--suppress AndroidDomInspection -->
 
     <TextView
-        android:id="@+id/explanationTextView"
+        android:id="@+id/explanationTextView1"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:scrollbars="vertical"
@@ -20,14 +20,30 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <TextView
+        android:id="@+id/explanationTextView2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:scrollbars="vertical"
+        app:layout_constraintTop_toBottomOf="@id/explanationTextView1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <EditText
-        android:id="@+id/editTextNumber"
+        android:id="@+id/editTextNumberOfDownloadDays"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:ems="10"
+        android:ems="2"
+        android:digits="0123456789"
         android:inputType="number"
+        android:imeOptions="actionDone"
+        app:layout_constraintTop_toBottomOf="@id/explanationTextView2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        tools:layout_editor_absoluteY="27dp" />
+        tools:layout_editor_absoluteY="27dp"
+        android:autofillHints="" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
