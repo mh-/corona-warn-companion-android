@@ -123,8 +123,8 @@ public class CctgDbOnDisk {
                             int rssi = (int) cursor.getLong(3);
                             int duration = cursor.getInt(4);
 
-                            Log.d(TAG, "Scan read: " + byteArrayToHexString(rpiBytes) + " " + byteArrayToHexString(aemBytes) +
-                                    " RSSI: " + rssi + ", Timestamp: " + timestampMs + ", Duration: " + duration);
+                            //Log.d(TAG, "Scan read: " + byteArrayToHexString(rpiBytes) + " " + byteArrayToHexString(aemBytes) +
+                            //        " RSSI: " + rssi + ", Timestamp: " + timestampMs + ", Duration: " + duration);
 
                             // limit RSSI, which could be a very large number, because of this bug: https://github.com/microg/android_packages_apps_GmsCore/issues/1230
                             if (rssi < -200L) rssi = -200;
@@ -157,6 +157,7 @@ public class CctgDbOnDisk {
                     }
                 }
                 cursor.close();
+                microGDb.close();
             }
         } catch (Exception e) {
             e.printStackTrace();
