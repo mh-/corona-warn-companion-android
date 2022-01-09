@@ -50,7 +50,7 @@ This app reads RPIs from the [microG ENF framework](https://microg.org). Works i
 ## Modes that work without root:
 
 ### RaMBLE mode:
-You need to record with the [RaMBLE app](https://play.google.com/store/apps/details?id=com.contextis.android.BLEScanner) (to record, tap the "▶" button), and then on the next day, export the database (tap the "⋮" button in the top right corner, select "Export Database"). Then set this app to RaMBLE Mode (tap the "⋮" menu button in the top right corner, select "RaMBLE Mode"). *You then need to select the newest "RaMBLE_..." file from the "Downloads" directory*, where RaMBLE has stored its exported database.
+You need to record with the [RaMBLE app](https://apkpure.com/de/ramble-bluetooth-le-mapper/com.contextis.android.BLEScanner) (to record, tap the "▶" button), and then on the next day, export the database (tap the "⋮" button in the top right corner, select "Export Database"). Then set this app to RaMBLE Mode (tap the "⋮" menu button in the top right corner, select "RaMBLE Mode"). *You then need to select the newest "RaMBLE_..." file from the "Downloads" directory*, where RaMBLE has stored its exported database.
 
 Note that the next time you want to use this app, you need to follow the same steps again (export from RaMBLE, select the file in this app).
 
@@ -74,7 +74,7 @@ This app helps you to better understand warnings of the official Corona-Warn-App
    (this is only possible with root permissions, which is why official Exposure Notifications apps, such as Corona-Warn-App,
    cannot display these details).  
    ![-Example Recorded Encounters-](screenshots/rpis_en.png)
-   Alternatively, without root permissions, the app can also read a database exported from the [RaMBLE - Bluetooth LE Mapper app](https://play.google.com/store/apps/details?id=com.contextis.android.BLEScanner), or from the [CCTG Corona Contact Tracing Germany app](https://f-droid.org/de/packages/de.corona.tracing/) / microG.
+   Alternatively, without root permissions, the app can also read a database exported from the [RaMBLE - Bluetooth LE Mapper app](https://apkpure.com/de/ramble-bluetooth-le-mapper/com.contextis.android.BLEScanner), or from the [CCTG Corona Contact Tracing Germany app](https://f-droid.org/de/packages/de.corona.tracing/) / microG.
 2. The app downloads the Diagnosis Keys from the official German Corona-Warn-Server and other countries' servers, as selected by you.
    For Germany, it downloads the keys published daily for the last few days, and the keys published every hour for today. 
    Only keys for the days found in step 1 are shown and counted.  
@@ -99,7 +99,7 @@ Note that 1 means a low and 8 means a high transmission risk.
 The source code of the app is published at https://github.com/mh-/corona-warn-companion-android, so you can check the source code, build the app yourself, and you are also welcome to contribute to improvements.
 
 # RaMBLE mode - works without root permissions
-This mode requires the installation of the [RamBLE - Bluetooth LE Mapper app](https://play.google.com/store/apps/details?id=com.contextis.android.BLEScanner).
+This mode requires the installation of the [RamBLE - Bluetooth LE Mapper app](https://apkpure.com/de/ramble-bluetooth-le-mapper/com.contextis.android.BLEScanner).
 
 In RaMBLE mode, the app will not read the Exposure Notification database, but instead read the most recent RaMBLE database export stored in the `Download` folder.
 Note that the Exposure Notifications database contains `calibrated_rssi` ([see here](https://developers.google.com/android/exposure-notifications/ble-attenuation-overview#calibration_per-device_tx_power_and_per-device_rssi_correction)).
