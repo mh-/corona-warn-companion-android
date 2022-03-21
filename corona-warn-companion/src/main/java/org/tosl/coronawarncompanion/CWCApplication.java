@@ -33,7 +33,7 @@ public class CWCApplication extends Application {
     public enum AppModeOptions {NORMAL_MODE, DEMO_MODE, RAMBLE_MODE, MICROG_MODE, CCTG_MODE}
     public static AppModeOptions appMode = AppModeOptions.NORMAL_MODE;
 
-    static final int maxNumDownloadDays = 14;
+    static final int maxNumDownloadDays = 10;
     static final int minNumDownloadDays = 1;
     static int numDownloadDays = maxNumDownloadDays;
 
