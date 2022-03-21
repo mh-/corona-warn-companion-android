@@ -159,21 +159,9 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         // UTC because we don't want DateFormat to do additional time zone compensation
 
         boolean hasTransmissionRiskLevel = false;
-        boolean hasAustrianColorCode = false;
-        String austrianColorCode = "";
         int transmissionRiskLevel = 0;
         if (dk.dk.hasTransmissionRiskLevel()) {
-            if (dk.countryCode.equals(Country.Austria.getCode(mContext))) {
-                // Austria
-                if (dk.dk.getTransmissionRiskLevel() == 5) {
-                    hasAustrianColorCode = true;
-                    austrianColorCode = mContext.getString(R.string.austrian_color_code_yellow);
-                } else
-                if (dk.dk.getTransmissionRiskLevel() == 2) {
-                    hasAustrianColorCode = true;
-                    austrianColorCode = mContext.getString(R.string.austrian_color_code_red);
-                }
-            } else if (dk.countryCode.equals(Country.Switzerland.getCode(mContext))) {
+            if (dk.countryCode.equals(Country.Switzerland.getCode(mContext))) {
                 // Switzerland
                 transmissionRiskLevel = dk.dk.getTransmissionRiskLevel();
                 if (transmissionRiskLevel != 0) {
@@ -234,10 +222,6 @@ public class MatchesRecyclerViewAdapter extends RecyclerView.Adapter<MatchesRecy
         }
         if (hasTransmissionRiskLevel) {
             sb.append(this.mContext.getResources().getString(R.string.transmission_risk_level)).append(": ").append(transmissionRiskLevel).append("\n");
-            numLinesDetails++;
-        }
-        if (hasAustrianColorCode) {
-            sb.append(this.mContext.getResources().getString(R.string.transmission_risk_level)).append(": ").append(austrianColorCode).append("\n");
             numLinesDetails++;
         }
         if (hasDaysSinceOnsetOfSymptoms) {

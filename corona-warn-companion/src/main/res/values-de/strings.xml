@@ -81,11 +81,8 @@
     <string name="country_germany">🇩🇪 Deutschland</string>
     <string name="country_poland">🇵🇱 Polen</string>
     <string name="country_switzerland">🇨🇭 Schweiz</string>
-    <string name="country_austria">🇦🇹 Österreich</string>
     <string name="country_eaw">🏴󠁧󠁢󠁥󠁮󠁧󠁿🏴󠁧󠁢󠁷󠁬󠁳󠁿 England und Wales</string>
     <string name="country_belgium">🇧🇪 Belgien</string>
-    <string name="austrian_color_code_yellow">gelb</string>
-    <string name="austrian_color_code_red">rot</string>
     <string name="country_netherlands">🇳🇱 Niederlande</string>
     <string name="toast_download_error">Fehler während Download: %1$s</string>
     <string name="country_canada">🇨🇦 Kanada</string>
@@ -95,7 +92,7 @@
     <string name="country_denmark">🇩🇰 Dänemark</string>
     <string name="country_latvia">🇱🇻 Lettland</string>
     <string name="country_spain">🇪🇸 Spanien</string>
-    <string name="countries_one_europe">🇩🇪 Deutschland, 🇧🇪 Belgien, 🇩🇰 Dänemark, 🇪🇪 Estland, 🇫🇮 Finnland, 🇮🇪 Irland, 🇮🇹 Italien, 🇭🇷 Kroatien, 🇱🇻 Lettland, 🇱🇹 Litauen, 🇲🇹 Malta, 🇳🇱 Niederlande, 🇳🇴 Norwegen, 🇦🇹 Österreich, 🇵🇱 Polen, 🇸🇮 Slowenien, 🇨🇭 Schweiz, 🇪🇸 Spanien, 🇨🇾 Zypern</string>
+    <string name="countries_one_europe">🇩🇪 Deutschland, 🇧🇪 Belgien, 🇩🇰 Dänemark, 🇪🇪 Estland, 🇫🇮 Finnland, 🇮🇪 Irland, 🇮🇹 Italien, 🇭🇷 Kroatien, 🇱🇻 Lettland, 🇱🇹 Litauen, 🇲🇹 Malta, 🇳🇱 Niederlande, 🇳🇴 Norwegen, 🇵🇱 Polen, 🇸🇮 Slowenien, 🇨🇭 Schweiz, 🇪🇸 Spanien, 🇨🇾 Zypern</string>
     <string name="point_of_exposure">Risikobegegnung</string>
     <string name="toast_switching_to_microg_mode">Die App wird in den microG Modus geschaltet!</string>
     <string name="title_activity_set_num_download_days">Anzahl der Download Tage</string>

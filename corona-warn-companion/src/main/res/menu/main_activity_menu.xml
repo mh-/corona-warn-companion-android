@@ -22,8 +22,6 @@
         <menu >
             <group android:id="@+id/country_group"
                 android:checkableBehavior="all">
-                <item android:id="@+id/austria"
-                    android:title="@string/country_austria" />
                 <item android:id="@+id/belgium"
                     android:title="@string/country_belgium" />
                 <item android:id="@+id/canada"
