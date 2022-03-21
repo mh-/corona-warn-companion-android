@@ -37,7 +37,7 @@ Der Source Code der App ist unter https://github.com/mh-/corona-warn-companion-a
 
 # Unterstützte Länder
 Vom deutschen Warn-App-Server:
-🇩🇪 Deutschland, 🇧🇪 Belgien, 🇩🇰 Dänemark, 🇪🇪 Estland, 🇫🇮 Finnland, 🇮🇪 Irland, 🇮🇹 Italien, 🇭🇷 Kroatien, 🇱🇻 Lettland, 🇱🇹 Litauen, 🇲🇹 Malta, 🇳🇱 Niederlande, 🇳🇴 Norwegen, 🇵🇱 Polen, 🇸🇮 Slowenien, 🇨🇭 Schweiz, 🇪🇸 Spanien, 🇨🇾 Zypern
+🇩🇪 Deutschland, 🇧🇪 Belgien, 🇩🇰 Dänemark, 🇪🇪 Estland, 🇫🇮 Finnland, 🇮🇪 Irland, 🇮🇹 Italien, 🇭🇷 Kroatien, 🇱🇻 Lettland, 🇱🇹 Litauen, 🇲🇹 Malta, 🇳🇱 Niederlande, 🇳🇴 Norwegen, 🇵🇱 Polen, 🇸🇮 Slowenien, 🇨🇭 Schweiz, 🇪🇸 Spanien
 
 Von Servern der jeweiligen Länder:
 - Belgien
