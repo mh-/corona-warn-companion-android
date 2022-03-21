@@ -292,7 +292,7 @@ public class MainActivity extends AppCompatActivity {
         desiredAppMode = CWCApplication.appMode;
 
         // get Number Of Download Days from SharedPreferences
-        numDownloadDays = sharedPreferences.getInt(getString(R.string.saved_num_download_days), 14);
+        numDownloadDays = sharedPreferences.getInt(getString(R.string.saved_num_download_days), 10);
         int previousNumDownloadDays = numDownloadDays;
         if (numDownloadDays > maxNumDownloadDays) numDownloadDays = maxNumDownloadDays;
         if (numDownloadDays < minNumDownloadDays) numDownloadDays = minNumDownloadDays;
