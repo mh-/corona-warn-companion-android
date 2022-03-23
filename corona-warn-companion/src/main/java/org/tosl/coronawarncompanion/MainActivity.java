@@ -89,6 +89,7 @@ import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 
+import static org.tosl.coronawarncompanion.CWCApplication.mainActivityShouldBeRecreatedAnyway;
 import static org.tosl.coronawarncompanion.CWCApplication.sharedPreferences;
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.CCTG_MODE;
 import static org.tosl.coronawarncompanion.CWCApplication.AppModeOptions.DEMO_MODE;
@@ -100,6 +101,7 @@ import static org.tosl.coronawarncompanion.CWCApplication.backgroundThreadsRunni
 import static org.tosl.coronawarncompanion.CWCApplication.numDownloadDays;
 import static org.tosl.coronawarncompanion.CWCApplication.minNumDownloadDays;
 import static org.tosl.coronawarncompanion.CWCApplication.maxNumDownloadDays;
+import static org.tosl.coronawarncompanion.CWCApplication.userHasChosenNumDownloadDays;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysSinceEpochFromENIN;
 import static org.tosl.coronawarncompanion.tools.Utils.getDaysFromMillis;
 import static org.tosl.coronawarncompanion.tools.Utils.getENINFromDate;
@@ -302,6 +304,15 @@ public class MainActivity extends AppCompatActivity {
             editor.apply();
         }
 
+        // if user selected maxNumDownloadDays, give a chance to change that:
+        if (!userHasChosenNumDownloadDays && (numDownloadDays == maxNumDownloadDays)) {
+            mainActivityShouldBeRecreatedAnyway = true;
+            startActivity(new Intent(this, SetNumberOfDownloadDaysActivity.class));
+            return;
+        } else {
+            mainActivityShouldBeRecreatedAnyway = false;
+        }
+
         // If the app was opened with a Send intent, parse the database-uri and use it as a microG database
         // instead of using su to copy it from the gms directory
         File databaseFile = null;
@@ -433,6 +444,14 @@ public class MainActivity extends AppCompatActivity {
             continueWhenRpisAreAvailable();
         } else {
             throw new IllegalStateException();
+        }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        if (mainActivityShouldBeRecreated) {
+            recreateMainActivityOnNextPossibleOccasion();
         }
     }
 

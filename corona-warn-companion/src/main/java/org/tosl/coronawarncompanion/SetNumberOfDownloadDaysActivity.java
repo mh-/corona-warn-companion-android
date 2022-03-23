@@ -28,11 +28,13 @@ import android.widget.TextView;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import static org.tosl.coronawarncompanion.CWCApplication.mainActivityShouldBeRecreatedAnyway;
 import static org.tosl.coronawarncompanion.CWCApplication.numDownloadDays;
 import static org.tosl.coronawarncompanion.CWCApplication.sharedPreferences;
 import static org.tosl.coronawarncompanion.CWCApplication.maxNumDownloadDays;
 import static org.tosl.coronawarncompanion.CWCApplication.minNumDownloadDays;
 import static org.tosl.coronawarncompanion.CWCApplication.backgroundThreadsShouldStop;
+import static org.tosl.coronawarncompanion.CWCApplication.userHasChosenNumDownloadDays;
 import static org.tosl.coronawarncompanion.MainActivity.mainActivityShouldBeRecreated;
 
 
@@ -45,6 +47,12 @@ public class SetNumberOfDownloadDaysActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_set_num_download_days);
+
+        userHasChosenNumDownloadDays = true;
+        if (mainActivityShouldBeRecreatedAnyway) {
+            mainActivityShouldBeRecreated = true;
+            backgroundThreadsShouldStop = true;
+        }
 
         // Action Bar:
         ActionBar actionBar = getSupportActionBar();

@@ -36,6 +36,8 @@ public class CWCApplication extends Application {
     static final int maxNumDownloadDays = 10;
     static final int minNumDownloadDays = 1;
     static int numDownloadDays = maxNumDownloadDays;
+    public static boolean mainActivityShouldBeRecreatedAnyway = false;
+    public static boolean userHasChosenNumDownloadDays = false;
 
     private static MatchEntryContent matchEntryContent = null;
     public static MatchEntryContent getMatchEntryContent() {return matchEntryContent;}
