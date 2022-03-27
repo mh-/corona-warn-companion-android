@@ -74,7 +74,8 @@
     <string name="error_empty_rpis_ramble_mode">ERROR!\nFEHLER!\nKeine Begegnungen gefunden.\nHast Du Begegnungen aufgezeichnet und dann nochmal aus RaMBLE exportiert? Die exportierte Datenbank ist anscheinend noch leer.</string>
     <string name="error_download">FEHLER!\nEs gab ein Problem beim Herunterladen der Diagnoseschlüssel.\nFunktioniert Deine Internetverbindung?</string>
     <string name="title_activity_about">Über diese App</string>
-    <string name="about_version">Version\n%1$s (%2$d, %3$s)</string>
+    <string name="about_version">Version\n%1$s (%2$d, %3$s)\nRAM: %4$d MB verfügbar</string>
+    <string name="about_version_low_mem">Version\n%1$s (%2$d, %3$s)\nRAM: %4$d MB verfügbar (LOW MEMORY!)</string>
     <string name="error_download_invalid_key_file_header">FEHLER!\nEine heruntergeladene Diagnoseschlüssel-Datei beginnt nicht mit der erwarteten Zeichenfolge!</string>
     <string name="tx_power">Gemeldete Sendeleistung: %1$s dB</string>
     <string name="menu_entry_countries_sub_menu">Länder</string>

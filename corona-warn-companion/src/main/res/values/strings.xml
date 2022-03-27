@@ -74,7 +74,8 @@
     <string name="error_empty_rpis_ramble_mode">ERROR!\nNo encounters found.\nDid you scan some encounters and then export a fresh RaMBLE database? The exported database is apparently empty.</string>
     <string name="error_download">ERROR!\nDownload of Diagnosis Keys failed.\nIs your internet connection working?</string>
     <string name="title_activity_about">About this app</string>
-    <string name="about_version">Version\n%1$s (%2$d, %3$s)</string>
+    <string name="about_version">Version\n%1$s (%2$d, %3$s)\nRAM: %4$d MB available</string>
+    <string name="about_version_low_mem">Version\n%1$s (%2$d, %3$s)\nRAM: %4$d MB available (LOW MEMORY!)</string>
     <string name="error_download_invalid_key_file_header">ERROR!\nDownloaded Diagnosis Keys file starts with incorrect header!</string>
     <string name="saved_app_mode" translatable="false">APP_MODE</string>
     <string name="tx_power">TX Power reported by sender: %1$s dB</string>

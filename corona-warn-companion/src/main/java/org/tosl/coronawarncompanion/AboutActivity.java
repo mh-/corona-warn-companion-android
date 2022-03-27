@@ -21,6 +21,7 @@ package org.tosl.coronawarncompanion;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.widget.TextView;
@@ -49,11 +50,21 @@ public class AboutActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setTitle(R.string.title_activity_about);
         }
+
         TextView versionTextView = findViewById(R.id.versionTextView);
         TextView mainTextView = findViewById(R.id.explanationTextView1);
 
-        versionTextView.setText(getString(R.string.about_version,
-                BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, BuildConfig.BUILD_TYPE));
+        ActivityManager.MemoryInfo memoryInfo = getAvailableMemory();
+
+        if (!memoryInfo.lowMemory) {
+            versionTextView.setText(getString(R.string.about_version,
+                    BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, BuildConfig.BUILD_TYPE,
+                    memoryInfo.availMem/1024/1024));
+        } else {
+            versionTextView.setText(getString(R.string.about_version_low_mem,
+                    BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, BuildConfig.BUILD_TYPE,
+                    memoryInfo.availMem/1024/1024));
+        }
 
         String filename = "about_en.md";
         if (Locale.getDefault().getLanguage().equals("de")) {
@@ -76,5 +87,13 @@ public class AboutActivity extends AppCompatActivity {
                 .usePlugin(ImagesPlugin.create(plugin -> plugin.addSchemeHandler(FileSchemeHandler.createWithAssets(context))))
                 .build();
         markwon.setMarkdown(mainTextView, new String(output.toByteArray(), StandardCharsets.UTF_8));
+    }
+
+    // Get a MemoryInfo object for the device's current memory status.
+    private ActivityManager.MemoryInfo getAvailableMemory() {
+        ActivityManager activityManager = (ActivityManager) this.getSystemService(ACTIVITY_SERVICE);
+        ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
+        activityManager.getMemoryInfo(memoryInfo);
+        return memoryInfo;
     }
 }
