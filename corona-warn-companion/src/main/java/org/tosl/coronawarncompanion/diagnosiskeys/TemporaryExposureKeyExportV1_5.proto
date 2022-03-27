@@ -17,8 +17,9 @@
  * I hereby state that I changed this file.
  */
 
-// To compile this, run
-// protoc -I=./ --java_out=../../../../ TemporaryExposureKeyExportV1_5.proto
+// compile with (in directory src/main/java):
+// protoc --java_out=lite:. org/tosl/coronawarncompanion/diagnosiskeys/TemporaryExposureKeyExportV1_5.proto
+// (this generates org/tosl/coronawarncompanion/diagnosiskeys/TemporaryExposureKeyExportV1_5.java)
 
 syntax = "proto2";
 

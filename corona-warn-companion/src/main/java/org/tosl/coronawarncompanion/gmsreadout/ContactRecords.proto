@@ -18,8 +18,8 @@
 
 // reference: https://github.com/google/exposure-notifications-internals/blob/main/exposurenotification/src/main/proto/contact_record.proto
 //
-// compile with:
-// protoc --java_out=. ContactRecords.proto
+// compile with (in directory src/main/java):
+// protoc --java_out=lite:. org/tosl/coronawarncompanion/gmsreadout/ContactRecords.proto
 // (this generates org/tosl/coronawarncompanion/gmsreadout/ContactRecordsProtos.java)
 
 syntax = "proto2";
