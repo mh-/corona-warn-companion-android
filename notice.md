@@ -142,7 +142,7 @@ This program also uses libraries from other sources, e.g.
         See the License for the specific language governing permissions and
         limitations under the License.
 
-  * Protocol Buffers - com.google.protobuf:protobuf-java - [link](https://github.com/protocolbuffers/protobuf)
+  * Protocol Buffers - com.google.protobuf:protobuf-javalite - [link](https://github.com/protocolbuffers/protobuf)
 
         Copyright 2008 Google Inc.  All rights reserved.
 
