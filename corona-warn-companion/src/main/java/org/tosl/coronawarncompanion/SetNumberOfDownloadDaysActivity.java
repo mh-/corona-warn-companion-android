@@ -34,7 +34,6 @@ import static org.tosl.coronawarncompanion.CWCApplication.sharedPreferences;
 import static org.tosl.coronawarncompanion.CWCApplication.maxNumDownloadDays;
 import static org.tosl.coronawarncompanion.CWCApplication.minNumDownloadDays;
 import static org.tosl.coronawarncompanion.CWCApplication.backgroundThreadsShouldStop;
-import static org.tosl.coronawarncompanion.CWCApplication.userHasChosenNumDownloadDays;
 import static org.tosl.coronawarncompanion.MainActivity.mainActivityShouldBeRecreated;
 
 
@@ -48,7 +47,6 @@ public class SetNumberOfDownloadDaysActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_set_num_download_days);
 
-        userHasChosenNumDownloadDays = true;
         if (mainActivityShouldBeRecreatedAnyway) {
             mainActivityShouldBeRecreated = true;
             backgroundThreadsShouldStop = true;
