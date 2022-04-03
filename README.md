@@ -6,6 +6,13 @@ Android App Which Shows Details about CWA Exposures (Requires Root)
 © 2020-2022  Michael Huebler and other contributors.
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
+---
+Deutsche Anleitungen z.B. hier: 
+- c't 6/2022 S. 152: https://www.heise.de/select/ct/2022/6/2202010261560076939 
+- heise online: https://www.heise.de/hintergrund/Wie-Sie-verborgene-Daten-aus-der-Corona-Warn-App-herauskitzeln-6363619.html
+- sbamueller: https://sbamueller.com/2022/01/21/von-wo-habe-ich-den-nun-die-rote-kachel-in-der-corona-warn-app/
+---
+
 # How to install the app
 
 There are 3 options:
