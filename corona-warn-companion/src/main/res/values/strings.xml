@@ -46,9 +46,9 @@
     <string name="menu_entry_show_hide_all_scans">Show/Hide All Scans</string>
     <string name="menu_entry_show_hide_location">Show/Hide Location</string>
     <string name="menu_entry_switch_to_normal_mode">Normal Mode (root)</string>
-    <string name="menu_entry_switch_to_ramble_mode">RaMBLE Mode</string>
+    <string name="menu_entry_switch_to_ramble_mode">RaMBLE Import</string>
     <string name="menu_entry_switch_to_microg_mode">microG Mode (root)</string>
-    <string name="menu_entry_switch_to_cctg_mode">CCTG Mode (root)</string>
+    <string name="menu_entry_switch_to_cctg_mode">CCTG Import</string>
     <string name="menu_entry_switch_to_demo_mode">Demo Mode</string>
     <string name="menu_entry_oss_licenses">Open Source Software Licenses</string>
     <string name="menu_entry_view_further_oss_licenses">Further Open Source Software Licenses</string>
@@ -59,7 +59,7 @@
     <string name="title_activity_main_demo_prefix">"DEMO "</string>
     <string name="title_activity_main_ramble_version">"RaMBLE-Warn-Companion"</string>
     <string name="title_activity_main_microg_version">"microG-Warn-Companion"</string>
-    <string name="title_activity_main_cctg_version">"CCTG-Warn-Companion"</string>
+    <string name="title_activity_main_cctg_version">"CCTG-Import-Warn-Companion"</string>
     <!--suppress AndroidDomInspection -->
     <string name="title_activity_details">@string/app_name</string>
     <string name="title_activity_details_demo">DEMO sample details</string>

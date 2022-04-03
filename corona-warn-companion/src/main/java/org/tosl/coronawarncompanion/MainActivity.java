@@ -115,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_MESSAGE_DAY = "org.tosl.coronawarncompanion.DAY_MESSAGE";
     public static final String EXTRA_MESSAGE_COUNT = "org.tosl.coronawarncompanion.COUNT_MESSAGE";
     public static final int INTENT_PICK_RAMBLE_FILE = 1;
+    public static final int INTENT_PICK_CCTG_FILE = 2;
     static boolean mainActivityShouldBeRecreated = false;
     private static CWCApplication.AppModeOptions desiredAppMode;
     private RpiList rpiList = null;
@@ -441,9 +442,10 @@ public class MainActivity extends AppCompatActivity {
             rpiList = microGDbOnDisk.getRpisFromContactDB(this, databaseFile);
             continueWhenRpisAreAvailable();
         } else if (CWCApplication.appMode == CCTG_MODE) {
-            CctgDbOnDisk cctgDbOnDisk = new CctgDbOnDisk(this);
-            rpiList = cctgDbOnDisk.getRpisFromContactDB(this);
-            continueWhenRpisAreAvailable();
+            intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("application/octet-stream");  // this is the MIME type of a CCTG SQLITE database
+            startActivityForResult(intent, INTENT_PICK_CCTG_FILE);
         } else {
             throw new IllegalStateException();
         }
@@ -549,6 +551,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, resultData);
         if (requestCode == INTENT_PICK_RAMBLE_FILE
                 && resultCode == Activity.RESULT_OK) {
+            // Import the RaMBLE file:
             // The result data contains a URI for the document or directory that
             // the user selected.
             Uri uri;
@@ -559,6 +562,19 @@ public class MainActivity extends AppCompatActivity {
                 // limit RaMBLE encounters to the last 14 days
                 rpiList = rambleDbOnDisk.getRpisFromContactDB(
                         getDaysFromMillis(System.currentTimeMillis()) - 14);
+                continueWhenRpisAreAvailable();
+            }
+        } else if (requestCode == INTENT_PICK_CCTG_FILE
+                && resultCode == Activity.RESULT_OK) {
+            // Import the CCTG file:
+            // The result data contains a URI for the document or directory that
+            // the user selected.
+            Uri uri;
+            if (resultData != null) {
+                uri = resultData.getData();
+                // Perform operations on the document using its URI.
+                CctgDbOnDisk cctgDbOnDisk = new CctgDbOnDisk(this, uri);
+                rpiList = cctgDbOnDisk.getRpisFromContactDB();
                 continueWhenRpisAreAvailable();
             }
         }
