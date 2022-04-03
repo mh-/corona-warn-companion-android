@@ -41,24 +41,33 @@ The currently available modes are:
 This app reads RPIs from the Google Exposure Notifications service / framework. Works together with the official [Corona-Warn-App](https://www.coronawarn.app/de/).
 
 ### microG mode (root):
-This app reads RPIs from the [microG ENF framework](https://microg.org). Works if you have installed microG and an app that activates microG ENF RPI recording, and give root access to this app.
+This app reads RPIs from the [microG ENF framework](https://microg.org). This works if you have installed microG and an app that activates microG ENF RPI recording, and give root access to this app.
 
 ## Modes that work without root:
 
-### RaMBLE Import:
-You need to record with the [RaMBLE app](https://apkpure.com/de/ramble-bluetooth-le-mapper/com.contextis.android.BLEScanner) (to record, tap the "▶" button), and then on the next day, export the database (tap the "⋮" button in the top right corner, select "Export Database"). Then set this app to RaMBLE Mode (tap the "⋮" menu button in the top right corner, select "RaMBLE Mode"). *You then need to select the newest "RaMBLE_..." file from the "Downloads" directory*, where RaMBLE has stored its exported database.
-
-Note that the next time you want to use this app, you need to follow the same steps again (export from RaMBLE, select the file in this app).
-
-### CCTG Export (not a special mode within this app):
-This requires the installation of the [Corona Contact Tracing Germany app](https://bubu1.eu/cctg/). On the next day, export the tracing information from CCTG and share with this app as described in the [CCTG FAQ](https://codeberg.org/corona-contact-tracing-germany/cwa-android#how-do-i-access-the-microg-exposure-notitifaction-settings-in-the-standalone-app). If you tap "export" on the microG ENF screen, and select to *share* with this app (tap on the Friendly Dog icon), this app is called and automatically reads the data, and also automatically selects "microG mode" in the process.
+### CCTG Export (this is not a special mode within this app, use 'sharing' from CCTG to activate this):
+This requires the installation of the [Corona Contact Tracing Germany app](https://bubu1.eu/cctg/). On the next day, export the tracing information from CCTG and *share* with this app as described in the [CCTG FAQ](https://codeberg.org/corona-contact-tracing-germany/cwa-android#how-do-i-access-the-microg-exposure-notitifaction-settings-in-the-standalone-app). If you tap "export" on the microG ENF screen, and select to *share* with this app (tap on the Friendly Dog icon), this app is called and automatically reads the data, and also automatically selects "microG mode" in the process.
 
 Note that the next time you want to use this app, you need to follow the same steps again (export and share from CCTG / microG ENF).
 
 ### CCTG Import:
 *NOTE: It's easier to use the CCTG Export (as explained above) instead*
-This app can read RPIs from a file created by the [Corona Contact Tracing Germany app](https://bubu1.eu/cctg/) (which brings its own microG framework that stores the RPIs in its own location: /data/data/de.corona.tracing/databases/exposure.db). Works if you have installed CCTG, can copy the database file to a location where you can select it from within this app - e.g. by doing `adb shell su -c cp /data/data/de.corona.tracing/databases/exposure.db /storage/emulated/0/Download/`.
-One thing you can also do using this mode: Use a **copy of a database file** that was copied from a slow device, where analysis takes very long, on another more capable device, where analysis runs faster.
+
+This app can read RPIs from a file created by the [Corona Contact Tracing Germany app](https://bubu1.eu/cctg/) (which brings its own microG framework that stores the RPIs in its own location: /data/data/de.corona.tracing/databases/exposure.db). Works if you have installed CCTG and if you can copy the database file to a location where you can select it from within this app - e.g. by doing 
+`adb shell su -c cp /data/data/de.corona.tracing/databases/exposure.db /storage/emulated/0/Download/`.
+One thing you can also do using this mode: 
+Use a **copy of a database file** that was copied from a slow device, where analysis takes very long, on another more capable device, where analysis runs faster.
+
+### RaMBLE Import:
+This mode requires the installation of the [RamBLE - Bluetooth LE Mapper app](https://apkpure.com/de/ramble-bluetooth-le-mapper/com.contextis.android.BLEScanner).
+
+You need to record with the [RaMBLE app](https://apkpure.com/de/ramble-bluetooth-le-mapper/com.contextis.android.BLEScanner) (to record, tap the "▶" button). 
+And then on the next day, export the database (tap the "⋮" button in the top right corner, select "Export Database"). Then set this app to RaMBLE Mode (tap the "⋮" menu button in the top right corner, select "RaMBLE Mode"). *You then need to select the newest "RaMBLE_..." file from the "Downloads" directory*, where RaMBLE has stored its exported database.
+
+Note that the next time you want to use this app, you need to follow the same steps again (export from RaMBLE, select the file in this app).
+
+Note that the Exposure Notifications database contains `calibrated_rssi` ([see here](https://developers.google.com/android/exposure-notifications/ble-attenuation-overview#calibration_per-device_tx_power_and_per-device_rssi_correction)).
+RaMBLE however stores only `raw_rssi`, which means that the colors shown on the details screen are probably different from the case when the app reads the Exposure Notifications database.
 
 
 ---
@@ -99,13 +108,6 @@ Note that 1 means a low and 8 means a high transmission risk.
 
 # Open Source
 The source code of the app is published at https://github.com/mh-/corona-warn-companion-android, so you can check the source code, build the app yourself, and you are also welcome to contribute to improvements.
-
-# RaMBLE mode - works without root permissions
-This mode requires the installation of the [RamBLE - Bluetooth LE Mapper app](https://apkpure.com/de/ramble-bluetooth-le-mapper/com.contextis.android.BLEScanner).
-
-In RaMBLE mode, the app will not read the Exposure Notification database, but instead read the most recent RaMBLE database export stored in the `Download` folder.
-Note that the Exposure Notifications database contains `calibrated_rssi` ([see here](https://developers.google.com/android/exposure-notifications/ble-attenuation-overview#calibration_per-device_tx_power_and_per-device_rssi_correction)).
-RaMBLE however stores only `raw_rssi`, which means that the colors shown on the details screen are probably different from the case when the app reads the Exposure Notifications database.
 
 # Countries covered
 Download from the German server: 
